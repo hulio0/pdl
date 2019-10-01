@@ -26,10 +26,6 @@ public class Main {
 			Consola.escribir( mensaje(e) );
 			e.printStackTrace();			
 		}
-		
-		Consola.escribir("Perro");
-		Consola.escribir("Gato");
-		Consola.escribir("Chano");
 	}
 	
 	private static String mensaje(Exception e) {
