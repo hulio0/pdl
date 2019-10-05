@@ -8,7 +8,7 @@ public class Main {
 		
 		String dirActual = System.getProperty("user.dir");
 		
-		String nombreFicheroEntrada = "Entrada.js";
+		String nombreFicheroEntrada = "Entrada.txt";
 		if(args.length>0)
 			nombreFicheroEntrada = args[0];
 		

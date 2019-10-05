@@ -19,9 +19,15 @@ public class Control {
 		
 		// Ahora creamos los ficheros de salida. Primero crearemos una carpeta para
 		// meter toda la salida del programa allí, así está todo más organizado
-		
+				
 		// La carpeta se llamará SALIDA
 		dirActual+="//SALIDA";
+		
+		// Bueno, antes de seguir habrá que cargarse cualquier otra ejecución anterior. El problema es
+		// que no podemos simplemente usar .delete en la carpeta pues esto sólo  funciona cuando está
+		// vacía así que lo que haremos esta vez es simplemente borrar todos los FICHEROS de DENTRO
+		// (si quisieramos borrar el contenido de sub carpetas nececitaríamos una función recursiva)
+		limpiar(dirActual);
 		
 		// La creamos.
 		new File(dirActual).mkdir();
@@ -31,7 +37,7 @@ public class Control {
 		// Luego, basta darles nombres a los ficheros, instanciar los File's y llamar al método correspondiente
 		File ficheroALexico = new File( dirActual + "//Salida Analizador Léxico.txt");
 		File ficheroASintactico = new File( dirActual + "//Salida Analizador Sintáctico.txt");
-		File ficheroASemantico = new File( dirActual + "//Salida Analizador Léxico.txt");
+		File ficheroASemantico = new File( dirActual + "//Salida Analizador Semántico.txt");
 		File ficheroErrores = new File( dirActual + "//Salida Gestor de Errores.txt");
 		
 		try {
@@ -47,4 +53,8 @@ public class Control {
 		AnalizadorLexico.iniciar(ficheroFuente, ficheroALexico);
 	}
 
+	private static void limpiar(String dir) {
+		for( File f : new File(dir).listFiles() )
+			f.delete();
+	}
 }

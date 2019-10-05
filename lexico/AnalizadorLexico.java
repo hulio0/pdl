@@ -309,12 +309,12 @@ public class AnalizadorLexico {
 		
 		try { fichFuente = new RandomAccessFile(ficheroFuente, "r"); }
 		catch( FileNotFoundException e ) { /*Esta situación ya ha sido tratada en Control*/ }
-		
+				
 		Correspondencia.iniciar();
 		MatrizTransicion.iniciar();
 		SalidaLexico.iniciar(ficheroSalidaLex);
 		TablaPR.iniciar();
-		
+				
 		// Empezamos: leemos el primer caracter del fichero
 		leer();
 		
@@ -325,7 +325,7 @@ public class AnalizadorLexico {
 	private static void leer() {
 		try { 
 			// Leemos el caracter
-			charActual = fichFuente.readChar();
+			charActual = (char) fichFuente.read();
 			
 			// Actualizamos el puntero
 			posicionActual = fichFuente.getFilePointer();
@@ -339,10 +339,9 @@ public class AnalizadorLexico {
 		// Variables auxiliares
 		String lex ="";
 		Integer num = null;
-		Token token = null;
 		Integer posicion = null;
 		Integer codToken = null;
-		
+		EstadoAccion entrada = null;
 		
 		estadoActual = 0;
 		
@@ -352,8 +351,9 @@ public class AnalizadorLexico {
 		// Los estados no terminales son 0,1,2,3,4,5,6
 		while( estadoActual <=6 ) {
 			
-			estadoActual = MatrizTransicion.getNextTrans().estado();
-			toDo = MatrizTransicion.getNextTrans().accion();
+			entrada = MatrizTransicion.getNextTrans();	
+			  estadoActual = entrada.estado();
+			  toDo = entrada.accion();
 			
 			switch( toDo ){
 			
@@ -399,6 +399,9 @@ public class AnalizadorLexico {
 				// En cualquier caso se genera el token de variable
 				codToken = Correspondencia.de(lex);
 				SalidaLexico.escribir(new Token(codToken,posicion).toString());
+				
+				// Liberamos el lexema
+				lex = "";
 				break;
 								
 			case GENERAR_ENTERO:
@@ -406,11 +409,17 @@ public class AnalizadorLexico {
 					SalidaLexico.escribir(new Token(Correspondencia.de("ENT"),num).toString());
 				else
 					System.out.println("TO-DO LANZAR ERROR");
+				
+				// Liberamos num
+				num = null;
 				break;
 				
 			case GENERAR_CADENA: 
 				leer();
 				SalidaLexico.escribir(new Token(Correspondencia.de("CAD"),lex).toString());
+				
+				// Liberamos el lexema
+				lex="";
 				break;
 				
 			case GENERAR_MENOS:
@@ -493,8 +502,9 @@ public class AnalizadorLexico {
 		} // EOWhile
 		
 		// Si llegamos aquí se ha generado un token satisfactoriamente. Como el sintáctico aún 
-		// no nos pide nada pues vamos a llamar en bucle a genToken hasta que el RandomAccessFile se
-		// encuentre con el final del fichero y pare por la excepción EOFileException
+		// no nos pide nada pues vamos a terminar así de forma provisional (evidentemente tenemos
+		// que dejar la 'ñ' donde queramos que termine)
+		if(charActual=='ñ') System.exit(0);
 		genToken();
 		
 		
