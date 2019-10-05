@@ -3,48 +3,48 @@ package control;
 import java.io.File;
 import java.io.IOException;
 
-import excepciones.FicheroEntradaNoValido;
+import lexico.AnalizadorLexico;
 
 public class Control {
 	
-	private static String dirActual;
-	
-	private static File entrada;
-	private static File salidaAnalizadorLexico;
-	
-	public static void iniciar(String directorio, String nombreFicheroEntrada)
-		throws FicheroEntradaNoValido, IOException {
-		
-		// Guardamos el directorio donde nos encontramos
-		dirActual = directorio;
+	public static void iniciar(String dirActual, String nombreFicheroEntrada){
 		
 		// Cargamos el fichero de entrada
-		entrada = new File(dirActual+"//"+nombreFicheroEntrada);
+		File ficheroFuente = new File(dirActual+"//"+nombreFicheroEntrada);
 		
-		if( !entrada.exists() )
-			throw new FicheroEntradaNoValido("No se ha encontrado el fichero de entrada");
+		if( !ficheroFuente.exists() ) {
+			System.out.println("No se ha encontrado el fichero fuente");
+			return;
+		}
 		
-		// Ahora creamos los ficheros de salida
-		crearFicheros(dirActual);
+		// Ahora creamos los ficheros de salida. Primero crearemos una carpeta para
+		// meter toda la salida del programa allí, así está todo más organizado
 		
-		Consola.escribir("Inicio completado satisfactoriamente");
-	}
-	
-	private static void crearFicheros(String directorio) throws IOException {
+		// La carpeta se llamará SALIDA
+		dirActual+="//SALIDA";
 		
-		// La carpeta donde guardaremos los ficheros de 
-		// salida se llamará SALIDA
-		directorio += "//SALIDA";
+		// La creamos.
+		new File(dirActual).mkdir();
 		
-		// Creamos la carpeta
-		new File(directorio).mkdir();
+		// Ahora creamos los ficheros de salida dentro de ella. Nótese que dirActual "apunta"
+		// al interior de la carpeta SALIDA, en otras palabras, ahora mismo estamos dentro de ella.
+		// Luego, basta darles nombres a los ficheros, instanciar los File's y llamar al método correspondiente
+		File ficheroALexico = new File( dirActual + "//Salida Analizador Léxico.txt");
+		File ficheroASintactico = new File( dirActual + "//Salida Analizador Sintáctico.txt");
+		File ficheroASemantico = new File( dirActual + "//Salida Analizador Léxico.txt");
+		File ficheroErrores = new File( dirActual + "//Salida Gestor de Errores.txt");
 		
-		// Instanciamos los File's de los ficheros de salida
-		salidaAnalizadorLexico = new File( directorio + "\\SALIDA ANALIZADOR LÉXICO.txt" );
-
-		// Creamos los ficheros de salida dentro de la carpeta
-		salidaAnalizadorLexico.createNewFile();
+		try {
+			ficheroALexico.createNewFile();
+			ficheroASintactico.createNewFile();
+			ficheroASemantico.createNewFile();
+			ficheroErrores.createNewFile();
+		} catch(IOException e) { System.out.println("No se han podido crear los ficheros de salida"); }
 		
+		
+		
+		// Ponemos en marcha los analizadores:
+		AnalizadorLexico.iniciar(ficheroFuente, ficheroALexico);
 	}
 
 }
