@@ -2,10 +2,17 @@ package lexico;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.regex.Pattern;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 import lexico.auxiliares.Accion;
 import lexico.auxiliares.EstadoAccion;
+import lexico.auxiliares.FilaTS;
+import lexico.auxiliares.Token;
 
 public class AnalizadorLexico {
 	
@@ -38,7 +45,7 @@ public class AnalizadorLexico {
 		public static final EstadoAccion[][] mat = 
 				new EstadoAccion[N_ESTADOS_NO_TERMINALES][N_SIMBOLOS];
 		
-		public static void iniciar() {
+		public static void iniciar() {			
 			iniciarEstado0();
 			iniciarEstado1();
 			iniciarEstado2();
@@ -228,14 +235,75 @@ public class AnalizadorLexico {
 			mat[6][RESTO_CARACT] = irA6YLeer;
 		}
 	
-		public static void transitar() {
+		public static EstadoAccion getNextTrans() {
+			return mat[estadoActual][getPosicion(charActual)];
+		}
+		
+		// Dado un caracter devuelve el correspondiente índice de la matriz al que hace
+		// referencia. Ejemplo, dado '2' debería de devolver DIGITO, que es el índice 3
+		public static int getPosicion(char c) {
+			
+			// Incluimos '\r' como delimitador para que el compilador se los salte. Esto para
+			// evitar problemas con aquello de que ficheros editados en Windows se codifican de modo
+			// que los saltos de línea se traducen en una secuencia de \r\n en vez de sólo \n
+			if( c=='\t' || c==' '||c=='\r' )
+				return DEL;
+			
+			else if(c=='\n')
+				return CR;
+			
+			else if( Pattern.matches("[a-z|A-Z]", c+"") )
+				return LETRA;
+			
+			else if( Pattern.matches("[0-9]",c+"") )
+				return DIGITO;
+			
+			switch(c) {
+			case '_':
+				return UNDERSCORE;
+			case '\'':
+				return COMILLA;
+			case '-':
+				return MENOS;
+			case '/':
+				return BARRA;
+			case '=':
+				return IGUAL;
+			case '+':
+				return MAS;
+			case '>':
+				return MAYOR;
+			case '<':
+				return MENOR;
+			case '!':
+				return DISTINTO;
+			case ',':
+				return COMA;
+			case ';':
+				return PUNTO_COMA;
+			case '(':
+				return PAR_AB;
+			case ')':
+				return PAR_CE;
+			case '{':
+				return LLAV_AB;
+			case '}':
+				return LLAVE_CE;
+				
+			default:
+				System.out.println("Ha habido un problema transitando");
+				return -1;
+			}
+			
 			
 		}
+		
 	}
 	
 	private static RandomAccessFile fichFuente;
 	private static long posicionActual;	
 	private static char charActual;
+	private static int estadoActual;
 	
 	
 	public static void iniciar(File ficheroFuente, File ficheroSalidaLex) {
@@ -246,7 +314,117 @@ public class AnalizadorLexico {
 		SalidaLexico.iniciar(ficheroSalidaLex);
 		MatrizTransicion.iniciar();
 		TablaPR.iniciar();
-		CorrespLexCod.iniciar();
+		Correspondencia.iniciar();
+		
+		
+		// Empezamos: leemos el primer caracter del fichero
+		leer();
+		
+		// Le decimos al ALex que genere todos los tokens
+		genTokens();
+	}
+	
+	private static void leer() {
+		try { 
+			// Leemos el caracter
+			charActual = fichFuente.readChar();
+			
+			// Actualizamos el puntero
+			posicionActual = fichFuente.getFilePointer();
+		}
+		catch(IOException e) { System.out.println("Problemas leyendo el fichero fuente"); }
+	}
+	
+	private static void genTokens(){
+		
+		// Variables auxiliares
+		String lex ="";
+		Integer num = null;
+		Token token = null;
+		Integer posicion = null;
+		Integer codToken = null;
+		
+		
+		estadoActual = 0;
+		
+		// toDo es la acción semántica a realizar en cada "iteración"
+		Accion toDo = null;
+		
+		// Los estados no terminales son 0,1,2,3,4,5,6
+		while( estadoActual <=6 ) {
+			
+			estadoActual = MatrizTransicion.getNextTrans().estado();
+			toDo = MatrizTransicion.getNextTrans().accion();
+			
+			switch( toDo ){
+			
+			case LEER: 
+				leer();
+				break;
+				
+			case CONCATENAR:
+				lex+=charActual;
+				leer();
+				break;
+				
+			case DECLARAR_NUM:
+				num = Integer.parseInt(charActual+"");
+				leer();
+				break;
+				
+			case INCREMENTAR_NUM:
+				num = num*10 + Integer.parseInt(charActual+"");
+				leer();
+				break;
+				
+			case GENERAR_PR_ID:
+				posicion = TablaPR.get(lex);
+				
+				if( posicion !=null ) {
+					
+					// Obtenemos el código de la PR que está ahora mismo en lex
+					codToken = Correspondencia.de(lex);
+					
+					// Generamos el token
+					SalidaLexico.escribir(new Token(codToken,posicion).toString());
+				}
+				
+				// Si no es una PR entonces es una variable. Buscamos
+				// a ver si ya está en la TS
+				posicion = TablaS.get(lex);
+				
+				// Si no está añadimos la variable a la tabla
+				if(posicion == null) 
+					posicion = TablaS.insert(new FilaTS(lex));
+				
+				// En cualquier caso se genera el token de variable
+				codToken = Correspondencia.get(lex);
+				SalidaLexico.escribir(new Token(codToken,posicion).toString());
+				break;
+				
+			case GENERAR_ENTERO:
+			case GENERAR_CADENA: 
+			case GENERAR_MENOS:
+			case GENERAR_POS_DECREMENTO: 
+			case GENERAR_IGUAL:
+			case GENERAR_MAS:
+			case GENERAR_MAYOR:
+			case GENERAR_MENOR:
+			case GENERAR_DISTINTO:
+			case GENERAR_COMA:
+			case GENERAR_PUNTO_COMA:
+			case GENERAR_PARENTESIS_AB:
+			case GENERAR_PARENTESIS_CE:
+			case GENERAR_LLAVE_AB:
+			case GENERAR_LLAVE_CE:
+			case ERR_CARACTER_NO_RECONOCIDO:
+			case ERR_INICIO_COMENTARIO_IMCOMPLETO:
+			case ERR_ENTERO_FUERA_DE_RANGO:
+			
+			}
+			
+		}
+		
 		
 	}
 

@@ -5,7 +5,7 @@ import com.google.common.collect.HashBiMap;
 
 // Permite conocer rápidamente la correspondencia entre
 // un lexema y su código token 
-public class CorrespLexCod {
+public class Correspondencia {
 	
 	private static final int NUM_TOKENS = 17;
 	private static final BiMap<String,Integer> TABLA = HashBiMap.create(NUM_TOKENS);
@@ -30,11 +30,11 @@ public class CorrespLexCod {
 		TABLA.put("}", 17);
 	}
 
-	public static Integer get(String lex) {
+	public static Integer de(String lex) {
 		return TABLA.get(lex);
 	}
 	
-	public static String get(int id) {
+	public static String de(int id) {
 		return TABLA.inverse().get(id);
 	}
 }
