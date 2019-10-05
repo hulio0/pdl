@@ -5,9 +5,9 @@ import lexico.Correspondencia;
 public class Token {
 	
 	int id;
-	int atributo;  // Suele ser pos. en x sitio
+	Object atributo;
 	
-	public Token(int id,int atributo) {
+	public Token(int id,Object atributo) {
 		this.id=id;
 		this.atributo=atributo;
 	}

@@ -1,13 +1,11 @@
 package lexico;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.regex.Pattern;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 
 import lexico.auxiliares.Accion;
 import lexico.auxiliares.EstadoAccion;
@@ -259,6 +257,7 @@ public class AnalizadorLexico {
 				return DIGITO;
 			
 			switch(c) {
+			
 			case '_':
 				return UNDERSCORE;
 			case '\'':
@@ -311,17 +310,16 @@ public class AnalizadorLexico {
 		try { fichFuente = new RandomAccessFile(ficheroFuente, "r"); }
 		catch( FileNotFoundException e ) { /*Esta situación ya ha sido tratada en Control*/ }
 		
-		SalidaLexico.iniciar(ficheroSalidaLex);
-		MatrizTransicion.iniciar();
-		TablaPR.iniciar();
 		Correspondencia.iniciar();
-		
+		MatrizTransicion.iniciar();
+		SalidaLexico.iniciar(ficheroSalidaLex);
+		TablaPR.iniciar();
 		
 		// Empezamos: leemos el primer caracter del fichero
 		leer();
 		
 		// Le decimos al ALex que genere todos los tokens
-		genTokens();
+		genToken();
 	}
 	
 	private static void leer() {
@@ -332,10 +330,11 @@ public class AnalizadorLexico {
 			// Actualizamos el puntero
 			posicionActual = fichFuente.getFilePointer();
 		}
+		catch(EOFException e) {System.out.println("Y se acabó perro"); System.exit(0); }
 		catch(IOException e) { System.out.println("Problemas leyendo el fichero fuente"); }
 	}
 	
-	private static void genTokens(){
+	private static void genToken(){
 		
 		// Variables auxiliares
 		String lex ="";
@@ -347,7 +346,7 @@ public class AnalizadorLexico {
 		
 		estadoActual = 0;
 		
-		// toDo es la acción semántica a realizar en cada "iteración"
+		// toDo es la acción semántica a realizar en cada transición
 		Accion toDo = null;
 		
 		// Los estados no terminales son 0,1,2,3,4,5,6
@@ -378,8 +377,8 @@ public class AnalizadorLexico {
 				break;
 				
 			case GENERAR_PR_ID:
-				posicion = TablaPR.get(lex);
 				
+				posicion = TablaPR.get(lex);
 				if( posicion !=null ) {
 					
 					// Obtenemos el código de la PR que está ahora mismo en lex
@@ -398,32 +397,105 @@ public class AnalizadorLexico {
 					posicion = TablaS.insert(new FilaTS(lex));
 				
 				// En cualquier caso se genera el token de variable
-				codToken = Correspondencia.get(lex);
+				codToken = Correspondencia.de(lex);
 				SalidaLexico.escribir(new Token(codToken,posicion).toString());
 				break;
-				
+								
 			case GENERAR_ENTERO:
+				if(num<=Math.pow(2, 16)-1)
+					SalidaLexico.escribir(new Token(Correspondencia.de("ENT"),num).toString());
+				else
+					System.out.println("TO-DO LANZAR ERROR");
+				break;
+				
 			case GENERAR_CADENA: 
+				leer();
+				SalidaLexico.escribir(new Token(Correspondencia.de("CAD"),lex).toString());
+				break;
+				
 			case GENERAR_MENOS:
+				SalidaLexico.escribir(new Token(Correspondencia.de("-"),"").toString());
+				break;
+				
 			case GENERAR_POS_DECREMENTO: 
+				leer();
+				SalidaLexico.escribir(new Token(Correspondencia.de("--"),"").toString());
+				break;
+				
 			case GENERAR_IGUAL:
+				leer();
+				SalidaLexico.escribir(new Token(Correspondencia.de("="),"").toString());
+				break;
+				
 			case GENERAR_MAS:
+				leer();
+				SalidaLexico.escribir(new Token(Correspondencia.de("+"),"").toString());
+				break;
+				
 			case GENERAR_MAYOR:
+				leer();
+				SalidaLexico.escribir(new Token(Correspondencia.de(">"),"").toString());
+				break;
+				
 			case GENERAR_MENOR:
+				leer();
+				SalidaLexico.escribir(new Token(Correspondencia.de("<"),"").toString());
+				break;
+				
 			case GENERAR_DISTINTO:
+				leer();
+				SalidaLexico.escribir(new Token(Correspondencia.de("!"),"").toString());
+				break;
+				
 			case GENERAR_COMA:
+				leer();
+				SalidaLexico.escribir(new Token(Correspondencia.de(","),"").toString());
+				break;
+				
 			case GENERAR_PUNTO_COMA:
+				leer();
+				SalidaLexico.escribir(new Token(Correspondencia.de(";"),"").toString());
+				break;
+				
 			case GENERAR_PARENTESIS_AB:
+				leer();
+				SalidaLexico.escribir(new Token(Correspondencia.de("("),"").toString());
+				break;
+				
 			case GENERAR_PARENTESIS_CE:
+				leer();
+				SalidaLexico.escribir(new Token(Correspondencia.de(")"),"").toString());
+				break;
+				
 			case GENERAR_LLAVE_AB:
+				leer();
+				SalidaLexico.escribir(new Token(Correspondencia.de("{"),"").toString());
+				break;
+				
 			case GENERAR_LLAVE_CE:
+				leer();
+				SalidaLexico.escribir(new Token(Correspondencia.de("}"),"").toString());
+				break;
+				
 			case ERR_CARACTER_NO_RECONOCIDO:
+				System.out.println("TO-DO");
+				break;
+				
 			case ERR_INICIO_COMENTARIO_IMCOMPLETO:
-			case ERR_ENTERO_FUERA_DE_RANGO:
+				System.out.println("TO-DO");
+				break;
+				
+			default:
+				System.out.println("Error transitando");
+				return;
+			} //EOSwitch
 			
-			}
-			
-		}
+		} // EOWhile
+		
+		// Si llegamos aquí se ha generado un token satisfactoriamente. Como el sintáctico aún 
+		// no nos pide nada pues vamos a llamar en bucle a genToken hasta que el RandomAccessFile se
+		// encuentre con el final del fichero y pare por la excepción EOFileException
+		genToken();
 		
 		
 	}
