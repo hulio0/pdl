@@ -1,10 +1,10 @@
 package lexico;
 
-import java.io.EOFException;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.regex.Pattern;
 
 import lexico.auxiliares.Accion;
@@ -299,16 +299,20 @@ public class AnalizadorLexico {
 		
 	}
 	
-	private static RandomAccessFile fichFuente;
+	//private static RandomAccessFile fichFuente;
+	private static FileReader ficheroFuente;
+	
 	private static long posicionActual;	
 	private static char charActual;
 	private static int estadoActual;
 	
 	
-	public static void iniciar(File ficheroFuente, File ficheroSalidaLex) {
+	public static void iniciar(File fuente, File ficheroSalidaLex) {
 		
-		try { fichFuente = new RandomAccessFile(ficheroFuente, "r"); }
-		catch( FileNotFoundException e ) { /*Esta situación ya ha sido tratada en Control*/ }
+		try { ficheroFuente = new FileReader(fuente); }
+		catch( FileNotFoundException e ) {}
+//		try { fichFuente = new RandomAccessFile(ficheroFuente, "r"); }
+//		catch( FileNotFoundException e ) { /*Esta situación ya ha sido tratada en Control*/ }
 				
 		Correspondencia.iniciar();
 		MatrizTransicion.iniciar();
@@ -322,7 +326,21 @@ public class AnalizadorLexico {
 		genToken();
 	}
 	
+	private static boolean finFichero = false;
 	private static void leer() {
+		int nextChar = -1;
+		try { nextChar = ficheroFuente.read(); } 
+		catch(IOException e) { e.printStackTrace(); }
+		
+		if( nextChar == -1 )
+			finFichero = true;
+		
+		if( nextChar == (int) '\n' )
+			System.out.println("TO-DO: Incrementar contador de saltos de línea");
+		
+		charActual = (char) nextChar;
+		
+		/* Versión antigua
 		try { 
 			// Leemos el caracter
 			charActual = (char) fichFuente.read();
@@ -332,6 +350,7 @@ public class AnalizadorLexico {
 		}
 		catch(EOFException e) {System.out.println("Y se acabó perro"); System.exit(0); }
 		catch(IOException e) { System.out.println("Problemas leyendo el fichero fuente"); }
+		*/
 	}
 	
 	private static void genToken(){
@@ -501,10 +520,9 @@ public class AnalizadorLexico {
 			
 		} // EOWhile
 		
-		// Si llegamos aquí se ha generado un token satisfactoriamente. Como el sintáctico aún 
-		// no nos pide nada pues vamos a terminar así de forma provisional (evidentemente tenemos
-		// que dejar la 'ñ' donde queramos que termine)
-		if(charActual=='ñ') System.exit(0);
+		// De momento en bucle hasta que se termine de leer el fichero
+		if( finFichero )
+			System.exit(0);	
 		genToken();
 		
 		
