@@ -1,5 +1,6 @@
 package lexico;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -292,7 +293,6 @@ public class AnalizadorLexico {
 				return LLAV_AB;
 			case '}':
 				return LLAVE_CE;
-				
 			default:
 				return RESTO_CARACT;
 			}
@@ -302,7 +302,7 @@ public class AnalizadorLexico {
 		
 	}
 	
-	private static FileReader ficheroFuente;
+	private static BufferedReader ficheroFuente;
 	private static Salida salida;
 	
 	private static int lineaActual;
@@ -310,7 +310,7 @@ public class AnalizadorLexico {
 	
 	public static void iniciar(File fuente, File ficheroSalidaLex) {
 		
-		try { ficheroFuente = new FileReader(fuente); }
+		try { ficheroFuente = new BufferedReader(new FileReader(fuente)); }
 		catch( FileNotFoundException e ) {}
 		
 		salida = new Salida(ficheroSalidaLex);
@@ -339,17 +339,22 @@ public class AnalizadorLexico {
 			
 			// Hacemos que nuestro compilador interprete el fin de fichero
 			// como un delimitador. De esta manera simplemente lo saltará o 
-			// generará un token pendiente (alguno de estos ID,PR,ENT,- que
+			// generará un token pendiente (alguno de estos: ID,PR,ENT,- que
 			// se generan en estados finales cuyas transciciones son o.c.)
 			nextChar = (int) ' ';
 		}
 		
-		else if( nextChar == (int) '\n' )
+		if( nextChar == (int) '\n' )
 			lineaActual++;
 			
 		charActual = (char) nextChar;
-
 	}
+	
+	
+	
+	private static int estadoActual;
+	private static Integer num;
+	private static String lex;
 	
 	// Si no estamos en un estado final, hay que parar el bucle de transiciones
 	// cuando lleguemos al final del fichero y lex y num estén sin nada guardado
@@ -357,9 +362,6 @@ public class AnalizadorLexico {
 		return finFichero && lex.equals("") && num == null;
 	}
 	
-	private static int estadoActual;
-	private static Integer num;
-	private static String lex;
 	private static void genToken(){
 		estadoActual=0;
 		num=null;
@@ -403,12 +405,8 @@ public class AnalizadorLexico {
 				
 				posicion = TablaPR.get(lex);
 				if( posicion !=null ) {
-					
-					// Obtenemos el código identificador de PR
-					codToken = Correspondencia.de("PR");
-					
-					// Generamos el token
-					salida.escribir(new Token(codToken,posicion).toString());
+					salida.escribir(new 
+							Token(Correspondencia.de("PR"),posicion).toString());
 				}
 				
 				// Si no es una PR entonces es una variable
@@ -422,8 +420,8 @@ public class AnalizadorLexico {
 						posicion = TablaS.insert(new FilaTS(lex));
 					
 					// En cualquier caso se genera el token de variable
-					codToken = Correspondencia.de("ID");
-					salida.escribir(new Token(codToken,posicion).toString());	
+					salida.escribir(new 
+							Token(Correspondencia.de("ID"),posicion).toString());	
 				}
 				// Liberamos el lexema
 				lex = "";
@@ -431,7 +429,8 @@ public class AnalizadorLexico {
 								
 			case GENERAR_ENTERO:
 				if(num<=Math.pow(2, 16)-1)
-					salida.escribir(new Token(Correspondencia.de("ENT"),num).toString());
+					salida.escribir(new 
+							Token(Correspondencia.de("ENT"),num).toString());
 				else
 					GestorErrores.reportar(new
 							ErrorEnteroFueraDeRango(num,lineaActual));
@@ -442,74 +441,88 @@ public class AnalizadorLexico {
 				
 			case GENERAR_CADENA: 
 				leer();
-				salida.escribir(new Token(Correspondencia.de("CAD"),lex).toString());
+				salida.escribir(new
+						Token(Correspondencia.de("CAD"),lex).toString());
 				
 				// Liberamos el lexema
 				lex="";
 				break;
 				
 			case GENERAR_MENOS:
-				salida.escribir(new Token(Correspondencia.de("-"),"").toString());
+				salida.escribir(new
+						Token(Correspondencia.de("-"),"").toString());
 				break;
 				
 			case GENERAR_POS_DECREMENTO: 
 				leer();
-				salida.escribir(new Token(Correspondencia.de("--"),"").toString());
+				salida.escribir(new
+						Token(Correspondencia.de("--"),"").toString());
 				break;
 				
 			case GENERAR_IGUAL:
 				leer();
-				salida.escribir(new Token(Correspondencia.de("="),"").toString());
+				salida.escribir(new
+						Token(Correspondencia.de("="),"").toString());
 				break;
 				
 			case GENERAR_MAS:
 				leer();
-				salida.escribir(new Token(Correspondencia.de("+"),"").toString());
+				salida.escribir(new
+						Token(Correspondencia.de("+"),"").toString());
 				break;
 				
 			case GENERAR_MAYOR:
 				leer();
-				salida.escribir(new Token(Correspondencia.de(">"),"").toString());
+				salida.escribir(new
+						Token(Correspondencia.de(">"),"").toString());
 				break;
 				
 			case GENERAR_MENOR:
 				leer();
-				salida.escribir(new Token(Correspondencia.de("<"),"").toString());
+				salida.escribir(new
+						Token(Correspondencia.de("<"),"").toString());
 				break;
 				
 			case GENERAR_DISTINTO:
 				leer();
-				salida.escribir(new Token(Correspondencia.de("!"),"").toString());
+				salida.escribir(new
+						Token(Correspondencia.de("!"),"").toString());
 				break;
 				
 			case GENERAR_COMA:
 				leer();
-				salida.escribir(new Token(Correspondencia.de(","),"").toString());
+				salida.escribir(new
+						Token(Correspondencia.de(","),"").toString());
 				break;
 				
 			case GENERAR_PUNTO_COMA:
 				leer();
-				salida.escribir(new Token(Correspondencia.de(";"),"").toString());
+				salida.escribir(new
+						Token(Correspondencia.de(";"),"").toString());
 				break;
 				
 			case GENERAR_PARENTESIS_AB:
 				leer();
-				salida.escribir(new Token(Correspondencia.de("("),"").toString());
+				salida.escribir(new
+						Token(Correspondencia.de("("),"").toString());
 				break;
 				
 			case GENERAR_PARENTESIS_CE:
 				leer();
-				salida.escribir(new Token(Correspondencia.de(")"),"").toString());
+				salida.escribir(new
+						Token(Correspondencia.de(")"),"").toString());
 				break;
 				
 			case GENERAR_LLAVE_AB:
 				leer();
-				salida.escribir(new Token(Correspondencia.de("{"),"").toString());
+				salida.escribir(new
+						Token(Correspondencia.de("{"),"").toString());
 				break;
 				
 			case GENERAR_LLAVE_CE:
 				leer();
-				salida.escribir(new Token(Correspondencia.de("}"),"").toString());
+				salida.escribir(new
+						Token(Correspondencia.de("}"),"").toString());
 				break;
 				
 			// En los errores también leemos (básicamente pq si no lo hacemos
@@ -538,8 +551,6 @@ public class AnalizadorLexico {
 		if( finFichero )
 			System.exit(0);	
 		genToken();
-		
-		
 	}
 
 }

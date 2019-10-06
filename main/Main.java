@@ -12,7 +12,6 @@ public class Main {
 		if(args.length>0)
 			nombreFicheroEntrada = args[0];
 		
-		
 		// Ponemos en marcha el programa
 		Control.iniciar(dirActual, nombreFicheroEntrada);
 	}

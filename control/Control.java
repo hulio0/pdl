@@ -25,18 +25,22 @@ public class Control {
 		dirActual+="//SALIDA";
 		File f = new File(dirActual);
 		
-		// Bueno, antes de seguir habrá que cargarse cualquier otra ejecución anterior. El problema es
-		// que no podemos simplemente usar .delete en la carpeta pues esto sólo  funciona cuando está
-		// vacía así que lo que haremos esta vez es simplemente borrar todos los FICHEROS de DENTRO
+		// Si la carpeta ya existe (por ejemplo por una ejecución anterior) habrá que eliminar
+		// todo su contenido. El problema es que no podemos simplemente usar .delete en la carpeta
+		// y crearla otra vez, pues borrarla con este método sólo funciona cuando la carpeta está
+		// vacía, así que lo que haremos esta vez es simplemente borrar todos los FICHEROS de DENTRO
 		// (si quisieramos borrar el contenido de sub carpetas nececitaríamos una función recursiva)
 		if( f.exists() )
-			limpiar(dirActual);
+			limpiar(f);
+		
+		// Creamos la carpeta
 		else
 			f.mkdir();
 		
 		// Ahora creamos los ficheros de salida dentro de ella. Nótese que dirActual "apunta"
-		// al interior de la carpeta SALIDA, en otras palabras, ahora mismo estamos dentro de ella.
-		// Luego, basta darles nombres a los ficheros, instanciar los File's y llamar al método correspondiente
+		// al interior de la carpeta SALIDA, en otras palabras, ahora mismo estamos dentro de
+		// ella. Luego, basta darles nombres a los ficheros, instanciar los File's y llamar
+		// al método correspondiente
 		File ficheroALexico = new File( dirActual + "//Salida Analizador Léxico.txt");
 		File ficheroASintactico = new File( dirActual + "//Salida Analizador Sintáctico.txt");
 		File ficheroASemantico = new File( dirActual + "//Salida Analizador Semántico.txt");
@@ -47,17 +51,15 @@ public class Control {
 			ficheroASintactico.createNewFile();
 			ficheroASemantico.createNewFile();
 			ficheroErrores.createNewFile();
-		} catch(IOException e) { System.out.println("No se han podido crear los ficheros de salida"); }
-		
-		
+		} catch(IOException e) { e.printStackTrace(); }
 		
 		// Ponemos en marcha los modulos
 		GestorErrores.iniciar(ficheroErrores);
 		AnalizadorLexico.iniciar(ficheroFuente, ficheroALexico);
 	}
 
-	private static void limpiar(String dir) {
-		for( File f : new File(dir).listFiles() )
+	private static void limpiar(File carpeta) {
+		for( File f : carpeta.listFiles() )
 			f.delete();
 	}
 }
