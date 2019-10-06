@@ -22,15 +22,16 @@ public class Control {
 				
 		// La carpeta se llamará SALIDA
 		dirActual+="//SALIDA";
+		File f = new File(dirActual);
 		
 		// Bueno, antes de seguir habrá que cargarse cualquier otra ejecución anterior. El problema es
 		// que no podemos simplemente usar .delete en la carpeta pues esto sólo  funciona cuando está
 		// vacía así que lo que haremos esta vez es simplemente borrar todos los FICHEROS de DENTRO
 		// (si quisieramos borrar el contenido de sub carpetas nececitaríamos una función recursiva)
-		limpiar(dirActual);
-		
-		// La creamos.
-		new File(dirActual).mkdir();
+		if( f.exists() )
+			limpiar(dirActual);
+		else
+			f.mkdir();
 		
 		// Ahora creamos los ficheros de salida dentro de ella. Nótese que dirActual "apunta"
 		// al interior de la carpeta SALIDA, en otras palabras, ahora mismo estamos dentro de ella.
