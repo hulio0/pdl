@@ -20,7 +20,7 @@ public class Token {
 	
 	public String toString() {
 		return toStringFriendly();
-		//return "<"+id+","+"atributo"+">";
+		//return "<"+id+","+atributo+">";
 	}
 
 }

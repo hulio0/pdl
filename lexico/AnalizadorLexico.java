@@ -77,29 +77,29 @@ public class AnalizadorLexico {
 		}
 		
 		private static void iniciarEstado1() {
-			EstadoAccion irA7YGenerarEntero = new EstadoAccion(7, Accion.GENERAR_ENTERO);
+			EstadoAccion irA7YGenerarPRoID = new EstadoAccion(7, Accion.GENERAR_PR_ID);
 			EstadoAccion irA1YConcatenar = new EstadoAccion(1, Accion.CONCATENAR);
 			
-			mat[1][DEL]   		 = irA7YGenerarEntero;
-			mat[1][CR]    		 = irA7YGenerarEntero;
+			mat[1][DEL]   		 = irA7YGenerarPRoID;
+			mat[1][CR]    		 = irA7YGenerarPRoID;
 			mat[1][LETRA] 		 = irA1YConcatenar;
 			mat[1][DIGITO]   	 = irA1YConcatenar;
 			mat[1][UNDERSCORE] 	 = irA1YConcatenar;
-			mat[1][COMILLA] 	 = irA7YGenerarEntero;
-			mat[1][MENOS] 		 = irA7YGenerarEntero;
-			mat[1][BARRA] 		 = irA7YGenerarEntero;
-			mat[1][IGUAL] 		 = irA7YGenerarEntero;
-			mat[1][MAS] 		 = irA7YGenerarEntero;
-			mat[1][MAYOR] 		 = irA7YGenerarEntero;
-			mat[1][MENOR] 		 = irA7YGenerarEntero;
-			mat[1][DISTINTO] 	 = irA7YGenerarEntero;
-			mat[1][COMA] 		 = irA7YGenerarEntero;
-			mat[1][PUNTO_COMA] 	 = irA7YGenerarEntero;
-			mat[1][PAR_AB] 		 = irA7YGenerarEntero;
-			mat[1][PAR_CE] 		 = irA7YGenerarEntero;
-			mat[1][LLAV_AB] 	 = irA7YGenerarEntero;
-			mat[1][LLAVE_CE] 	 = irA7YGenerarEntero;
-			mat[1][RESTO_CARACT] = irA7YGenerarEntero;
+			mat[1][COMILLA] 	 = irA7YGenerarPRoID;
+			mat[1][MENOS] 		 = irA7YGenerarPRoID;
+			mat[1][BARRA] 		 = irA7YGenerarPRoID;
+			mat[1][IGUAL] 		 = irA7YGenerarPRoID;
+			mat[1][MAS] 		 = irA7YGenerarPRoID;
+			mat[1][MAYOR] 		 = irA7YGenerarPRoID;
+			mat[1][MENOR] 		 = irA7YGenerarPRoID;
+			mat[1][DISTINTO] 	 = irA7YGenerarPRoID;
+			mat[1][COMA] 		 = irA7YGenerarPRoID;
+			mat[1][PUNTO_COMA] 	 = irA7YGenerarPRoID;
+			mat[1][PAR_AB] 		 = irA7YGenerarPRoID;
+			mat[1][PAR_CE] 		 = irA7YGenerarPRoID;
+			mat[1][LLAV_AB] 	 = irA7YGenerarPRoID;
+			mat[1][LLAVE_CE] 	 = irA7YGenerarPRoID;
+			mat[1][RESTO_CARACT] = irA7YGenerarPRoID;
 			
 		}
 		
@@ -157,7 +157,7 @@ public class AnalizadorLexico {
 		
 		private static void iniciarEstado4() {
 			EstadoAccion irA11YGenerarPosDecr = new EstadoAccion(11, Accion.GENERAR_POS_DECREMENTO);
-			EstadoAccion irA10YGenerarMenos = new EstadoAccion(3, Accion.GENERAR_MENOS);
+			EstadoAccion irA10YGenerarMenos = new EstadoAccion(10, Accion.GENERAR_MENOS);
 			
 			mat[4][DEL]   		 = irA10YGenerarMenos;
 			mat[4][CR]    		 = irA10YGenerarMenos;
@@ -290,8 +290,7 @@ public class AnalizadorLexico {
 				return LLAVE_CE;
 				
 			default:
-				System.out.println("Ha habido un problema transitando");
-				return -1;
+				return RESTO_CARACT;
 			}
 			
 			
@@ -303,6 +302,7 @@ public class AnalizadorLexico {
 	private static FileReader ficheroFuente;
 	
 	private static long posicionActual;	
+	private static int lineaActual;
 	private static char charActual;
 	private static int estadoActual;
 	
@@ -320,6 +320,7 @@ public class AnalizadorLexico {
 		TablaPR.iniciar();
 				
 		// Empezamos: leemos el primer caracter del fichero
+		lineaActual=1;
 		leer();
 		
 		// Le decimos al ALex que genere todos los tokens
@@ -332,43 +333,47 @@ public class AnalizadorLexico {
 		try { nextChar = ficheroFuente.read(); } 
 		catch(IOException e) { e.printStackTrace(); }
 		
-		if( nextChar == -1 )
+		if( nextChar == -1 ) {
 			finFichero = true;
-		
-		if( nextChar == (int) '\n' )
-			System.out.println("TO-DO: Incrementar contador de saltos de línea");
-		
-		charActual = (char) nextChar;
-		
-		/* Versión antigua
-		try { 
-			// Leemos el caracter
-			charActual = (char) fichFuente.read();
+			try { ficheroFuente.close(); }catch(IOException e) {}
 			
-			// Actualizamos el puntero
-			posicionActual = fichFuente.getFilePointer();
+			// Hacemos que nuestro compilador interprete el fin de fichero
+			// como un delimitador. De esta manera simplemente lo saltará o 
+			// generará un token pendiente (alguno de estos ID,PR,ENT,- que
+			// se generan en estados finales cuyas transciciones son o.c.)
+			nextChar = (int) ' ';
 		}
-		catch(EOFException e) {System.out.println("Y se acabó perro"); System.exit(0); }
-		catch(IOException e) { System.out.println("Problemas leyendo el fichero fuente"); }
-		*/
+		
+		else if( nextChar == (int) '\n' )
+			lineaActual++;
+			
+		charActual = (char) nextChar;
+
 	}
 	
+	// Si no estamos en un estado final, hay que parar el bucle de transiciones
+	// cuando lleguemos al final del fichero y lex y num estén sin nada guardado
+	private static boolean terminar() {
+		return finFichero && lex.equals("") && num == null;
+	}
+	
+	private static Integer num;
+	private static String lex;
 	private static void genToken(){
+		estadoActual=0;
+		num=null;
+		lex="";
 		
 		// Variables auxiliares
-		String lex ="";
-		Integer num = null;
 		Integer posicion = null;
 		Integer codToken = null;
 		EstadoAccion entrada = null;
-		
-		estadoActual = 0;
-		
+				
 		// toDo es la acción semántica a realizar en cada transición
 		Accion toDo = null;
 		
 		// Los estados no terminales son 0,1,2,3,4,5,6
-		while( estadoActual <=6 ) {
+		while( estadoActual <=6 && !terminar() ) {
 			
 			entrada = MatrizTransicion.getNextTrans();	
 			  estadoActual = entrada.estado();
@@ -400,25 +405,27 @@ public class AnalizadorLexico {
 				posicion = TablaPR.get(lex);
 				if( posicion !=null ) {
 					
-					// Obtenemos el código de la PR que está ahora mismo en lex
-					codToken = Correspondencia.de(lex);
+					// Obtenemos el código identificador de PR
+					codToken = Correspondencia.de("PR");
 					
 					// Generamos el token
 					SalidaLexico.escribir(new Token(codToken,posicion).toString());
 				}
 				
-				// Si no es una PR entonces es una variable. Buscamos
-				// a ver si ya está en la TS
-				posicion = TablaS.get(lex);
-				
-				// Si no está añadimos la variable a la tabla
-				if(posicion == null) 
-					posicion = TablaS.insert(new FilaTS(lex));
-				
-				// En cualquier caso se genera el token de variable
-				codToken = Correspondencia.de(lex);
-				SalidaLexico.escribir(new Token(codToken,posicion).toString());
-				
+				// Si no es una PR entonces es una variable
+				else{
+					
+					// Buscamos a ver si ya está en la TS
+					posicion = TablaS.get(lex);
+					
+					// Si no está añadimos la variable a la tabla
+					if(posicion == null) 
+						posicion = TablaS.insert(new FilaTS(lex));
+					
+					// En cualquier caso se genera el token de variable
+					codToken = Correspondencia.de("ID");
+					SalidaLexico.escribir(new Token(codToken,posicion).toString());	
+				}
 				// Liberamos el lexema
 				lex = "";
 				break;
@@ -506,11 +513,11 @@ public class AnalizadorLexico {
 				break;
 				
 			case ERR_CARACTER_NO_RECONOCIDO:
-				System.out.println("TO-DO");
+				System.out.println("TO-DO-error caracter no reconocido "+charActual+" "+lineaActual);
 				break;
 				
 			case ERR_INICIO_COMENTARIO_IMCOMPLETO:
-				System.out.println("TO-DO");
+				System.out.println("TO-DO-error mal comentario");
 				break;
 				
 			default:

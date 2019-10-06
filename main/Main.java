@@ -8,7 +8,7 @@ public class Main {
 		
 		String dirActual = System.getProperty("user.dir");
 		
-		String nombreFicheroEntrada = "Entrada.txt";
+		String nombreFicheroEntrada = "PIdG83.txt";
 		if(args.length>0)
 			nombreFicheroEntrada = args[0];
 		
