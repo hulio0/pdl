@@ -1,12 +1,16 @@
 package lexico;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
+import control.Salida;
+import errores.ErrorCharNoPer;
+import errores.ErrorComentarioMalForm;
+import errores.ErrorEnteroFueraDeRango;
+import errores.GestorErrores;
 import lexico.auxiliares.Accion;
 import lexico.auxiliares.EstadoAccion;
 import lexico.auxiliares.FilaTS;
@@ -58,7 +62,7 @@ public class AnalizadorLexico {
 			mat[0][CR]    		 = new EstadoAccion(0, Accion.LEER);
 			mat[0][LETRA] 		 = new EstadoAccion(1, Accion.CONCATENAR);
 			mat[0][DIGITO]   	 = new EstadoAccion(2, Accion.DECLARAR_NUM);
-			mat[0][UNDERSCORE] 	 = new EstadoAccion(0, Accion.ERR_CARACTER_NO_RECONOCIDO);
+			mat[0][UNDERSCORE] 	 = new EstadoAccion(0, Accion.ERR_CARACTER_NO_PERMITIDO);
 			mat[0][COMILLA] 	 = new EstadoAccion(3, Accion.LEER);
 			mat[0][MENOS] 		 = new EstadoAccion(4, Accion.LEER);
 			mat[0][BARRA] 		 = new EstadoAccion(5, Accion.LEER);
@@ -73,7 +77,7 @@ public class AnalizadorLexico {
 			mat[0][PAR_CE] 		 = new EstadoAccion(20, Accion.GENERAR_PARENTESIS_CE);
 			mat[0][LLAV_AB] 	 = new EstadoAccion(21, Accion.GENERAR_LLAVE_AB);
 			mat[0][LLAVE_CE] 	 = new EstadoAccion(22, Accion.GENERAR_LLAVE_CE);
-			mat[0][RESTO_CARACT] = new EstadoAccion(0, Accion.ERR_CARACTER_NO_RECONOCIDO);
+			mat[0][RESTO_CARACT] = new EstadoAccion(0, Accion.ERR_CARACTER_NO_PERMITIDO);
 		}
 		
 		private static void iniciarEstado1() {
@@ -183,28 +187,28 @@ public class AnalizadorLexico {
 		
 		private static void iniciarEstado5() {
 			EstadoAccion irA6YLeer = new EstadoAccion(6, Accion.LEER);
-			EstadoAccion irA5YErrorComentario = new EstadoAccion(5, Accion.ERR_INICIO_COMENTARIO_IMCOMPLETO);
+			EstadoAccion irA0YErrorComentario = new EstadoAccion(0, Accion.ERR_INICIO_COMENTARIO_IMCOMPLETO);
 			
-			mat[5][DEL]   		 = irA5YErrorComentario;
-			mat[5][CR]    		 = irA5YErrorComentario;
-			mat[5][LETRA] 		 = irA5YErrorComentario;
-			mat[5][DIGITO]   	 = irA5YErrorComentario;
-			mat[5][UNDERSCORE] 	 = irA5YErrorComentario;
-			mat[5][COMILLA] 	 = irA5YErrorComentario;
-			mat[5][MENOS] 		 = irA5YErrorComentario;
+			mat[5][DEL]   		 = irA0YErrorComentario;
+			mat[5][CR]    		 = irA0YErrorComentario;
+			mat[5][LETRA] 		 = irA0YErrorComentario;
+			mat[5][DIGITO]   	 = irA0YErrorComentario;
+			mat[5][UNDERSCORE] 	 = irA0YErrorComentario;
+			mat[5][COMILLA] 	 = irA0YErrorComentario;
+			mat[5][MENOS] 		 = irA0YErrorComentario;
 			mat[5][BARRA] 		 = irA6YLeer;
-			mat[5][IGUAL] 		 = irA5YErrorComentario;
-			mat[5][MAS] 		 = irA5YErrorComentario;
-			mat[5][MAYOR] 		 = irA5YErrorComentario;
-			mat[5][MENOR] 		 = irA5YErrorComentario;
-			mat[5][DISTINTO] 	 = irA5YErrorComentario;
-			mat[5][COMA] 		 = irA5YErrorComentario;
-			mat[5][PUNTO_COMA] 	 = irA5YErrorComentario;
-			mat[5][PAR_AB] 		 = irA5YErrorComentario;
-			mat[5][PAR_CE] 		 = irA5YErrorComentario;
-			mat[5][LLAV_AB] 	 = irA5YErrorComentario;
-			mat[5][LLAVE_CE] 	 = irA5YErrorComentario;
-			mat[5][RESTO_CARACT] = irA5YErrorComentario;
+			mat[5][IGUAL] 		 = irA0YErrorComentario;
+			mat[5][MAS] 		 = irA0YErrorComentario;
+			mat[5][MAYOR] 		 = irA0YErrorComentario;
+			mat[5][MENOR] 		 = irA0YErrorComentario;
+			mat[5][DISTINTO] 	 = irA0YErrorComentario;
+			mat[5][COMA] 		 = irA0YErrorComentario;
+			mat[5][PUNTO_COMA] 	 = irA0YErrorComentario;
+			mat[5][PAR_AB] 		 = irA0YErrorComentario;
+			mat[5][PAR_CE] 		 = irA0YErrorComentario;
+			mat[5][LLAV_AB] 	 = irA0YErrorComentario;
+			mat[5][LLAVE_CE] 	 = irA0YErrorComentario;
+			mat[5][RESTO_CARACT] = irA0YErrorComentario;
 		}
 		
 		private static void iniciarEstado6() {
@@ -298,25 +302,21 @@ public class AnalizadorLexico {
 		
 	}
 	
-	//private static RandomAccessFile fichFuente;
 	private static FileReader ficheroFuente;
+	private static Salida salida;
 	
-	private static long posicionActual;	
 	private static int lineaActual;
 	private static char charActual;
-	private static int estadoActual;
-	
 	
 	public static void iniciar(File fuente, File ficheroSalidaLex) {
 		
 		try { ficheroFuente = new FileReader(fuente); }
 		catch( FileNotFoundException e ) {}
-//		try { fichFuente = new RandomAccessFile(ficheroFuente, "r"); }
-//		catch( FileNotFoundException e ) { /*Esta situación ya ha sido tratada en Control*/ }
+		
+		salida = new Salida(ficheroSalidaLex);
 				
 		Correspondencia.iniciar();
 		MatrizTransicion.iniciar();
-		SalidaLexico.iniciar(ficheroSalidaLex);
 		TablaPR.iniciar();
 				
 		// Empezamos: leemos el primer caracter del fichero
@@ -357,6 +357,7 @@ public class AnalizadorLexico {
 		return finFichero && lex.equals("") && num == null;
 	}
 	
+	private static int estadoActual;
 	private static Integer num;
 	private static String lex;
 	private static void genToken(){
@@ -368,10 +369,8 @@ public class AnalizadorLexico {
 		Integer posicion = null;
 		Integer codToken = null;
 		EstadoAccion entrada = null;
-				
-		// toDo es la acción semántica a realizar en cada transición
-		Accion toDo = null;
-		
+		Accion toDo = null;  // acción semántica a realizar en cada transición
+
 		// Los estados no terminales son 0,1,2,3,4,5,6
 		while( estadoActual <=6 && !terminar() ) {
 			
@@ -409,7 +408,7 @@ public class AnalizadorLexico {
 					codToken = Correspondencia.de("PR");
 					
 					// Generamos el token
-					SalidaLexico.escribir(new Token(codToken,posicion).toString());
+					salida.escribir(new Token(codToken,posicion).toString());
 				}
 				
 				// Si no es una PR entonces es una variable
@@ -424,7 +423,7 @@ public class AnalizadorLexico {
 					
 					// En cualquier caso se genera el token de variable
 					codToken = Correspondencia.de("ID");
-					SalidaLexico.escribir(new Token(codToken,posicion).toString());	
+					salida.escribir(new Token(codToken,posicion).toString());	
 				}
 				// Liberamos el lexema
 				lex = "";
@@ -432,9 +431,10 @@ public class AnalizadorLexico {
 								
 			case GENERAR_ENTERO:
 				if(num<=Math.pow(2, 16)-1)
-					SalidaLexico.escribir(new Token(Correspondencia.de("ENT"),num).toString());
+					salida.escribir(new Token(Correspondencia.de("ENT"),num).toString());
 				else
-					System.out.println("TO-DO LANZAR ERROR");
+					GestorErrores.reportar(new
+							ErrorEnteroFueraDeRango(num,lineaActual));
 				
 				// Liberamos num
 				num = null;
@@ -442,82 +442,89 @@ public class AnalizadorLexico {
 				
 			case GENERAR_CADENA: 
 				leer();
-				SalidaLexico.escribir(new Token(Correspondencia.de("CAD"),lex).toString());
+				salida.escribir(new Token(Correspondencia.de("CAD"),lex).toString());
 				
 				// Liberamos el lexema
 				lex="";
 				break;
 				
 			case GENERAR_MENOS:
-				SalidaLexico.escribir(new Token(Correspondencia.de("-"),"").toString());
+				salida.escribir(new Token(Correspondencia.de("-"),"").toString());
 				break;
 				
 			case GENERAR_POS_DECREMENTO: 
 				leer();
-				SalidaLexico.escribir(new Token(Correspondencia.de("--"),"").toString());
+				salida.escribir(new Token(Correspondencia.de("--"),"").toString());
 				break;
 				
 			case GENERAR_IGUAL:
 				leer();
-				SalidaLexico.escribir(new Token(Correspondencia.de("="),"").toString());
+				salida.escribir(new Token(Correspondencia.de("="),"").toString());
 				break;
 				
 			case GENERAR_MAS:
 				leer();
-				SalidaLexico.escribir(new Token(Correspondencia.de("+"),"").toString());
+				salida.escribir(new Token(Correspondencia.de("+"),"").toString());
 				break;
 				
 			case GENERAR_MAYOR:
 				leer();
-				SalidaLexico.escribir(new Token(Correspondencia.de(">"),"").toString());
+				salida.escribir(new Token(Correspondencia.de(">"),"").toString());
 				break;
 				
 			case GENERAR_MENOR:
 				leer();
-				SalidaLexico.escribir(new Token(Correspondencia.de("<"),"").toString());
+				salida.escribir(new Token(Correspondencia.de("<"),"").toString());
 				break;
 				
 			case GENERAR_DISTINTO:
 				leer();
-				SalidaLexico.escribir(new Token(Correspondencia.de("!"),"").toString());
+				salida.escribir(new Token(Correspondencia.de("!"),"").toString());
 				break;
 				
 			case GENERAR_COMA:
 				leer();
-				SalidaLexico.escribir(new Token(Correspondencia.de(","),"").toString());
+				salida.escribir(new Token(Correspondencia.de(","),"").toString());
 				break;
 				
 			case GENERAR_PUNTO_COMA:
 				leer();
-				SalidaLexico.escribir(new Token(Correspondencia.de(";"),"").toString());
+				salida.escribir(new Token(Correspondencia.de(";"),"").toString());
 				break;
 				
 			case GENERAR_PARENTESIS_AB:
 				leer();
-				SalidaLexico.escribir(new Token(Correspondencia.de("("),"").toString());
+				salida.escribir(new Token(Correspondencia.de("("),"").toString());
 				break;
 				
 			case GENERAR_PARENTESIS_CE:
 				leer();
-				SalidaLexico.escribir(new Token(Correspondencia.de(")"),"").toString());
+				salida.escribir(new Token(Correspondencia.de(")"),"").toString());
 				break;
 				
 			case GENERAR_LLAVE_AB:
 				leer();
-				SalidaLexico.escribir(new Token(Correspondencia.de("{"),"").toString());
+				salida.escribir(new Token(Correspondencia.de("{"),"").toString());
 				break;
 				
 			case GENERAR_LLAVE_CE:
 				leer();
-				SalidaLexico.escribir(new Token(Correspondencia.de("}"),"").toString());
+				salida.escribir(new Token(Correspondencia.de("}"),"").toString());
 				break;
 				
-			case ERR_CARACTER_NO_RECONOCIDO:
-				System.out.println("TO-DO-error caracter no reconocido "+charActual+" "+lineaActual);
+			// En los errores también leemos (básicamente pq si no lo hacemos
+			// entramos en un bucle infinito. La otra opción es parar el Alex pero
+			// queremos que continue para que muestre todos los errores del fichero)
+			case ERR_CARACTER_NO_PERMITIDO:
+				GestorErrores.reportar(new 
+						ErrorCharNoPer(charActual,lineaActual));	
+				leer();
 				break;
 				
 			case ERR_INICIO_COMENTARIO_IMCOMPLETO:
-				System.out.println("TO-DO-error mal comentario");
+				GestorErrores.reportar(new
+						ErrorComentarioMalForm(lineaActual));
+				leer();
 				break;
 				
 			default:

@@ -3,6 +3,7 @@ package control;
 import java.io.File;
 import java.io.IOException;
 
+import errores.GestorErrores;
 import lexico.AnalizadorLexico;
 
 public class Control {
@@ -50,7 +51,8 @@ public class Control {
 		
 		
 		
-		// Ponemos en marcha los analizadores:
+		// Ponemos en marcha los modulos
+		GestorErrores.iniciar(ficheroErrores);
 		AnalizadorLexico.iniciar(ficheroFuente, ficheroALexico);
 	}
 
