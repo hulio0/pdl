@@ -344,7 +344,7 @@ public class AnalizadorLexico {
 			nextChar = (int) ' ';
 		}
 		
-		if( nextChar == (int) '\n' )
+		else if( nextChar == (int) '\n' )
 			lineaActual++;
 			
 		charActual = (char) nextChar;
