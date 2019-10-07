@@ -242,13 +242,13 @@ public class AnalizadorLexico {
 			return mat[estadoActual][getPosicion(charActual)];
 		}
 		
-		// Dado un caracter devuelve el correspondiente Ìndice de la matriz al que hace
-		// referencia. Ejemplo, dado '2' deberÌa de devolver DIGITO, que es el Ìndice 3
+		// Dado un caracter devuelve el correspondiente √≠ndice de la matriz al que hace
+		// referencia. Ejemplo, dado '2' deber√≠a de devolver DIGITO, que es el √≠ndice 3
 		public static int getPosicion(char c) {
 			
 			// Incluimos '\r' como delimitador para que el compilador se los salte. Esto para
 			// evitar problemas con aquello de que ficheros editados en Windows se codifican de modo
-			// que los saltos de lÌnea se traducen en una secuencia de \r\n en vez de sÛlo \n
+			// que los saltos de l√≠nea se traducen en una secuencia de \r\n en vez de s√≥lo \n
 			if( c=='\t' || c==' '||c=='\r' )
 				return DEL;
 			
@@ -338,8 +338,8 @@ public class AnalizadorLexico {
 			try { ficheroFuente.close(); }catch(IOException e) {}
 			
 			// Hacemos que nuestro compilador interprete el fin de fichero
-			// como un delimitador. De esta manera simplemente lo saltar· o 
-			// generar· un token pendiente (alguno de estos: ID,PR,ENT,- que
+			// como un delimitador. De esta manera simplemente lo saltar√° o 
+			// generar√° un token pendiente (alguno de estos: ID,PR,ENT,- que
 			// se generan en estados finales cuyas transciciones son o.c.)
 			nextChar = (int) ' ';
 		}
@@ -357,7 +357,7 @@ public class AnalizadorLexico {
 	private static String lex;
 	
 	// Si no estamos en un estado final, hay que parar el bucle de transiciones
-	// cuando lleguemos al final del fichero y lex y num estÈn sin nada guardado
+	// cuando lleguemos al final del fichero y lex y num est√©n sin nada guardado
 	private static boolean terminar() {
 		return finFichero && lex.equals("") && num == null;
 	}
@@ -371,7 +371,7 @@ public class AnalizadorLexico {
 		Integer posicion = null;
 		Integer codToken = null;
 		EstadoAccion entrada = null;
-		Accion toDo = null;  // acciÛn sem·ntica a realizar en cada transiciÛn
+		Accion toDo = null;  // acci√≥n sem√°ntica a realizar en cada transici√≥n
 
 		// Los estados no terminales son 0,1,2,3,4,5,6
 		while( estadoActual <=6 && !terminar() ) {
@@ -412,10 +412,10 @@ public class AnalizadorLexico {
 				// Si no es una PR entonces es una variable
 				else{
 					
-					// Buscamos a ver si ya est· en la TS
+					// Buscamos a ver si ya est√° en la TS
 					posicion = TablaS.get(lex);
 					
-					// Si no est· aÒadimos la variable a la tabla
+					// Si no est√° a√±adimos la variable a la tabla
 					if(posicion == null) 
 						posicion = TablaS.insert(new FilaTS(lex));
 					
@@ -442,7 +442,7 @@ public class AnalizadorLexico {
 			case GENERAR_CADENA: 
 				leer();
 				salida.escribir(new
-						Token(Correspondencia.de("CAD"),lex).toString());
+						Token(Correspondencia.de("CAD"),"\""+lex+"\"").toString());
 				
 				// Liberamos el lexema
 				lex="";
@@ -525,8 +525,8 @@ public class AnalizadorLexico {
 						Token(Correspondencia.de("}"),"").toString());
 				break;
 				
-			// En los errores tambiÈn leemos (b·sicamente pq si no lo hacemos
-			// entramos en un bucle infinito. La otra opciÛn es parar el Alex pero
+			// En los errores tambi√©n leemos (b√°sicamente pq si no lo hacemos
+			// entramos en un bucle infinito. La otra opci√≥n es parar el Alex pero
 			// queremos que continue para que muestre todos los errores del fichero)
 			case ERR_CARACTER_NO_PERMITIDO:
 				GestorErrores.reportar(new 
