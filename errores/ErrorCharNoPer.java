@@ -2,10 +2,10 @@ package errores;
 
 public class ErrorCharNoPer implements Error {
 	
-	// El car�cter en cuesti�n
+	// El carácter en cuestión
 	private char c;
 
-	// L�nea donde se ha encontrado
+	// Línea donde se ha encontrado
 	private int linea;
 
 	public ErrorCharNoPer(char c,int linea) {
@@ -15,7 +15,8 @@ public class ErrorCharNoPer implements Error {
 
 	@Override
 	public String getDesc() {
-		return "(LINEA "+linea+") Car�cter '"+c+"' no es un car�cter permitido en este contexto.";
+		return "Error LÉXICO-->(LINEA "+linea+") "
+		     + "Carácter '"+c+"' no es un carácter permitido en este contexto.";
 	}
 
 }
