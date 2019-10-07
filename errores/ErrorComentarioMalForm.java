@@ -9,7 +9,8 @@ public class ErrorComentarioMalForm implements Error{
 	}
 	
 	public String getDesc() {
-		return "(LINEA "+linea+") Los comentarios DEBEN llevar dos barras. S�lo se ha encontrado una.";
+		return "Error LÉXICO-->(LINEA "+linea+") "
+		     + "Los comentarios DEBEN llevar dos barras (//). Sólo se ha encontrado una (/).";
 	}
 	
 
