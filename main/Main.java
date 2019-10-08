@@ -1,5 +1,7 @@
 package main;
 
+import java.io.File;
+
 import control.Control;
 
 public class Main {
@@ -13,7 +15,7 @@ public class Main {
 			nombreFicheroEntrada = args[0];
 		
 		// Ponemos en marcha el programa
-		Control.iniciar(dirActual, nombreFicheroEntrada);
+		Control.iniciar(new File(dirActual), nombreFicheroEntrada);
 	}
 	
 }

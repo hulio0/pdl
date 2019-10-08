@@ -8,10 +8,11 @@ import lexico.AnalizadorLexico;
 
 public class Control {
 	
-	public static void iniciar(String dirActual, String nombreFicheroEntrada){
+	public static void iniciar(File dirActual, String nombreFicheroEntrada){
+		String separador = System.getProperty("file.separator");
 		
 		// Cargamos el fichero de entrada
-		File ficheroFuente = new File(dirActual+"//"+nombreFicheroEntrada);
+		File ficheroFuente = new File(dirActual+separador+nombreFicheroEntrada);
 		
 		if( !ficheroFuente.exists() ) {
 			System.out.println("No se ha encontrado el fichero fuente");
@@ -19,32 +20,31 @@ public class Control {
 		}
 		
 		// Ahora creamos los ficheros de salida. Primero crearemos una carpeta para
-		// meter toda la salida del programa allí, así está todo más organizado
+		// meter toda la salida del programa allï¿½, asï¿½ estï¿½ todo mï¿½s organizado
 				
-		// La carpeta se llamará SALIDA
-		dirActual+="//SALIDA";
-		File f = new File(dirActual);
+		// La carpeta se llamarï¿½ SALIDA
+		dirActual = new File(dirActual,"SAlida");
 		
-		// Si la carpeta ya existe (por ejemplo por una ejecución anterior) habrá que eliminar
+		// Si la carpeta ya existe (por ejemplo por una ejecuciï¿½n anterior) habrï¿½ que eliminar
 		// todo su contenido. El problema es que no podemos simplemente usar .delete en la carpeta
-		// y crearla otra vez, pues borrarla con este método sólo funciona cuando la carpeta está
-		// vacía, así que lo que haremos esta vez es simplemente borrar todos los FICHEROS de DENTRO
-		// (si quisieramos borrar el contenido de sub carpetas nececitaríamos una función recursiva)
-		if( f.exists() )
-			limpiar(f);
+		// y crearla otra vez, pues borrarla con este mï¿½todo sï¿½lo funciona cuando la carpeta estï¿½
+		// vacï¿½a, asï¿½ que lo que haremos esta vez es simplemente borrar todos los FICHEROS de DENTRO
+		// (si quisieramos borrar el contenido de sub carpetas nececitarï¿½amos una funciï¿½n recursiva)
+		if( dirActual.exists() )
+			limpiar(dirActual);
 		
 		// Creamos la carpeta
 		else
-			f.mkdir();
+			dirActual.mkdir();
 		
-		// Ahora creamos los ficheros de salida dentro de ella. Nótese que dirActual "apunta"
+		// Ahora creamos los ficheros de salida dentro de ella. Nï¿½tese que dirActual "apunta"
 		// al interior de la carpeta SALIDA, en otras palabras, ahora mismo estamos dentro de
 		// ella. Luego, basta darles nombres a los ficheros, instanciar los File's y llamar
-		// al método correspondiente
-		File ficheroALexico = new File( dirActual + "//Salida Analizador Léxico.txt");
-		File ficheroASintactico = new File( dirActual + "//Salida Analizador Sintáctico.txt");
-		File ficheroASemantico = new File( dirActual + "//Salida Analizador Semántico.txt");
-		File ficheroErrores = new File( dirActual + "//Salida Gestor de Errores.txt");
+		// al mï¿½todo correspondiente
+		File ficheroALexico = new File( dirActual , "Salida Analizador Lï¿½xico.txt");
+		File ficheroASintactico = new File( dirActual , "Salida Analizador Sintï¿½ctico.txt");
+		File ficheroASemantico = new File( dirActual , "Salida Analizador Semï¿½ntico.txt");
+		File ficheroErrores = new File( dirActual , "Salida Gestor de Errores.txt");
 		
 		try {
 			ficheroALexico.createNewFile();
