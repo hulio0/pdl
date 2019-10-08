@@ -1,7 +1,7 @@
 package lexico.auxiliares;
 
-// Enumerado que recoge TODAS las acciones semánticas
-// que puede llegar a ejecutar el analizador léxico
+// Enumerado que recoge TODAS las acciones semanticas
+// que puede llegar a ejecutar el analizador lexico
 public enum Accion {
 	LEER, 
 	CONCATENAR, 
@@ -24,5 +24,5 @@ public enum Accion {
 	GENERAR_LLAVE_AB,
 	GENERAR_LLAVE_CE,
 	ERR_CARACTER_NO_PERMITIDO,
-	ERR_INICIO_COMENTARIO_IMCOMPLETO,
+	ERR_COMENTARIO_MAL_FORMADO,
 }

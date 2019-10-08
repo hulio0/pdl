@@ -3,12 +3,13 @@ package lexico;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-// Permite conocer rápidamente la correspondencia entre
-// un lexema y su código token 
+// Permite conocer rapidamente la correspondencia entre
+// un codigo token numerico y su representacion "human friendly"
 public class Correspondencia {
 	
 	private static final int NUM_TOKENS = 17;
-	private static final BiMap<String,Integer> TABLA = HashBiMap.create(NUM_TOKENS);
+	private static final BiMap<String,Integer> TABLA =
+			HashBiMap.create(NUM_TOKENS);
 	
 	public static void iniciar() {
 		TABLA.put("PR", 0);
@@ -29,12 +30,15 @@ public class Correspondencia {
 		TABLA.put("{", 15);
 		TABLA.put("}", 16);
 	}
-
-	public static Integer de(String lex) {
-		return TABLA.get(lex);
+	
+	// Recibe representacion "friendly" y 
+	// devuelve la correspondencia numerica
+	public static Integer de(String codTokenFriendly) {
+		return TABLA.get(codTokenFriendly);
 	}
 	
-	public static String de(int id) {
-		return TABLA.inverse().get(id);
+	// Analogo al metodo anterior
+	public static String de(int codigoTokenNumerico) {
+		return TABLA.inverse().get(codigoTokenNumerico);
 	}
 }

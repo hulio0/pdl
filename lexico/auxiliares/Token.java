@@ -1,5 +1,4 @@
 package lexico.auxiliares;
-
 import lexico.Correspondencia;
 
 public class Token {
@@ -12,15 +11,15 @@ public class Token {
 		this.atributo=atributo;
 	}
 	
-	// Devuelve el String del token con su
-	// id convertido a su significado
+	// Devuelve el .toString del token con su codigo
+	// en su representacion "human friendly"
 	public String toStringFriendly() {
 		return "<"+Correspondencia.de(id)+","+atributo+">";
 	}
 	
 	public String toString() {
-		return toStringFriendly();
-		//return "<"+id+","+atributo+">";
+		//return toStringFriendly();
+		return "<"+id+","+atributo+">";
 	}
 
 }

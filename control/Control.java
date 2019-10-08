@@ -6,30 +6,27 @@ import java.io.IOException;
 import errores.GestorErrores;
 import lexico.AnalizadorLexico;
 
+// Clase que crea los ficheros de salida y pone en marcha todos los modulos del programa
 public class Control {
 	
 	public static void iniciar(File dirActual, String nombreFicheroEntrada){
-		String separador = System.getProperty("file.separator");
 		
 		// Cargamos el fichero de entrada
-		File ficheroFuente = new File(dirActual+separador+nombreFicheroEntrada);
+		File ficheroFuente = new File(dirActual,nombreFicheroEntrada);
 		
 		if( !ficheroFuente.exists() ) {
 			System.out.println("No se ha encontrado el fichero fuente");
 			return;
 		}
 		
-		// Ahora creamos los ficheros de salida. Primero crearemos una carpeta para
-		// meter toda la salida del programa all�, as� est� todo m�s organizado
+		// Creamos los ficheros de salida. Primero crearemos una carpeta
+		// para meterlos dentro
 				
-		// La carpeta se llamar� SALIDA
-		dirActual = new File(dirActual,"SAlida");
+		// La carpeta se llamara SALIDA
+		dirActual = new File(dirActual,"SALIDA");
 		
-		// Si la carpeta ya existe (por ejemplo por una ejecuci�n anterior) habr� que eliminar
-		// todo su contenido. El problema es que no podemos simplemente usar .delete en la carpeta
-		// y crearla otra vez, pues borrarla con este m�todo s�lo funciona cuando la carpeta est�
-		// vac�a, as� que lo que haremos esta vez es simplemente borrar todos los FICHEROS de DENTRO
-		// (si quisieramos borrar el contenido de sub carpetas nececitar�amos una funci�n recursiva)
+		// Si la carpeta ya existe (por ejemplo, por una ejecucion anterior)
+		// habra que eliminar todo su contenido. 
 		if( dirActual.exists() )
 			limpiar(dirActual);
 		
@@ -37,15 +34,11 @@ public class Control {
 		else
 			dirActual.mkdir();
 		
-		// Ahora creamos los ficheros de salida dentro de ella. N�tese que dirActual "apunta"
-		// al interior de la carpeta SALIDA, en otras palabras, ahora mismo estamos dentro de
-		// ella. Luego, basta darles nombres a los ficheros, instanciar los File's y llamar
-		// al m�todo correspondiente
-		File ficheroALexico = new File( dirActual , "Salida Analizador L�xico.txt");
-		File ficheroASintactico = new File( dirActual , "Salida Analizador Sint�ctico.txt");
-		File ficheroASemantico = new File( dirActual , "Salida Analizador Sem�ntico.txt");
+		// Ahora si, creamos los ficheros de salida
+		File ficheroALexico = new File( dirActual , "Salida Analizador Lexico.txt");
+		File ficheroASintactico = new File( dirActual , "Salida Analizador Sintactico.txt");
+		File ficheroASemantico = new File( dirActual , "Salida Analizador Semantico.txt");
 		File ficheroErrores = new File( dirActual , "Salida Gestor de Errores.txt");
-		
 		try {
 			ficheroALexico.createNewFile();
 			ficheroASintactico.createNewFile();
@@ -57,7 +50,10 @@ public class Control {
 		GestorErrores.iniciar(ficheroErrores);
 		AnalizadorLexico.iniciar(ficheroFuente, ficheroALexico);
 	}
-
+	
+	// Elimina todos los ficheros del directorio que le pasemos
+	// No elimina sub-carpetas pues .delete solo funciona con ellas
+	// cuando estan vacias
 	private static void limpiar(File carpeta) {
 		for( File f : carpeta.listFiles() )
 			f.delete();

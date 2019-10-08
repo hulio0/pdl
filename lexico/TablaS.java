@@ -6,7 +6,8 @@ import java.util.ArrayList;
 
 public class TablaS {
 	
-	private static ArrayList<FilaTS> tabla = new ArrayList<FilaTS>();
+	private static ArrayList<FilaTS> tabla =
+			new ArrayList<FilaTS>();
 	
 	public static Integer get(String lexema) {
 		int res = -1;

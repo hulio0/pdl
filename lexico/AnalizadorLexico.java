@@ -58,7 +58,7 @@ public class AnalizadorLexico {
 			iniciarEstado6();			
 		}
 		
-		private static void iniciarEstado0() {
+		private static void iniciarEstado0() {			
 			mat[0][DEL]   		 = new EstadoAccion(0, Accion.LEER);
 			mat[0][CR]    		 = new EstadoAccion(0, Accion.LEER);
 			mat[0][LETRA] 		 = new EstadoAccion(1, Accion.CONCATENAR);
@@ -188,7 +188,7 @@ public class AnalizadorLexico {
 		
 		private static void iniciarEstado5() {
 			EstadoAccion irA6YLeer = new EstadoAccion(6, Accion.LEER);
-			EstadoAccion irA0YErrorComentario = new EstadoAccion(0, Accion.ERR_INICIO_COMENTARIO_IMCOMPLETO);
+			EstadoAccion irA0YErrorComentario = new EstadoAccion(0, Accion.ERR_COMENTARIO_MAL_FORMADO);
 			
 			mat[5][DEL]   		 = irA0YErrorComentario;
 			mat[5][CR]    		 = irA0YErrorComentario;
@@ -237,10 +237,6 @@ public class AnalizadorLexico {
 			mat[6][LLAVE_CE] 	 = irA6YLeer;
 			mat[6][RESTO_CARACT] = irA6YLeer;
 		}
-	
-		public static EstadoAccion getNextTrans() {
-			return mat[estadoActual][getPosicion(charActual)];
-		}
 		
 		// Dado un caracter devuelve el correspondiente índice de la matriz al que hace
 		// referencia. Ejemplo, dado '2' debería de devolver DIGITO, que es el índice 3
@@ -255,7 +251,7 @@ public class AnalizadorLexico {
 			else if(c=='\n')
 				return CR;
 			
-			else if( Pattern.matches("[a-z|A-Z]", c+"") )
+			else if( Pattern.matches("[a-z|A-Z]",c+"") )
 				return LETRA;
 			
 			else if( Pattern.matches("[0-9]",c+"") )
@@ -296,38 +292,41 @@ public class AnalizadorLexico {
 			default:
 				return RESTO_CARACT;
 			}
-			
-			
+		}
+		
+		// Devuelve la siguiente transicion a ejecutar
+		public static EstadoAccion getNextTrans() {
+			return mat[estadoActual][getPosicion(charActual)];
 		}
 		
 	}
 	
 	private static BufferedReader ficheroFuente;
-	private static Salida salida;
-	
+	private static Salida salidaLex;
 	private static int lineaActual;
-	private static char charActual;
 	
 	public static void iniciar(File fuente, File ficheroSalidaLex) {
 		
 		try { ficheroFuente = new BufferedReader(new FileReader(fuente)); }
-		catch( FileNotFoundException e ) {}
+		catch( FileNotFoundException e ) { /*Ya se ha controlado esta situacion*/ }
+		salidaLex = new Salida(ficheroSalidaLex);
+		lineaActual=1;
 		
-		salida = new Salida(ficheroSalidaLex);
-				
+		// Iniciamos los elementos del lexico necesarios		
 		Correspondencia.iniciar();
 		MatrizTransicion.iniciar();
 		TablaPR.iniciar();
 				
 		// Empezamos: leemos el primer caracter del fichero
-		lineaActual=1;
 		leer();
 		
-		// Le decimos al ALex que genere todos los tokens
+		// Generamos todos los tokens
 		genToken();
 	}
 	
+	private static char charActual;
 	private static boolean finFichero = false;
+	
 	private static void leer() {
 		int nextChar = -1;
 		try { nextChar = ficheroFuente.read(); } 
@@ -338,8 +337,8 @@ public class AnalizadorLexico {
 			try { ficheroFuente.close(); }catch(IOException e) {}
 			
 			// Hacemos que nuestro compilador interprete el fin de fichero
-			// como un delimitador. De esta manera simplemente lo saltará o 
-			// generará un token pendiente (alguno de estos: ID,PR,ENT,- que
+			// como un delimitador. De esta manera simplemente lo saltara o 
+			// generara un token pendiente (alguno de estos: ID,PR,ENT,- que
 			// se generan en estados finales cuyas transciciones son o.c.)
 			nextChar = (int) ' ';
 		}
@@ -349,7 +348,6 @@ public class AnalizadorLexico {
 			
 		charActual = (char) nextChar;
 	}
-	
 	
 	
 	private static int estadoActual;
@@ -369,16 +367,16 @@ public class AnalizadorLexico {
 		
 		// Variables auxiliares
 		Integer posicion = null;
-		Integer codToken = null;
 		EstadoAccion entrada = null;
-		Accion toDo = null;  // acción semántica a realizar en cada transición
+		Accion toDo = null;  // accion semantica a realizar en cada transicion
 
 		// Los estados no terminales son 0,1,2,3,4,5,6
 		while( estadoActual <=6 && !terminar() ) {
 			
 			entrada = MatrizTransicion.getNextTrans();	
-			  estadoActual = entrada.estado();
-			  toDo = entrada.accion();
+			
+			estadoActual = entrada.estado();
+			toDo = entrada.accion();
 			
 			switch( toDo ){
 			
@@ -405,7 +403,7 @@ public class AnalizadorLexico {
 				
 				posicion = TablaPR.get(lex);
 				if( posicion !=null ) {
-					salida.escribir(new 
+					salidaLex.escribir(new 
 							Token(Correspondencia.de("PR"),posicion).toString());
 				}
 				
@@ -415,12 +413,12 @@ public class AnalizadorLexico {
 					// Buscamos a ver si ya está en la TS
 					posicion = TablaS.get(lex);
 					
-					// Si no está añadimos la variable a la tabla
+					// Si no esta añadimos la variable a la tabla
 					if(posicion == null) 
 						posicion = TablaS.insert(new FilaTS(lex));
 					
 					// En cualquier caso se genera el token de variable
-					salida.escribir(new 
+					salidaLex.escribir(new 
 							Token(Correspondencia.de("ID"),posicion).toString());	
 				}
 				// Liberamos el lexema
@@ -429,7 +427,7 @@ public class AnalizadorLexico {
 								
 			case GENERAR_ENTERO:
 				if(num<=Math.pow(2, 16)-1)
-					salida.escribir(new 
+					salidaLex.escribir(new 
 							Token(Correspondencia.de("ENT"),num).toString());
 				else
 					GestorErrores.reportar(new
@@ -441,7 +439,7 @@ public class AnalizadorLexico {
 				
 			case GENERAR_CADENA: 
 				leer();
-				salida.escribir(new
+				salidaLex.escribir(new
 						Token(Correspondencia.de("CAD"),"\""+lex+"\"").toString());
 				
 				// Liberamos el lexema
@@ -449,92 +447,92 @@ public class AnalizadorLexico {
 				break;
 				
 			case GENERAR_MENOS:
-				salida.escribir(new
+				salidaLex.escribir(new
 						Token(Correspondencia.de("-"),"").toString());
 				break;
 				
 			case GENERAR_POS_DECREMENTO: 
 				leer();
-				salida.escribir(new
+				salidaLex.escribir(new
 						Token(Correspondencia.de("--"),"").toString());
 				break;
 				
 			case GENERAR_IGUAL:
 				leer();
-				salida.escribir(new
+				salidaLex.escribir(new
 						Token(Correspondencia.de("="),"").toString());
 				break;
 				
 			case GENERAR_MAS:
 				leer();
-				salida.escribir(new
+				salidaLex.escribir(new
 						Token(Correspondencia.de("+"),"").toString());
 				break;
 				
 			case GENERAR_MAYOR:
 				leer();
-				salida.escribir(new
+				salidaLex.escribir(new
 						Token(Correspondencia.de(">"),"").toString());
 				break;
 				
 			case GENERAR_MENOR:
 				leer();
-				salida.escribir(new
+				salidaLex.escribir(new
 						Token(Correspondencia.de("<"),"").toString());
 				break;
 				
 			case GENERAR_DISTINTO:
 				leer();
-				salida.escribir(new
+				salidaLex.escribir(new
 						Token(Correspondencia.de("!"),"").toString());
 				break;
 				
 			case GENERAR_COMA:
 				leer();
-				salida.escribir(new
+				salidaLex.escribir(new
 						Token(Correspondencia.de(","),"").toString());
 				break;
 				
 			case GENERAR_PUNTO_COMA:
 				leer();
-				salida.escribir(new
+				salidaLex.escribir(new
 						Token(Correspondencia.de(";"),"").toString());
 				break;
 				
 			case GENERAR_PARENTESIS_AB:
 				leer();
-				salida.escribir(new
+				salidaLex.escribir(new
 						Token(Correspondencia.de("("),"").toString());
 				break;
 				
 			case GENERAR_PARENTESIS_CE:
 				leer();
-				salida.escribir(new
+				salidaLex.escribir(new
 						Token(Correspondencia.de(")"),"").toString());
 				break;
 				
 			case GENERAR_LLAVE_AB:
 				leer();
-				salida.escribir(new
+				salidaLex.escribir(new
 						Token(Correspondencia.de("{"),"").toString());
 				break;
 				
 			case GENERAR_LLAVE_CE:
 				leer();
-				salida.escribir(new
+				salidaLex.escribir(new
 						Token(Correspondencia.de("}"),"").toString());
 				break;
 				
-			// En los errores también leemos (básicamente pq si no lo hacemos
-			// entramos en un bucle infinito. La otra opción es parar el Alex pero
-			// queremos que continue para que muestre todos los errores del fichero)
+			// En los errores también leemos (basicamente pq si no lo hacemos entramos
+			// en un bucle infinito. La otra opción es parar el Alex pero queremos que
+			// continue para que muestre todos los errores lexicos del fichero)
 			case ERR_CARACTER_NO_PERMITIDO:
 				GestorErrores.reportar(new 
 						ErrorCharNoPer(charActual,lineaActual));	
 				leer();
 				break;
 				
-			case ERR_INICIO_COMENTARIO_IMCOMPLETO:
+			case ERR_COMENTARIO_MAL_FORMADO:
 				GestorErrores.reportar(new
 						ErrorComentarioMalForm(lineaActual));
 				leer();

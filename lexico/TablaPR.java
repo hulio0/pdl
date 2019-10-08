@@ -3,12 +3,13 @@ package lexico;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-// Estructura de datos que permite hacer una correspondencia entre cada palabra clave
-// y la posición que ocupa en la estructura
+// Estructura de datos que permite hacer la correspondencia
+// entre cada palabra reservada y el codigo numerico que la identifica
 public class TablaPR {
 
 	private static final int NUM_PR = 10;
-	private static final BiMap<String,Integer> TABLA = HashBiMap.create(NUM_PR);
+	private static final BiMap<String,Integer> TABLA =
+			HashBiMap.create(NUM_PR);
 	
 	public static void iniciar() {
 		TABLA.put("boolean", 1);
@@ -23,16 +24,16 @@ public class TablaPR {
 		TABLA.put("var", 10);
 	}
 	
-	public static boolean buscarTPR(String lex) {
-		return TABLA.containsKey(lex);
+	public static boolean buscarTPR(String palTexto) {
+		return TABLA.containsKey(palTexto);
 	}
 	
-	public static Integer get(String pr) {
-		return TABLA.get(pr);
+	public static Integer get(String palTexto) {
+		return TABLA.get(palTexto);
 	}
 	
-	public static String get(Integer codPR) {
-		return TABLA.inverse().get(codPR);
+	public static String get(Integer palCodigo) {
+		return TABLA.inverse().get(palCodigo);
 	}
 	
 	

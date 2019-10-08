@@ -4,16 +4,19 @@ import java.io.File;
 
 import control.Salida;
 
+// Es el que recibe los errores de los diferentes modulos.
+// Basicamente se encarga de escribir las descripciones de
+// los errores en el fichero de errores
 public class GestorErrores {
 	
-	private static Salida salida;
+	private static Salida salidaGestErr;
 	
 	public static void iniciar(File ficheroSalidaErr) {
-		salida = new Salida(ficheroSalidaErr);
+		salidaGestErr = new Salida(ficheroSalidaErr);
 	}
 	
 	public static void reportar(Error e) {
-		salida.escribir( e.getDesc() );
+		salidaGestErr.escribir( e.getDesc() );
 	}
 
 }
