@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import control.Salida;
 import errores.ErrorCadenaNoTerminada;
+import errores.ErrorCadenaVariasLineas;
 import errores.ErrorCharNoPer;
 import errores.ErrorComentarioMalForm;
 import errores.ErrorEnteroFueraDeRango;
@@ -115,12 +116,11 @@ public class AnalizadorLexico {
 		
 		private static void iniciarEstado2() {
 			EstadoAccion irA8YGenerarEntero = new EstadoAccion(8, Accion.GENERAR_ENTERO);
-			EstadoAccion irA2EIncrementarNum = new EstadoAccion(2, Accion.INCREMENTAR_NUM);
 			
 			mat[2][DEL]   		 = irA8YGenerarEntero;
 			mat[2][CR]    		 = irA8YGenerarEntero;
 			mat[2][LETRA] 		 = irA8YGenerarEntero;
-			mat[2][DIGITO]   	 = irA2EIncrementarNum;
+			mat[2][DIGITO]   	 = new EstadoAccion(2, Accion.INCREMENTAR_NUM);
 			mat[2][UNDERSCORE] 	 = irA8YGenerarEntero;
 			mat[2][COMILLA] 	 = irA8YGenerarEntero;
 			mat[2][MENOS] 		 = irA8YGenerarEntero;
@@ -141,16 +141,14 @@ public class AnalizadorLexico {
 		}
 		
 		private static void iniciarEstado3() {
-			EstadoAccion irA0YErrCadMalForm = new EstadoAccion(0, Accion.ERR_CADENA_NO_TERMINADA);
-			EstadoAccion irA9YGenerarCadena = new EstadoAccion(9, Accion.GENERAR_CADENA);
 			EstadoAccion irA3YConcatenar = new EstadoAccion(3, Accion.CONCATENAR);
 			
 			mat[3][DEL]   		 = irA3YConcatenar;
-			mat[3][CR]    		 = irA0YErrCadMalForm;
+			mat[3][CR]    		 = new EstadoAccion(0,Accion.ERR_CADENA_EN_VARIAS_LINEAS);
 			mat[3][LETRA] 		 = irA3YConcatenar;
 			mat[3][DIGITO]   	 = irA3YConcatenar;
 			mat[3][UNDERSCORE] 	 = irA3YConcatenar;
-			mat[3][COMILLA] 	 = irA9YGenerarCadena;
+			mat[3][COMILLA] 	 = new EstadoAccion(9, Accion.GENERAR_CADENA);
 			mat[3][MENOS] 		 = irA3YConcatenar;
 			mat[3][BARRA] 		 = irA3YConcatenar;
 			mat[3][IGUAL] 		 = irA3YConcatenar;
@@ -164,12 +162,11 @@ public class AnalizadorLexico {
 			mat[3][PAR_CE] 		 = irA3YConcatenar;
 			mat[3][LLAV_AB] 	 = irA3YConcatenar;
 			mat[3][LLAVE_CE] 	 = irA3YConcatenar;
-			mat[3][EOF] 	 	 = irA0YErrCadMalForm;
+			mat[3][EOF] 	 	 = new EstadoAccion(0, Accion.ERR_CADENA_NO_TERMINADA);
 			mat[3][RESTO_CARACT] = irA3YConcatenar;
 		}
 		
 		private static void iniciarEstado4() {
-			EstadoAccion irA11YGenerarPosDecr = new EstadoAccion(11, Accion.GENERAR_POS_DECREMENTO);
 			EstadoAccion irA10YGenerarMenos = new EstadoAccion(10, Accion.GENERAR_MENOS);
 			
 			mat[4][DEL]   		 = irA10YGenerarMenos;
@@ -178,7 +175,7 @@ public class AnalizadorLexico {
 			mat[4][DIGITO]   	 = irA10YGenerarMenos;
 			mat[4][UNDERSCORE] 	 = irA10YGenerarMenos;
 			mat[4][COMILLA] 	 = irA10YGenerarMenos;
-			mat[4][MENOS] 		 = irA11YGenerarPosDecr;
+			mat[4][MENOS] 		 = new EstadoAccion(11, Accion.GENERAR_POS_DECREMENTO);
 			mat[4][BARRA] 		 = irA10YGenerarMenos;
 			mat[4][IGUAL] 		 = irA10YGenerarMenos;
 			mat[4][MAS] 		 = irA10YGenerarMenos;
@@ -196,7 +193,6 @@ public class AnalizadorLexico {
 		}
 		
 		private static void iniciarEstado5() {
-			EstadoAccion irA6YLeer = new EstadoAccion(6, Accion.LEER);
 			EstadoAccion irA0YErrorComentario = new EstadoAccion(0, Accion.ERR_COMENTARIO_MAL_FORMADO);
 			
 			mat[5][DEL]   		 = irA0YErrorComentario;
@@ -206,7 +202,7 @@ public class AnalizadorLexico {
 			mat[5][UNDERSCORE] 	 = irA0YErrorComentario;
 			mat[5][COMILLA] 	 = irA0YErrorComentario;
 			mat[5][MENOS] 		 = irA0YErrorComentario;
-			mat[5][BARRA] 		 = irA6YLeer;
+			mat[5][BARRA] 		 = new EstadoAccion(6, Accion.LEER);;
 			mat[5][IGUAL] 		 = irA0YErrorComentario;
 			mat[5][MAS] 		 = irA0YErrorComentario;
 			mat[5][MAYOR] 		 = irA0YErrorComentario;
@@ -356,7 +352,14 @@ public class AnalizadorLexico {
 			lineaActual++;
 	}
 	
-	private static boolean finFichero = false;
+	private static boolean finAnalLexico = false;
+	private static void terminarEjecucion() {
+		finAnalLexico=true;
+		
+		try { ficheroFuente.close(); }
+		catch(IOException e) { e.printStackTrace(); }
+	}
+	
 	private static int estadoActual = 0;
 	
 	private static void genToken(){
@@ -545,10 +548,13 @@ public class AnalizadorLexico {
 						ErrorCadenaNoTerminada(lex,lineaActual));
 				break;
 				
+			case ERR_CADENA_EN_VARIAS_LINEAS:
+				GestorErrores.reportar(new
+						ErrorCadenaVariasLineas(lex,lineaActual));
+				break;
+				
 			case TERMINAR_EJECUCION:
-				finFichero = true;
-				try { ficheroFuente.close(); }
-				catch(IOException e) { e.printStackTrace(); }
+				terminarEjecucion();
 				break;
 				
 			default:
@@ -559,7 +565,7 @@ public class AnalizadorLexico {
 		} // EOWhile
 		
 		// De momento en bucle hasta que se termine de leer el fichero
-		if( finFichero )
+		if( finAnalLexico )
 			System.exit(0);	
 		genToken();
 	}
