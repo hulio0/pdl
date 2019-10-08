@@ -9,20 +9,10 @@ import lexico.AnalizadorLexico;
 // Clase que crea los ficheros de salida y pone en marcha todos los modulos del programa
 public class Control {
 	
-	public static void iniciar(File dirActual, String nombreFicheroEntrada){
-		
-		// Cargamos el fichero de entrada
-		File ficheroFuente = new File(dirActual,nombreFicheroEntrada);
-		
-		if( !ficheroFuente.exists() ) {
-			System.out.println("No se ha encontrado el fichero fuente");
-			return;
-		}
+	public static void iniciar(File dirActual, File ficheroFuente){
 		
 		// Creamos los ficheros de salida. Primero crearemos una carpeta
-		// para meterlos dentro
-				
-		// La carpeta se llamara SALIDA
+		// para meterlos dentro. La carpeta se llamara SALIDA
 		dirActual = new File(dirActual,"SALIDA");
 		
 		// Si la carpeta ya existe (por ejemplo, por una ejecucion anterior)
