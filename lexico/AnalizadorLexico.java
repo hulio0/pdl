@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 import control.Salida;
+import errores.ErrorCadenaNoTerminada;
 import errores.ErrorCharNoPer;
 import errores.ErrorComentarioMalForm;
 import errores.ErrorEnteroFueraDeRango;
@@ -22,7 +23,7 @@ public class AnalizadorLexico {
 	private static class MatrizTransicion{
 		
 		public static final int N_ESTADOS_NO_TERMINALES = 7;
-		public static final int N_SIMBOLOS = 20;
+		public static final int N_SIMBOLOS = 21;
 		
 		public static final int DEL 		 = 0;
 		public static final int CR 			 = 1;
@@ -43,7 +44,9 @@ public class AnalizadorLexico {
 		public static final int PAR_CE 		 = 16;
 		public static final int LLAV_AB		 = 17;
 		public static final int LLAVE_CE 	 = 18;
-		public static final int RESTO_CARACT = 19;
+		public static final int EOF 		 = 19;
+		public static final int RESTO_CARACT = 20;
+		
 		
 		public static final EstadoAccion[][] mat = 
 				new EstadoAccion[N_ESTADOS_NO_TERMINALES][N_SIMBOLOS];
@@ -78,6 +81,7 @@ public class AnalizadorLexico {
 			mat[0][PAR_CE] 		 = new EstadoAccion(20, Accion.GENERAR_PARENTESIS_CE);
 			mat[0][LLAV_AB] 	 = new EstadoAccion(21, Accion.GENERAR_LLAVE_AB);
 			mat[0][LLAVE_CE] 	 = new EstadoAccion(22, Accion.GENERAR_LLAVE_CE);
+			mat[0][EOF] 	 	 = new EstadoAccion(23, Accion.TERMINAR_EJECUCION);
 			mat[0][RESTO_CARACT] = new EstadoAccion(0, Accion.ERR_CARACTER_NO_PERMITIDO);
 		}
 		
@@ -104,6 +108,7 @@ public class AnalizadorLexico {
 			mat[1][PAR_CE] 		 = irA7YGenerarPRoID;
 			mat[1][LLAV_AB] 	 = irA7YGenerarPRoID;
 			mat[1][LLAVE_CE] 	 = irA7YGenerarPRoID;
+			mat[1][EOF		] 	 = irA7YGenerarPRoID;
 			mat[1][RESTO_CARACT] = irA7YGenerarPRoID;
 			
 		}
@@ -131,15 +136,17 @@ public class AnalizadorLexico {
 			mat[2][PAR_CE] 		 = irA8YGenerarEntero;
 			mat[2][LLAV_AB] 	 = irA8YGenerarEntero;
 			mat[2][LLAVE_CE] 	 = irA8YGenerarEntero;
+			mat[2][EOF		] 	 = irA8YGenerarEntero;
 			mat[2][RESTO_CARACT] = irA8YGenerarEntero;
 		}
 		
 		private static void iniciarEstado3() {
+			EstadoAccion irA0YErrCadMalForm = new EstadoAccion(0, Accion.ERR_CADENA_NO_TERMINADA);
 			EstadoAccion irA9YGenerarCadena = new EstadoAccion(9, Accion.GENERAR_CADENA);
 			EstadoAccion irA3YConcatenar = new EstadoAccion(3, Accion.CONCATENAR);
 			
 			mat[3][DEL]   		 = irA3YConcatenar;
-			mat[3][CR]    		 = irA3YConcatenar;
+			mat[3][CR]    		 = irA0YErrCadMalForm;
 			mat[3][LETRA] 		 = irA3YConcatenar;
 			mat[3][DIGITO]   	 = irA3YConcatenar;
 			mat[3][UNDERSCORE] 	 = irA3YConcatenar;
@@ -157,6 +164,7 @@ public class AnalizadorLexico {
 			mat[3][PAR_CE] 		 = irA3YConcatenar;
 			mat[3][LLAV_AB] 	 = irA3YConcatenar;
 			mat[3][LLAVE_CE] 	 = irA3YConcatenar;
+			mat[3][EOF] 	 	 = irA0YErrCadMalForm;
 			mat[3][RESTO_CARACT] = irA3YConcatenar;
 		}
 		
@@ -183,6 +191,7 @@ public class AnalizadorLexico {
 			mat[4][PAR_CE] 		 = irA10YGenerarMenos;
 			mat[4][LLAV_AB] 	 = irA10YGenerarMenos;
 			mat[4][LLAVE_CE] 	 = irA10YGenerarMenos;
+			mat[4][EOF]		 	 = irA10YGenerarMenos;
 			mat[4][RESTO_CARACT] = irA10YGenerarMenos;
 		}
 		
@@ -209,12 +218,14 @@ public class AnalizadorLexico {
 			mat[5][PAR_CE] 		 = irA0YErrorComentario;
 			mat[5][LLAV_AB] 	 = irA0YErrorComentario;
 			mat[5][LLAVE_CE] 	 = irA0YErrorComentario;
+			mat[5][EOF] 	 	 = irA0YErrorComentario;
 			mat[5][RESTO_CARACT] = irA0YErrorComentario;
 		}
 		
 		private static void iniciarEstado6() {
 			EstadoAccion irA0YLeer = new EstadoAccion(0, Accion.LEER);
 			EstadoAccion irA6YLeer = new EstadoAccion(6, Accion.LEER);
+			EstadoAccion irA23YTerminar = new EstadoAccion(23,Accion.TERMINAR_EJECUCION);
 			
 			mat[6][DEL]   		 = irA6YLeer;
 			mat[6][CR]    		 = irA0YLeer;
@@ -235,23 +246,20 @@ public class AnalizadorLexico {
 			mat[6][PAR_CE] 		 = irA6YLeer;
 			mat[6][LLAV_AB] 	 = irA6YLeer;
 			mat[6][LLAVE_CE] 	 = irA6YLeer;
+			mat[6][EOF]		 	 = irA23YTerminar;
 			mat[6][RESTO_CARACT] = irA6YLeer;
 		}
 		
-		// Dado un caracter devuelve el correspondiente índice de la matriz al que hace
-		// referencia. Ejemplo, dado '2' debería de devolver DIGITO, que es el índice 3
-		public static int getPosicion(char c) {
+		// Dado un caracter devuelve el correspondiente indice de la matriz al que hace
+		// referencia. Ejemplo, dado '2' deberia de devolver DIGITO, que es el indice 3
+		public static int getPosicion(int ch) {
 			
-			// Incluimos '\r' como delimitador para que el compilador se los salte. Esto para
-			// evitar problemas con aquello de que ficheros editados en Windows se codifican de modo
-			// que los saltos de línea se traducen en una secuencia de \r\n en vez de sólo \n
-			if( c=='\t' || c==' '||c=='\r' )
-				return DEL;
+			if( ch == -1 )
+				return EOF;
 			
-			else if(c=='\n')
-				return CR;
+			char c = (char) ch;
 			
-			else if( Pattern.matches("[a-z|A-Z]",c+"") )
+			if( Pattern.matches("[a-z|A-Z]",c+"") )
 				return LETRA;
 			
 			else if( Pattern.matches("[0-9]",c+"") )
@@ -259,6 +267,17 @@ public class AnalizadorLexico {
 			
 			switch(c) {
 			
+			// Incluimos '\r' como delimitador para que el compilador
+			// se los salte. Esto para evitar problemas con aquello de
+			// que ficheros editados en Windows se codifican de modo que
+			// los saltos de linea se traducen en una secuencia de \r\n
+			// en vez de solo \n
+			case '\r':
+			case ' ':
+			case '\t':
+				return DEL;
+			case '\n':
+				return CR;
 			case '_':
 				return UNDERSCORE;
 			case '\'':
@@ -296,7 +315,7 @@ public class AnalizadorLexico {
 		
 		// Devuelve la siguiente transicion a ejecutar
 		public static EstadoAccion getNextTrans() {
-			return mat[estadoActual][getPosicion(charActual)];
+			return mat[estadoActual][getPosicion(chLeido)];
 		}
 		
 	}
@@ -324,57 +343,39 @@ public class AnalizadorLexico {
 		genToken();
 	}
 	
-	private static char charActual;
-	private static boolean finFichero = false;
+	// Lo declaramos como int para que pueda almacenar el -1 del Reader, que
+	// es mandado cuando se alcanza el final del fichero (eof)
+	private static int chLeido;
 	
 	private static void leer() {
-		int nextChar = -1;
-		try { nextChar = ficheroFuente.read(); } 
+		
+		try { chLeido = ficheroFuente.read(); } 
 		catch(IOException e) { e.printStackTrace(); }
 		
-		if( nextChar == -1 ) {
-			finFichero = true;
-			try { ficheroFuente.close(); }catch(IOException e) {}
-			
-			// Hacemos que nuestro compilador interprete el fin de fichero
-			// como un delimitador. De esta manera simplemente lo saltara o 
-			// generara un token pendiente (alguno de estos: ID,PR,ENT,- que
-			// se generan en estados finales cuyas transciciones son o.c.)
-			nextChar = (int) ' ';
-		}
-		
-		else if( nextChar == (int) '\n' )
+		if( (char) chLeido == '\n' )
 			lineaActual++;
-			
-		charActual = (char) nextChar;
 	}
 	
-	
-	private static int estadoActual;
-	private static Integer num;
-	private static String lex;
-	
-	// Si no estamos en un estado final, hay que parar el bucle de transiciones
-	// cuando lleguemos al final del fichero y lex y num estén sin nada guardado
-	private static boolean terminar() {
-		return finFichero && lex.equals("") && num == null;
-	}
+	private static boolean finFichero = false;
+	private static int estadoActual = 0;
 	
 	private static void genToken(){
 		estadoActual=0;
-		num=null;
-		lex="";
 		
 		// Variables auxiliares
-		Integer posicion = null;
-		EstadoAccion entrada = null;
-		Accion toDo = null;  // accion semantica a realizar en cada transicion
+		Integer num=null;
+		String lex="";				
+		Integer posicion = null;		// Cuando busquemos en TS o TPR guardaremos la respuesta aqu�
+		EstadoAccion entrada = null;	// Entrada de la matriz de transiciones que indica el sig. mov
+		Accion toDo = null;  			// accion semantica a realizar en cada transicion
+		char chActual = '?'; 			// Haremos cast a chLeido para manejar el caracter
 
 		// Los estados no terminales son 0,1,2,3,4,5,6
-		while( estadoActual <=6 && !terminar() ) {
+		while( estadoActual <=6 ) {
+			
+			chActual = (char) chLeido;
 			
 			entrada = MatrizTransicion.getNextTrans();	
-			
 			estadoActual = entrada.estado();
 			toDo = entrada.accion();
 			
@@ -385,17 +386,17 @@ public class AnalizadorLexico {
 				break;
 				
 			case CONCATENAR:
-				lex+=charActual;
+				lex+=chActual;
 				leer();
 				break;
 				
 			case DECLARAR_NUM:
-				num = Integer.parseInt(charActual+"");
+				num = Integer.parseInt(chActual+"");
 				leer();
 				break;
 				
 			case INCREMENTAR_NUM:
-				num = num*10 + Integer.parseInt(charActual+"");
+				num = num*10 + Integer.parseInt(chActual+"");
 				leer();
 				break;
 				
@@ -523,12 +524,12 @@ public class AnalizadorLexico {
 						Token(Correspondencia.de("}"),"").toString());
 				break;
 				
-			// En los errores también leemos (basicamente pq si no lo hacemos entramos
+			// En los errores tambien leemos (basicamente pq si no lo hacemos entramos
 			// en un bucle infinito. La otra opción es parar el Alex pero queremos que
 			// continue para que muestre todos los errores lexicos del fichero)
 			case ERR_CARACTER_NO_PERMITIDO:
 				GestorErrores.reportar(new 
-						ErrorCharNoPer(charActual,lineaActual));	
+						ErrorCharNoPer(chActual,lineaActual));	
 				leer();
 				break;
 				
@@ -536,6 +537,18 @@ public class AnalizadorLexico {
 				GestorErrores.reportar(new
 						ErrorComentarioMalForm(lineaActual));
 				leer();
+				break;
+				
+			
+			case ERR_CADENA_NO_TERMINADA:
+				GestorErrores.reportar(new
+						ErrorCadenaNoTerminada(lex,lineaActual));
+				break;
+				
+			case TERMINAR_EJECUCION:
+				finFichero = true;
+				try { ficheroFuente.close(); }
+				catch(IOException e) { e.printStackTrace(); }
 				break;
 				
 			default:

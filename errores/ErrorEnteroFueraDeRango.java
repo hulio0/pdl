@@ -2,10 +2,10 @@ package errores;
 
 public class ErrorEnteroFueraDeRango implements Error{
 	
-	// Número que se pretendía introducir
+	// Numero que se pretendia introducir
 	private int num;
 	
-	// Línea donde se ha encontrado
+	// Linea donde se ha encontrado
 	private int linea;
 	
 	public ErrorEnteroFueraDeRango(int num,int linea) {
@@ -15,8 +15,8 @@ public class ErrorEnteroFueraDeRango implements Error{
 
 	@Override
 	public String getDesc() {
-		return "Error LÉXICO-->(LINEA "+linea+") "
-		     + "Número "+num+" está fuera de rango.";
+		return "Error LEXICO-->(LINEA "+linea+") "
+		     + "Numero "+num+" esta fuera de rango.";
 	}
 	
 	
