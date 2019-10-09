@@ -67,7 +67,7 @@ public class AnalizadorLexico {
 			mat[0][CR]    		 = new EstadoAccion(0, Accion.LEER);
 			mat[0][LETRA] 		 = new EstadoAccion(1, Accion.CONCATENAR);
 			mat[0][DIGITO]   	 = new EstadoAccion(2, Accion.DECLARAR_NUM);
-			mat[0][UNDERSCORE] 	 = new EstadoAccion(0, Accion.ERR_CARACTER_NO_PERMITIDO);
+			mat[0][UNDERSCORE] 	 = new EstadoAccion(23, Accion.ERR_CARACTER_NO_PERMITIDO);
 			mat[0][COMILLA] 	 = new EstadoAccion(3, Accion.LEER);
 			mat[0][MENOS] 		 = new EstadoAccion(4, Accion.LEER);
 			mat[0][BARRA] 		 = new EstadoAccion(5, Accion.LEER);
@@ -83,7 +83,7 @@ public class AnalizadorLexico {
 			mat[0][LLAV_AB] 	 = new EstadoAccion(21, Accion.GENERAR_LLAVE_AB);
 			mat[0][LLAVE_CE] 	 = new EstadoAccion(22, Accion.GENERAR_LLAVE_CE);
 			mat[0][EOF] 	 	 = new EstadoAccion(23, Accion.TERMINAR_EJECUCION);
-			mat[0][RESTO_CARACT] = new EstadoAccion(0, Accion.ERR_CARACTER_NO_PERMITIDO);
+			mat[0][RESTO_CARACT] = new EstadoAccion(23, Accion.ERR_CARACTER_NO_PERMITIDO);
 		}
 		
 		private static void iniciarEstado1() {
@@ -144,7 +144,7 @@ public class AnalizadorLexico {
 			EstadoAccion irA3YConcatenar = new EstadoAccion(3, Accion.CONCATENAR);
 			
 			mat[3][DEL]   		 = irA3YConcatenar;
-			mat[3][CR]    		 = new EstadoAccion(0,Accion.ERR_CADENA_EN_VARIAS_LINEAS);
+			mat[3][CR]    		 = new EstadoAccion(23,Accion.ERR_CADENA_EN_VARIAS_LINEAS);
 			mat[3][LETRA] 		 = irA3YConcatenar;
 			mat[3][DIGITO]   	 = irA3YConcatenar;
 			mat[3][UNDERSCORE] 	 = irA3YConcatenar;
@@ -162,7 +162,7 @@ public class AnalizadorLexico {
 			mat[3][PAR_CE] 		 = irA3YConcatenar;
 			mat[3][LLAV_AB] 	 = irA3YConcatenar;
 			mat[3][LLAVE_CE] 	 = irA3YConcatenar;
-			mat[3][EOF] 	 	 = new EstadoAccion(0, Accion.ERR_CADENA_NO_TERMINADA);
+			mat[3][EOF] 	 	 = new EstadoAccion(23, Accion.ERR_CADENA_NO_TERMINADA);
 			mat[3][RESTO_CARACT] = irA3YConcatenar;
 		}
 		
@@ -193,29 +193,29 @@ public class AnalizadorLexico {
 		}
 		
 		private static void iniciarEstado5() {
-			EstadoAccion irA0YErrorComentario = new EstadoAccion(0, Accion.ERR_COMENTARIO_MAL_FORMADO);
+			EstadoAccion irA23YErrorComentario = new EstadoAccion(23, Accion.ERR_COMENTARIO_MAL_FORMADO);
 			
-			mat[5][DEL]   		 = irA0YErrorComentario;
-			mat[5][CR]    		 = irA0YErrorComentario;
-			mat[5][LETRA] 		 = irA0YErrorComentario;
-			mat[5][DIGITO]   	 = irA0YErrorComentario;
-			mat[5][UNDERSCORE] 	 = irA0YErrorComentario;
-			mat[5][COMILLA] 	 = irA0YErrorComentario;
-			mat[5][MENOS] 		 = irA0YErrorComentario;
+			mat[5][DEL]   		 = irA23YErrorComentario;
+			mat[5][CR]    		 = irA23YErrorComentario;
+			mat[5][LETRA] 		 = irA23YErrorComentario;
+			mat[5][DIGITO]   	 = irA23YErrorComentario;
+			mat[5][UNDERSCORE] 	 = irA23YErrorComentario;
+			mat[5][COMILLA] 	 = irA23YErrorComentario;
+			mat[5][MENOS] 		 = irA23YErrorComentario;
 			mat[5][BARRA] 		 = new EstadoAccion(6, Accion.LEER);;
-			mat[5][IGUAL] 		 = irA0YErrorComentario;
-			mat[5][MAS] 		 = irA0YErrorComentario;
-			mat[5][MAYOR] 		 = irA0YErrorComentario;
-			mat[5][MENOR] 		 = irA0YErrorComentario;
-			mat[5][DISTINTO] 	 = irA0YErrorComentario;
-			mat[5][COMA] 		 = irA0YErrorComentario;
-			mat[5][PUNTO_COMA] 	 = irA0YErrorComentario;
-			mat[5][PAR_AB] 		 = irA0YErrorComentario;
-			mat[5][PAR_CE] 		 = irA0YErrorComentario;
-			mat[5][LLAV_AB] 	 = irA0YErrorComentario;
-			mat[5][LLAVE_CE] 	 = irA0YErrorComentario;
-			mat[5][EOF] 	 	 = irA0YErrorComentario;
-			mat[5][RESTO_CARACT] = irA0YErrorComentario;
+			mat[5][IGUAL] 		 = irA23YErrorComentario;
+			mat[5][MAS] 		 = irA23YErrorComentario;
+			mat[5][MAYOR] 		 = irA23YErrorComentario;
+			mat[5][MENOR] 		 = irA23YErrorComentario;
+			mat[5][DISTINTO] 	 = irA23YErrorComentario;
+			mat[5][COMA] 		 = irA23YErrorComentario;
+			mat[5][PUNTO_COMA] 	 = irA23YErrorComentario;
+			mat[5][PAR_AB] 		 = irA23YErrorComentario;
+			mat[5][PAR_CE] 		 = irA23YErrorComentario;
+			mat[5][LLAV_AB] 	 = irA23YErrorComentario;
+			mat[5][LLAVE_CE] 	 = irA23YErrorComentario;
+			mat[5][EOF] 	 	 = irA23YErrorComentario;
+			mat[5][RESTO_CARACT] = irA23YErrorComentario;
 		}
 		
 		private static void iniciarEstado6() {
@@ -525,30 +525,30 @@ public class AnalizadorLexico {
 						Token(Correspondencia.de("}"),"").toString());
 				break;
 				
-			// En los errores tambien leemos (basicamente pq si no lo hacemos entramos
-			// en un bucle infinito. La otra opciÃ³n es parar el Alex pero queremos que
-			// continue para que muestre todos los errores lexicos del fichero)
+				
 			case ERR_CARACTER_NO_PERMITIDO:
 				GestorErrores.reportar(new 
 						ErrorCharNoPer(chActual,lineaActual));	
-				leer();
+				terminarEjecucion();
 				break;
 				
 			case ERR_COMENTARIO_MAL_FORMADO:
 				GestorErrores.reportar(new
 						ErrorComentarioMalForm(lineaActual));
-				leer();
+				terminarEjecucion();
 				break;
 				
 			
 			case ERR_CADENA_NO_TERMINADA:
 				GestorErrores.reportar(new
 						ErrorCadenaNoTerminada(lex,lineaActual));
+				terminarEjecucion();
 				break;
 				
 			case ERR_CADENA_EN_VARIAS_LINEAS:
 				GestorErrores.reportar(new
 						ErrorCadenaVariasLineas(lex,lineaActual));
+				terminarEjecucion();
 				break;
 				
 			case TERMINAR_EJECUCION:
