@@ -219,12 +219,10 @@ public class AnalizadorLexico {
 		}
 		
 		private static void iniciarEstado6() {
-			EstadoAccion irA0YLeer = new EstadoAccion(0, Accion.LEER);
 			EstadoAccion irA6YLeer = new EstadoAccion(6, Accion.LEER);
-			EstadoAccion irA23YTerminar = new EstadoAccion(23,Accion.TERMINAR_EJECUCION);
 			
 			mat[6][DEL]   		 = irA6YLeer;
-			mat[6][CR]    		 = irA0YLeer;
+			mat[6][CR]    		 = new EstadoAccion(0, Accion.LEER);
 			mat[6][LETRA] 		 = irA6YLeer;
 			mat[6][DIGITO]   	 = irA6YLeer;
 			mat[6][UNDERSCORE] 	 = irA6YLeer;
@@ -242,7 +240,7 @@ public class AnalizadorLexico {
 			mat[6][PAR_CE] 		 = irA6YLeer;
 			mat[6][LLAV_AB] 	 = irA6YLeer;
 			mat[6][LLAVE_CE] 	 = irA6YLeer;
-			mat[6][EOF]		 	 = irA23YTerminar;
+			mat[6][EOF]		 = new EstadoAccion(23,Accion.TERMINAR_EJECUCION);
 			mat[6][RESTO_CARACT] = irA6YLeer;
 		}
 		
@@ -368,7 +366,7 @@ public class AnalizadorLexico {
 		// Variables auxiliares
 		Integer num=null;
 		String lex="";				
-		Integer posicion = null;		// Cuando busquemos en TS o TPR guardaremos la respuesta aqu�
+		Integer posicion = null;		// Cuando busquemos en TS o TPR guardaremos la respuesta aquí
 		EstadoAccion entrada = null;	// Entrada de la matriz de transiciones que indica el sig. mov
 		Accion toDo = null;  			// accion semantica a realizar en cada transicion
 		char chActual = '?'; 			// Haremos cast a chLeido para manejar el caracter
@@ -414,10 +412,10 @@ public class AnalizadorLexico {
 				// Si no es una PR entonces es una variable
 				else{
 					
-					// Buscamos a ver si ya está en la TS
+					// Buscamos a ver si ya estÃ¡ en la TS
 					posicion = TablaS.get(lex);
 					
-					// Si no esta añadimos la variable a la tabla
+					// Si no esta aÃ±adimos la variable a la tabla
 					if(posicion == null) 
 						posicion = TablaS.insert(new FilaTS(lex));
 					
@@ -528,7 +526,7 @@ public class AnalizadorLexico {
 				break;
 				
 			// En los errores tambien leemos (basicamente pq si no lo hacemos entramos
-			// en un bucle infinito. La otra opción es parar el Alex pero queremos que
+			// en un bucle infinito. La otra opciÃ³n es parar el Alex pero queremos que
 			// continue para que muestre todos los errores lexicos del fichero)
 			case ERR_CARACTER_NO_PERMITIDO:
 				GestorErrores.reportar(new 
