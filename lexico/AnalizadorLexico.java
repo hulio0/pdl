@@ -324,7 +324,7 @@ public class AnalizadorLexico {
 		catch( FileNotFoundException e ) { /*Ya se ha controlado esta situacion*/ }
 		salidaLex = new Salida(ficheroSalidaLex);
 		lineaActual=1;
-		variable = DECLARACION;
+		variable = USO;
 		
 		// Iniciamos los elementos del lexico necesarios		
 		Correspondencia.iniciar();
@@ -427,7 +427,7 @@ public class AnalizadorLexico {
 					case DECLARACION:
 						
 						if( posicion!=null )
-							System.out.println("Error var ya declarada " +lex);
+							System.out.println("Error var ya declarada en " +lineaActual +" " +lex);
 						
 						else
 							posicion=TablaS.insert(lex);
@@ -437,7 +437,7 @@ public class AnalizadorLexico {
 					case USO:
 					
 						if( posicion!=null )
-							System.out.println("todo ok, no hace falta hacer nada "+lex);
+							System.out.println("todo ok, no hace falta hacer nada "+lineaActual+" "+lex);
 						
 						else {
 							// Buscamos en todas las tablas yendo de más específico a la más general
@@ -446,7 +446,7 @@ public class AnalizadorLexico {
 							if( posicion == null )
 								System.out.println("Error var no declarada "+lex);
 							else
-								System.out.println("do nothing " +lex);
+								System.out.println("todo ok, no hace falta hacer nada " +lex);
 							
 						}
 						
@@ -564,6 +564,9 @@ public class AnalizadorLexico {
 				
 			case GENERAR_PARENTESIS_CE:
 				leer();
+				
+				variable = USO;
+				
 				salidaLex.escribir(new
 						Token(Correspondencia.de(")"),"").toString());
 				break;
@@ -634,7 +637,12 @@ public class AnalizadorLexico {
 		return lex.equals("int")||lex.equals("string")||lex.equals("boolean");
 	}
 	private static int variable;
+	
+	// Se pasa a DECLARACION cuando se lea int,string o boolean
 	private static final int DECLARACION=0;
+	
+	// Se pasa a USO cuando se lea cualquier caracter que vaya después de una
+	// declaración, es decir: paréntesis derecho, coma y punto y coma. 
 	private static final int USO=1;
 
 }
