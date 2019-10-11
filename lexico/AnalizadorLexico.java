@@ -246,7 +246,7 @@ public class AnalizadorLexico {
 		
 		// Dado un caracter devuelve el correspondiente indice de la matriz al que hace
 		// referencia. Ejemplo, dado '2' deberia de devolver DIGITO, que es el indice 3
-		public static int getPosicion(int ch) {
+		public static int indiceMatriz(int ch) {
 			
 			if( ch == -1 )
 				return EOF;
@@ -309,7 +309,7 @@ public class AnalizadorLexico {
 		
 		// Devuelve la siguiente transicion a ejecutar
 		public static EstadoAccion getNextTrans() {
-			return mat[estadoActual][getPosicion(chLeido)];
+			return mat[estadoActual][indiceMatriz(chLeido)];
 		}
 		
 	}
@@ -412,7 +412,7 @@ public class AnalizadorLexico {
 				// Si no es una PR entonces es una variable
 				else{
 					
-					// Buscamos a ver si ya estÃ¡ en la TS
+					// Buscamos a ver si ya estaba en la TS
 					posicion = TablaS.get(lex);
 					
 					// Si no esta aÃ±adimos la variable a la tabla
@@ -431,9 +431,11 @@ public class AnalizadorLexico {
 				if(num<=Math.pow(2, 16)-1)
 					salidaLex.escribir(new 
 							Token(Correspondencia.de("ENT"),num).toString());
-				else
+				else {
 					GestorErrores.reportar(new
 							ErrorEnteroFueraDeRango(num,lineaActual));
+					terminarEjecucion();
+				}
 				
 				// Liberamos num
 				num = null;
