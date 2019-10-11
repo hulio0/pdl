@@ -18,8 +18,8 @@ public class Token {
 	}
 	
 	public String toString() {
-		//return toStringFriendly();
-		return "<"+id+","+atributo+">";
+		return toStringFriendly();
+		//return "<"+id+","+atributo+">";
 	}
 
 }
