@@ -17,7 +17,6 @@ import errores.err.ErrorEnteroFueraDeRango;
 import lexico.auxiliares.Accion;
 import lexico.auxiliares.EntradaMatTrans;
 import lexico.tpr.TablaPR;
-import lexico.ts.FilaTS;
 import lexico.ts.TablaS;
 
 public class AnalizadorLexico {
@@ -330,9 +329,13 @@ public class AnalizadorLexico {
 		catch( FileNotFoundException e ) { /*Ya se ha controlado esta situacion*/ }
 		salidaLex = new Salida(ficheroSalidaLex);
 		lineaActual=1;
-		
-		
-		
+		variable = USO;
+
+		// Iniciamos los elementos del lexico necesarios		
+		Correspondencia.iniciar();
+		MatrizTransicion.iniciar();
+		TablaS.iniciar();
+		TablaPR.iniciar();
 				
 		// Empezamos: leemos el primer caracter del fichero
 		leer();
@@ -369,8 +372,8 @@ public class AnalizadorLexico {
 		
 		// Variables auxiliares
 		Integer num=null;
-		String lex="";				
-		Integer posicion = null;		// Cuando busquemos en TS o TPR guardaremos la respuesta aquÃ­
+		String lex="";						
+		Integer posicion = null;		// Cuando busquemos en TS o TPR guardaremos la respuesta aquí
 		EntradaMatTrans entrada = null;	// Entrada de la matriz de transiciones que indica el sig. mov
 		Accion toDo = null;  			// accion semantica a realizar en cada transicion
 		char chActual = '?'; 			// Haremos cast a chLeido para manejar el caracter
@@ -409,6 +412,11 @@ public class AnalizadorLexico {
 				
 				posicion = TablaPR.get(lex);
 				if( posicion !=null ) {
+					
+					// Si es int,string o boolean
+					if(esPalDeclaracion(lex))
+						variable = DECLARACION;
+					
 					salidaLex.escribir(new 
 							Token(Correspondencia.de("PR"),posicion).toString());
 				}
@@ -416,12 +424,49 @@ public class AnalizadorLexico {
 				// Si no es una PR entonces es una variable
 				else{
 					
+					// Buscamos en el scope actual si ya está la variable
+					posicion = TablaS.currentScopeGet(lex);
+					
+					switch( variable ) {
+					
+					case DECLARACION:
+						
+						if( posicion!=null )
+							System.out.println("Error var ya declarada en " +lineaActual +" " +lex);
+						
+						else
+							posicion=TablaS.insert(lex);
+						
+						break;
+						
+					case USO:
+					
+						if( posicion!=null )
+							System.out.println("todo ok, no hace falta hacer nada "+lineaActual+" "+lex);
+						
+						else {
+							// Buscamos en todas las tablas yendo de más específico a la más general
+							posicion=TablaS.get(lex);
+							
+							if( posicion == null )
+								System.out.println("Error var no declarada "+lex);
+							else
+								System.out.println("todo ok, no hace falta hacer nada " +lex);
+							
+						}
+						
+						break;
+					
+					}
+					
 					// Buscamos a ver si ya estaba en la TS
 					posicion = TablaS.get(lex);
 					
-					// Si no esta aÃƒÂ±adimos la variable a la tabla
+					
+					// Si no esta agregamos la variable a la tabla (TablaS se
+					// encarga de crear la fila bien bien y tal)
 					if(posicion == null) 
-						posicion = TablaS.insert(new FilaTS(lex));
+						posicion = TablaS.insert(lex);
 					
 					// En cualquier caso se genera el token de variable
 					salidaLex.escribir(new 
@@ -467,6 +512,9 @@ public class AnalizadorLexico {
 				
 			case GENERAR_IGUAL:
 				leer();
+				
+				variable = USO;
+
 				salidaLex.escribir(new
 						Token(Correspondencia.de("="),"").toString());
 				break;
@@ -497,12 +545,18 @@ public class AnalizadorLexico {
 				
 			case GENERAR_COMA:
 				leer();
+				
+				variable = USO;
+				
 				salidaLex.escribir(new
 						Token(Correspondencia.de(","),"").toString());
 				break;
 				
 			case GENERAR_PUNTO_COMA:
 				leer();
+				
+				variable = USO;
+				
 				salidaLex.escribir(new
 						Token(Correspondencia.de(";"),"").toString());
 				break;
@@ -515,18 +569,27 @@ public class AnalizadorLexico {
 				
 			case GENERAR_PAR_CE:
 				leer();
+				
+				variable = USO;
+				
 				salidaLex.escribir(new
 						Token(Correspondencia.de(")"),"").toString());
 				break;
 				
 			case GENERAR_LLA_AB:
 				leer();
+				
+				TablaS.abrirAmbito();
+				
 				salidaLex.escribir(new
 						Token(Correspondencia.de("{"),"").toString());
 				break;
 				
 			case GENERAR_LLA_CE:
 				leer();
+				
+				TablaS.cerrarAmbito();
+				
 				salidaLex.escribir(new
 						Token(Correspondencia.de("}"),"").toString());
 				break;
@@ -573,5 +636,18 @@ public class AnalizadorLexico {
 			System.exit(0);	
 		genToken();
 	}
+	
+	
+	private static boolean esPalDeclaracion(String lex) {
+		return lex.equals("int")||lex.equals("string")||lex.equals("boolean");
+	}
+	private static int variable;
+	
+	// Se pasa a DECLARACION cuando se lea int,string o boolean
+	private static final int DECLARACION=0;
+	
+	// Se pasa a USO cuando se lea cualquier caracter que vaya después de una
+	// declaración, es decir: paréntesis derecho, coma y punto y coma. 
+	private static final int USO=1;
 
 }

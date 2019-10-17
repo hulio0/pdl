@@ -5,12 +5,18 @@ package lexico.ts;
 // TO-DO: Completar los atributos (las columnas, importante los getters)
 public class FilaTS {
 	
-	private String lexema;
+	private int id;
+	private String lex;
 	
-	public FilaTS(String lexema) {
-		this.lexema=lexema;
-	}
 	
-	public String lex() { return lexema; }
+	// Constructor por defecto
+	
+	
+	
+	public void setID(int idFila) { this.id=idFila; }
+	public void setLex(String lexema) { this.lex=lexema; }
+
+	public int getID() { return id; }
+	public String getLex() { return lex; }
 
 }
