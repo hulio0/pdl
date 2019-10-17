@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 import control.Salida;
 import errores.GestorErrores;
@@ -14,11 +13,11 @@ import errores.err.ErrorCadenaVariasLineas;
 import errores.err.ErrorCharNoPer;
 import errores.err.ErrorComentarioMalForm;
 import errores.err.ErrorEnteroFueraDeRango;
-import lexico.auxiliares.Accion;
-import lexico.auxiliares.EntradaMatTrans;
-import lexico.tpr.TablaPR;
-import lexico.ts.MatrizTransicion;
-import lexico.ts.TablaS;
+import lexico.matrans.Accion;
+import lexico.matrans.EntradaMatTrans;
+import lexico.matrans.MatrizTransicion;
+import lexico.tablapr.TablaPR;
+import lexico.tablasim.TablaS;
 
 public class AnalizadorLexico {
 		

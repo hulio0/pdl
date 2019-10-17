@@ -1,4 +1,4 @@
-package lexico.auxiliares;
+package lexico.matrans;
 
 // Enumerado que recoge las acciones semanticas
 // que puede llegar a ejecutar el analizador lexico

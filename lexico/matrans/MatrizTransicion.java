@@ -1,9 +1,6 @@
-package lexico.ts;
+package lexico.matrans;
 
 import java.util.regex.Pattern;
-
-import lexico.auxiliares.Accion;
-import lexico.auxiliares.EntradaMatTrans;
 
 public class MatrizTransicion {
 	public static final int N_ESTADOS_NO_TERMINALES = 7;

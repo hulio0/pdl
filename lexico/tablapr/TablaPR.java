@@ -1,4 +1,4 @@
-package lexico.tpr;
+package lexico.tablapr;
 
 import java.util.Map;
 import java.util.HashMap;

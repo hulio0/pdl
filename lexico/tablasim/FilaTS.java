@@ -1,4 +1,4 @@
-package lexico.ts;
+package lexico.tablasim;
 
 // Objeto que encapsula una fila de la tabla de símbolos
 

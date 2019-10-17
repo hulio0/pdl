@@ -1,4 +1,4 @@
-package lexico.ts;
+package lexico.tablasim;
 
 import java.util.HashMap;
 import java.util.Iterator;
