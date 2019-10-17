@@ -41,7 +41,7 @@ public class Control {
 		AnalizadorLexico.iniciar(ficheroFuente, ficheroALexico);
 	}
 	
-	// Elimina todos los ficheros del directorio que le pasemos
+	// Elimina todos los ficheros del directorio que le pasemos.
 	// No elimina sub-carpetas pues .delete solo funciona con ellas
 	// cuando estan vacias
 	private static void limpiar(File carpeta) {

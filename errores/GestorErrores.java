@@ -3,6 +3,7 @@ package errores;
 import java.io.File;
 
 import control.Salida;
+import errores.err.Error;
 
 // Es el que recibe los errores de los diferentes modulos.
 // Basicamente se encarga de escribir las descripciones de

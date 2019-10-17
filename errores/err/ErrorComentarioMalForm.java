@@ -1,4 +1,4 @@
-package errores;
+package errores.err;
 
 public class ErrorComentarioMalForm implements Error{
 	
@@ -9,8 +9,8 @@ public class ErrorComentarioMalForm implements Error{
 	}
 	
 	public String getDesc() {
-		return "Error LÃ‰XICO-->(LINEA "+linea+") "
-		     + "Los comentarios DEBEN llevar dos barras (//). SÃ³lo se ha encontrado una (/).";
+		return "Error LÉXICO-->(LINEA "+linea+") "
+		     + "Los comentarios DEBEN llevar dos barras (//). Sólo se ha encontrado una (/).";
 	}
 	
 

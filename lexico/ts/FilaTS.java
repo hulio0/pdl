@@ -1,4 +1,4 @@
-package lexico.auxiliares;
+package lexico.ts;
 
 // Objeto que encapsula una fila de la tabla de símbolos
 

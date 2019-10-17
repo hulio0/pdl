@@ -1,4 +1,4 @@
-package errores;
+package errores.err;
 
 public class ErrorCadenaVariasLineas implements Error{
 	
@@ -16,7 +16,7 @@ public class ErrorCadenaVariasLineas implements Error{
 	@Override
 	public String getDesc() {
 		return "Error LÉXICO-->(LINEA "+linea+") "
-		     + "Cadena '"+cad+"' incluye saltos de línea. "
+		     + "Cadena ["+cad+"] incluye saltos de línea. "
 		     + "Las cadenas DEBEN declararse en una ÚNICA línea.";
 	}
 

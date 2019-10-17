@@ -8,16 +8,17 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 import control.Salida;
-import errores.ErrorCadenaNoTerminada;
-import errores.ErrorCadenaVariasLineas;
-import errores.ErrorCharNoPer;
-import errores.ErrorComentarioMalForm;
-import errores.ErrorEnteroFueraDeRango;
 import errores.GestorErrores;
+import errores.err.ErrorCadenaNoTerminada;
+import errores.err.ErrorCadenaVariasLineas;
+import errores.err.ErrorCharNoPer;
+import errores.err.ErrorComentarioMalForm;
+import errores.err.ErrorEnteroFueraDeRango;
 import lexico.auxiliares.Accion;
-import lexico.auxiliares.EstadoAccion;
-import lexico.auxiliares.FilaTS;
-import lexico.auxiliares.Token;
+import lexico.auxiliares.EntradaMatTrans;
+import lexico.tpr.TablaPR;
+import lexico.ts.FilaTS;
+import lexico.ts.TablaS;
 
 public class AnalizadorLexico {
 	
@@ -49,8 +50,8 @@ public class AnalizadorLexico {
 		public static final int RESTO_CARACT = 20;
 		
 		
-		public static final EstadoAccion[][] mat = 
-				new EstadoAccion[N_ESTADOS_NO_TERMINALES][N_SIMBOLOS];
+		public static final EntradaMatTrans[][] mat = 
+				new EntradaMatTrans[N_ESTADOS_NO_TERMINALES][N_SIMBOLOS];
 		
 		public static void iniciar() {			
 			iniciarEstado0();
@@ -63,32 +64,32 @@ public class AnalizadorLexico {
 		}
 		
 		private static void iniciarEstado0() {			
-			mat[0][DEL]   		 = new EstadoAccion(0, Accion.LEER);
-			mat[0][CR]    		 = new EstadoAccion(0, Accion.LEER);
-			mat[0][LETRA] 		 = new EstadoAccion(1, Accion.CONCATENAR);
-			mat[0][DIGITO]   	 = new EstadoAccion(2, Accion.DECLARAR_NUM);
-			mat[0][UNDERSCORE] 	 = new EstadoAccion(23, Accion.ERR_CARACTER_NO_PERMITIDO);
-			mat[0][COMILLA] 	 = new EstadoAccion(3, Accion.LEER);
-			mat[0][MENOS] 		 = new EstadoAccion(4, Accion.LEER);
-			mat[0][BARRA] 		 = new EstadoAccion(5, Accion.LEER);
-			mat[0][IGUAL] 		 = new EstadoAccion(12, Accion.GENERAR_IGUAL);
-			mat[0][MAS] 		 = new EstadoAccion(13, Accion.GENERAR_MAS);
-			mat[0][MAYOR] 		 = new EstadoAccion(14, Accion.GENERAR_MAYOR);
-			mat[0][MENOR] 		 = new EstadoAccion(15, Accion.GENERAR_MENOR);
-			mat[0][DISTINTO] 	 = new EstadoAccion(16, Accion.GENERAR_DISTINTO);
-			mat[0][COMA] 		 = new EstadoAccion(17, Accion.GENERAR_COMA);
-			mat[0][PUNTO_COMA] 	 = new EstadoAccion(18, Accion.GENERAR_PUNTO_COMA);
-			mat[0][PAR_AB] 		 = new EstadoAccion(19, Accion.GENERAR_PARENTESIS_AB);
-			mat[0][PAR_CE] 		 = new EstadoAccion(20, Accion.GENERAR_PARENTESIS_CE);
-			mat[0][LLAV_AB] 	 = new EstadoAccion(21, Accion.GENERAR_LLAVE_AB);
-			mat[0][LLAVE_CE] 	 = new EstadoAccion(22, Accion.GENERAR_LLAVE_CE);
-			mat[0][EOF] 	 	 = new EstadoAccion(23, Accion.TERMINAR_EJECUCION);
-			mat[0][RESTO_CARACT] = new EstadoAccion(23, Accion.ERR_CARACTER_NO_PERMITIDO);
+			mat[0][DEL]   		 = new EntradaMatTrans(0, Accion.LEER);
+			mat[0][CR]    		 = new EntradaMatTrans(0, Accion.LEER);
+			mat[0][LETRA] 		 = new EntradaMatTrans(1, Accion.CONCATENAR);
+			mat[0][DIGITO]   	 = new EntradaMatTrans(2, Accion.DECLARAR_NUM);
+			mat[0][UNDERSCORE] 	 = new EntradaMatTrans(23, Accion.ERR_CARACTER_NO_PERMITIDO);
+			mat[0][COMILLA] 	 = new EntradaMatTrans(3, Accion.LEER);
+			mat[0][MENOS] 		 = new EntradaMatTrans(4, Accion.LEER);
+			mat[0][BARRA] 		 = new EntradaMatTrans(5, Accion.LEER);
+			mat[0][IGUAL] 		 = new EntradaMatTrans(12, Accion.GENERAR_IGUAL);
+			mat[0][MAS] 		 = new EntradaMatTrans(13, Accion.GENERAR_MAS);
+			mat[0][MAYOR] 		 = new EntradaMatTrans(14, Accion.GENERAR_MAYOR);
+			mat[0][MENOR] 		 = new EntradaMatTrans(15, Accion.GENERAR_MENOR);
+			mat[0][DISTINTO] 	 = new EntradaMatTrans(16, Accion.GENERAR_NEGACION);
+			mat[0][COMA] 		 = new EntradaMatTrans(17, Accion.GENERAR_COMA);
+			mat[0][PUNTO_COMA] 	 = new EntradaMatTrans(18, Accion.GENERAR_PUNTO_COMA);
+			mat[0][PAR_AB] 		 = new EntradaMatTrans(19, Accion.GENERAR_PAR_AB);
+			mat[0][PAR_CE] 		 = new EntradaMatTrans(20, Accion.GENERAR_PAR_CE);
+			mat[0][LLAV_AB] 	 = new EntradaMatTrans(21, Accion.GENERAR_LLA_AB);
+			mat[0][LLAVE_CE] 	 = new EntradaMatTrans(22, Accion.GENERAR_LLA_CE);
+			mat[0][EOF] 	 	 = new EntradaMatTrans(23, Accion.TERMINAR_EJECUCION);
+			mat[0][RESTO_CARACT] = new EntradaMatTrans(23, Accion.ERR_CARACTER_NO_PERMITIDO);
 		}
 		
 		private static void iniciarEstado1() {
-			EstadoAccion irA7YGenerarPRoID = new EstadoAccion(7, Accion.GENERAR_PR_ID);
-			EstadoAccion irA1YConcatenar = new EstadoAccion(1, Accion.CONCATENAR);
+			EntradaMatTrans irA7YGenerarPRoID = new EntradaMatTrans(7, Accion.GENERAR_PR_ID);
+			EntradaMatTrans irA1YConcatenar = new EntradaMatTrans(1, Accion.CONCATENAR);
 			
 			mat[1][DEL]   		 = irA7YGenerarPRoID;
 			mat[1][CR]    		 = irA7YGenerarPRoID;
@@ -115,12 +116,12 @@ public class AnalizadorLexico {
 		}
 		
 		private static void iniciarEstado2() {
-			EstadoAccion irA8YGenerarEntero = new EstadoAccion(8, Accion.GENERAR_ENTERO);
+			EntradaMatTrans irA8YGenerarEntero = new EntradaMatTrans(8, Accion.GENERAR_ENTERO);
 			
 			mat[2][DEL]   		 = irA8YGenerarEntero;
 			mat[2][CR]    		 = irA8YGenerarEntero;
 			mat[2][LETRA] 		 = irA8YGenerarEntero;
-			mat[2][DIGITO]   	 = new EstadoAccion(2, Accion.INCREMENTAR_NUM);
+			mat[2][DIGITO]   	 = new EntradaMatTrans(2, Accion.INCREMENTAR_NUM);
 			mat[2][UNDERSCORE] 	 = irA8YGenerarEntero;
 			mat[2][COMILLA] 	 = irA8YGenerarEntero;
 			mat[2][MENOS] 		 = irA8YGenerarEntero;
@@ -141,14 +142,14 @@ public class AnalizadorLexico {
 		}
 		
 		private static void iniciarEstado3() {
-			EstadoAccion irA3YConcatenar = new EstadoAccion(3, Accion.CONCATENAR);
+			EntradaMatTrans irA3YConcatenar = new EntradaMatTrans(3, Accion.CONCATENAR);
 			
 			mat[3][DEL]   		 = irA3YConcatenar;
-			mat[3][CR]    		 = new EstadoAccion(23,Accion.ERR_CADENA_EN_VARIAS_LINEAS);
+			mat[3][CR]    		 = new EntradaMatTrans(23,Accion.ERR_CADENA_EN_VARIAS_LINEAS);
 			mat[3][LETRA] 		 = irA3YConcatenar;
 			mat[3][DIGITO]   	 = irA3YConcatenar;
 			mat[3][UNDERSCORE] 	 = irA3YConcatenar;
-			mat[3][COMILLA] 	 = new EstadoAccion(9, Accion.GENERAR_CADENA);
+			mat[3][COMILLA] 	 = new EntradaMatTrans(9, Accion.GENERAR_CADENA);
 			mat[3][MENOS] 		 = irA3YConcatenar;
 			mat[3][BARRA] 		 = irA3YConcatenar;
 			mat[3][IGUAL] 		 = irA3YConcatenar;
@@ -162,12 +163,12 @@ public class AnalizadorLexico {
 			mat[3][PAR_CE] 		 = irA3YConcatenar;
 			mat[3][LLAV_AB] 	 = irA3YConcatenar;
 			mat[3][LLAVE_CE] 	 = irA3YConcatenar;
-			mat[3][EOF] 	 	 = new EstadoAccion(23, Accion.ERR_CADENA_NO_TERMINADA);
+			mat[3][EOF] 	 	 = new EntradaMatTrans(23, Accion.ERR_CADENA_NO_TERMINADA);
 			mat[3][RESTO_CARACT] = irA3YConcatenar;
 		}
 		
 		private static void iniciarEstado4() {
-			EstadoAccion irA10YGenerarMenos = new EstadoAccion(10, Accion.GENERAR_MENOS);
+			EntradaMatTrans irA10YGenerarMenos = new EntradaMatTrans(10, Accion.GENERAR_MENOS);
 			
 			mat[4][DEL]   		 = irA10YGenerarMenos;
 			mat[4][CR]    		 = irA10YGenerarMenos;
@@ -175,7 +176,7 @@ public class AnalizadorLexico {
 			mat[4][DIGITO]   	 = irA10YGenerarMenos;
 			mat[4][UNDERSCORE] 	 = irA10YGenerarMenos;
 			mat[4][COMILLA] 	 = irA10YGenerarMenos;
-			mat[4][MENOS] 		 = new EstadoAccion(11, Accion.GENERAR_POS_DECREMENTO);
+			mat[4][MENOS] 		 = new EntradaMatTrans(11, Accion.GENERAR_AUTO_DEC);
 			mat[4][BARRA] 		 = irA10YGenerarMenos;
 			mat[4][IGUAL] 		 = irA10YGenerarMenos;
 			mat[4][MAS] 		 = irA10YGenerarMenos;
@@ -193,7 +194,7 @@ public class AnalizadorLexico {
 		}
 		
 		private static void iniciarEstado5() {
-			EstadoAccion irA23YErrorComentario = new EstadoAccion(23, Accion.ERR_COMENTARIO_MAL_FORMADO);
+			EntradaMatTrans irA23YErrorComentario = new EntradaMatTrans(23, Accion.ERR_COMENTARIO_MAL_FORMADO);
 			
 			mat[5][DEL]   		 = irA23YErrorComentario;
 			mat[5][CR]    		 = irA23YErrorComentario;
@@ -202,7 +203,7 @@ public class AnalizadorLexico {
 			mat[5][UNDERSCORE] 	 = irA23YErrorComentario;
 			mat[5][COMILLA] 	 = irA23YErrorComentario;
 			mat[5][MENOS] 		 = irA23YErrorComentario;
-			mat[5][BARRA] 		 = new EstadoAccion(6, Accion.LEER);;
+			mat[5][BARRA] 		 = new EntradaMatTrans(6, Accion.LEER);;
 			mat[5][IGUAL] 		 = irA23YErrorComentario;
 			mat[5][MAS] 		 = irA23YErrorComentario;
 			mat[5][MAYOR] 		 = irA23YErrorComentario;
@@ -219,10 +220,10 @@ public class AnalizadorLexico {
 		}
 		
 		private static void iniciarEstado6() {
-			EstadoAccion irA6YLeer = new EstadoAccion(6, Accion.LEER);
+			EntradaMatTrans irA6YLeer = new EntradaMatTrans(6, Accion.LEER);
 			
 			mat[6][DEL]   		 = irA6YLeer;
-			mat[6][CR]    		 = new EstadoAccion(0, Accion.LEER);
+			mat[6][CR]    		 = new EntradaMatTrans(0, Accion.LEER);
 			mat[6][LETRA] 		 = irA6YLeer;
 			mat[6][DIGITO]   	 = irA6YLeer;
 			mat[6][UNDERSCORE] 	 = irA6YLeer;
@@ -240,7 +241,7 @@ public class AnalizadorLexico {
 			mat[6][PAR_CE] 		 = irA6YLeer;
 			mat[6][LLAV_AB] 	 = irA6YLeer;
 			mat[6][LLAVE_CE] 	 = irA6YLeer;
-			mat[6][EOF]		 = new EstadoAccion(23,Accion.TERMINAR_EJECUCION);
+			mat[6][EOF]		 = new EntradaMatTrans(23,Accion.TERMINAR_EJECUCION);
 			mat[6][RESTO_CARACT] = irA6YLeer;
 		}
 		
@@ -308,7 +309,7 @@ public class AnalizadorLexico {
 		}
 		
 		// Devuelve la siguiente transicion a ejecutar
-		public static EstadoAccion getNextTrans() {
+		public static EntradaMatTrans getNextTrans() {
 			return mat[estadoActual][indiceMatriz(chLeido)];
 		}
 		
@@ -320,15 +321,18 @@ public class AnalizadorLexico {
 	
 	public static void iniciar(File fuente, File ficheroSalidaLex) {
 		
+		// Iniciamos los sub-modulos
+		Correspondencia.iniciar();
+		TablaPR.iniciar();
+		MatrizTransicion.iniciar();
+		
 		try { ficheroFuente = new BufferedReader(new FileReader(fuente)); }
 		catch( FileNotFoundException e ) { /*Ya se ha controlado esta situacion*/ }
 		salidaLex = new Salida(ficheroSalidaLex);
 		lineaActual=1;
 		
-		// Iniciamos los elementos del lexico necesarios		
-		Correspondencia.iniciar();
-		MatrizTransicion.iniciar();
-		TablaPR.iniciar();
+		
+		
 				
 		// Empezamos: leemos el primer caracter del fichero
 		leer();
@@ -367,7 +371,7 @@ public class AnalizadorLexico {
 		Integer num=null;
 		String lex="";				
 		Integer posicion = null;		// Cuando busquemos en TS o TPR guardaremos la respuesta aquí
-		EstadoAccion entrada = null;	// Entrada de la matriz de transiciones que indica el sig. mov
+		EntradaMatTrans entrada = null;	// Entrada de la matriz de transiciones que indica el sig. mov
 		Accion toDo = null;  			// accion semantica a realizar en cada transicion
 		char chActual = '?'; 			// Haremos cast a chLeido para manejar el caracter
 
@@ -455,7 +459,7 @@ public class AnalizadorLexico {
 						Token(Correspondencia.de("-"),"").toString());
 				break;
 				
-			case GENERAR_POS_DECREMENTO: 
+			case GENERAR_AUTO_DEC: 
 				leer();
 				salidaLex.escribir(new
 						Token(Correspondencia.de("--"),"").toString());
@@ -485,7 +489,7 @@ public class AnalizadorLexico {
 						Token(Correspondencia.de("<"),"").toString());
 				break;
 				
-			case GENERAR_DISTINTO:
+			case GENERAR_NEGACION:
 				leer();
 				salidaLex.escribir(new
 						Token(Correspondencia.de("!"),"").toString());
@@ -503,25 +507,25 @@ public class AnalizadorLexico {
 						Token(Correspondencia.de(";"),"").toString());
 				break;
 				
-			case GENERAR_PARENTESIS_AB:
+			case GENERAR_PAR_AB:
 				leer();
 				salidaLex.escribir(new
 						Token(Correspondencia.de("("),"").toString());
 				break;
 				
-			case GENERAR_PARENTESIS_CE:
+			case GENERAR_PAR_CE:
 				leer();
 				salidaLex.escribir(new
 						Token(Correspondencia.de(")"),"").toString());
 				break;
 				
-			case GENERAR_LLAVE_AB:
+			case GENERAR_LLA_AB:
 				leer();
 				salidaLex.escribir(new
 						Token(Correspondencia.de("{"),"").toString());
 				break;
 				
-			case GENERAR_LLAVE_CE:
+			case GENERAR_LLA_CE:
 				leer();
 				salidaLex.escribir(new
 						Token(Correspondencia.de("}"),"").toString());

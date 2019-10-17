@@ -1,4 +1,4 @@
-package errores;
+package errores.err;
 
 public class ErrorEnteroFueraDeRango implements Error{
 	
@@ -15,8 +15,8 @@ public class ErrorEnteroFueraDeRango implements Error{
 
 	@Override
 	public String getDesc() {
-		return "Error LEXICO-->(LINEA "+linea+") "
-		     + "Numero "+num+" esta fuera de rango.";
+		return "Error LÉXICO-->(LINEA "+linea+") "
+		     + "Numero "+num+" está fuera de rango.";
 	}
 	
 	

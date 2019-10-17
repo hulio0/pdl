@@ -1,7 +1,6 @@
-package lexico;
+package lexico.ts;
 
 
-import lexico.auxiliares.FilaTS;
 import java.util.ArrayList;
 
 public class TablaS {

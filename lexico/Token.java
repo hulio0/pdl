@@ -1,5 +1,4 @@
-package lexico.auxiliares;
-import lexico.Correspondencia;
+package lexico;
 
 public class Token {
 	

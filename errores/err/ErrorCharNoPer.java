@@ -1,4 +1,4 @@
-package errores;
+package errores.err;
 
 public class ErrorCharNoPer implements Error {
 	
@@ -15,8 +15,8 @@ public class ErrorCharNoPer implements Error {
 
 	@Override
 	public String getDesc() {
-		return "Error LÃ‰XICO-->(LINEA "+linea+") "
-		     + "CarÃ¡cter '"+c+"' no es un carÃ¡cter permitido en este contexto.";
+		return "Error LÉXICO-->(LINEA "+linea+") "
+		     + "Carácter '"+c+"' no está permitido en este contexto.";
 	}
 
 }
