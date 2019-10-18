@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import errores.GestorErrores;
 import lexico.AnalizadorLexico;
+import sintactico.AnalizadorSintactico;
 
 // Clase que crea los ficheros de salida y pone en marcha todos los modulos del programa
 public class Control {
@@ -39,6 +40,7 @@ public class Control {
 		// Ponemos en marcha los modulos
 		GestorErrores.iniciar(ficheroErrores);
 		AnalizadorLexico.iniciar(ficheroFuente, ficheroALexico);
+		AnalizadorSintactico.iniciar(ficheroASintactico);
 	}
 	
 	// Elimina todos los ficheros del directorio que le pasemos.
