@@ -1,9 +1,11 @@
 package lexico.tablasim;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import control.Salida;
 import es.upm.aedlib.Position;
 import es.upm.aedlib.positionlist.NodePositionList;
 import es.upm.aedlib.positionlist.PositionList;
@@ -43,6 +45,18 @@ public class TablaS {
 			return ( found ? res : null );
 		}
 		
+		public String toString() {
+			
+			String s = "TABLA #"+id+":\n";
+			
+			for( FilaTS fila : tab.values() ) {
+				s+="*'"+fila.getLex()+"'\n";
+				s+="+id:"+fila.getID()+"\n";
+			}
+			return s;
+		}
+		
+		
 	} // EOClaseTabla
 	
 	
@@ -55,8 +69,11 @@ public class TablaS {
 	private static int nextRow;
 	
 	private static PositionList<Tabla> tablas;
+	
+	private static Salida salidaTS;
 					
-	public static void iniciar() {
+	public static void iniciar(File ficheroTS) {
+		salidaTS = new Salida(ficheroTS);
 		nextRow=1;
 		nextTable=1;
 		tablas = new NodePositionList<Tabla>();
@@ -70,7 +87,8 @@ public class TablaS {
 	}
 	
 	public static void cerrarAmbito() {
-		// To-Do escribir la tabla en un fichero antes de destruirla
+		salidaTS.escribir( tablas.last().toString() );
+		
 		tablas.remove( tablas.last() );
 	}
 
@@ -97,7 +115,7 @@ public class TablaS {
 		
 		FilaTS res=null;;
 		
-		Position<Tabla> tablaActual = tablas.last(); 		
+		Position<Tabla> tablaActual = tablas.last();  //Se está buscando 2 veces en la tabla actual (cambiar)
 		while( tablaActual!=null && (res=tablaActual.element().get(lex))==null )
 			tablaActual=tablas.prev(tablaActual);
 		
@@ -109,5 +127,6 @@ public class TablaS {
 		FilaTS res = tablas.last().element().get(lex);
 		return ( res!=null ? res.getID() : null );
 	}
+	
 	
 }

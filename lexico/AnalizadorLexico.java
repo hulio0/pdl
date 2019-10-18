@@ -23,7 +23,7 @@ public class AnalizadorLexico {
 	private static BufferedReader ficheroFuente;
 	private static Salida salidaLex;
 	
-	public static void iniciar(File fuente, File ficheroSalidaLex) {
+	public static void iniciar(File fuente, File ficheroSalidaLex, File ficheroTS) {
 		
 		// Preparamos la lectura del fichero fuente
 		try { ficheroFuente = new BufferedReader(new FileReader(fuente)); }
@@ -35,7 +35,7 @@ public class AnalizadorLexico {
 		// Iniciamos los sub-modulos
 		Correspondencia.iniciar();
 		TablaPR.iniciar();
-		TablaS.iniciar();
+		TablaS.iniciar(ficheroTS);
 		MatrizTransicion.iniciar();
 		
 		// Empezamos: leemos el primer caracter del fichero
@@ -130,20 +130,31 @@ public class AnalizadorLexico {
 					
 					res = new Token(pos,"");
 					
+					if( lex.equals("function") )
+						functionLeido = true;
+					if( esPalDeclaracion(lex) )
+						var=DEC;
+					
 				}
 				
 				// Si no es una PR entonces es una variable
 				else{
-									
-					// Buscamos a ver si ya estaba en la TS
-					pos = TablaS.get(lex);
+					System.out.println(lex);
+					pos = TablaS.currentScopeGet(lex);
 					
-					// Si no esta agregamos la variable a la tabla
-					// (TablaS se encarga de crear la fila bien y tal)
-					if(pos == null) 
-						pos = TablaS.insert(lex);
+					if( var == DEC ) {
+						if(pos!=null) { System.out.println("error var ya declarada"); terminarEjecucion(); }
+						else pos = TablaS.insert(lex);
+					}
 					
-					// En cualquier caso se genera el token de variable
+					else { // var == USO
+						if( pos==null ) { // Buscamos en el resto de tablas
+							pos = TablaS.get(lex);
+							
+							if(pos==null) { System.out.println("Error var no declarada"); terminarEjecucion(); }
+						}
+					}
+					
 					res = new Token(Correspondencia.de("ID"),pos);	
 					
 				}
@@ -185,6 +196,9 @@ public class AnalizadorLexico {
 			case GENERAR_IGUAL:
 				leer();
 				res = new Token(Correspondencia.de("IGUAL"),"");
+				
+				var = USO;
+				
 				break;
 				
 			case GENERAR_MAS:
@@ -210,21 +224,34 @@ public class AnalizadorLexico {
 			case GENERAR_COMA:
 				leer();		
 				res = new Token(Correspondencia.de("COMA"),"");
+				
+				var = USO;
+				
 				break;
 				
 			case GENERAR_PUNTO_COMA:
 				leer();
 				res = new Token(Correspondencia.de("PUNTO_COMA"),"");
+				
+				var = USO;
+				
 				break;
 				
 			case GENERAR_PAR_AB:
 				leer();
 				res = new Token(Correspondencia.de("PAR_AB"),"");
+				if( functionLeido ) {
+					TablaS.abrirAmbito();
+					functionLeido=false;
+				}
 				break;
 				
 			case GENERAR_PAR_CE:
 				leer();
 				res = new Token(Correspondencia.de("PAR_CE"),"");
+				
+				var = USO;
+				
 				break;
 				
 			case GENERAR_LLA_AB:
@@ -235,6 +262,9 @@ public class AnalizadorLexico {
 			case GENERAR_LLA_CE:
 				leer();
 				res = new Token(Correspondencia.de("LLA_CE"),"");
+				
+				TablaS.cerrarAmbito();
+				
 				break;
 				
 				
@@ -271,8 +301,10 @@ public class AnalizadorLexico {
 		} // EOWhile
 		
 		
-		if( finAnalLexico )
+		if( finAnalLexico ) {
+			TablaS.cerrarAmbito(); // Para que se escriba la tabla global
 			System.exit(0);	
+		}
 		
 		
 		// Antes de devolver el token lo escribimos en la salida
@@ -281,6 +313,15 @@ public class AnalizadorLexico {
 		return res;
 	}
 	
-	
 	private static int valor(char c) { return Integer.parseInt(c+""); }
+	
+	// Código de ámbitos
+	private static final int USO = 0;
+	private static final int DEC = 1;
+	private static boolean functionLeido = false;
+	private static int var = USO;
+	private static boolean esPalDeclaracion(String lex) {
+		return lex.equals("int")||lex.equals("string")||lex.equals("boolean")||lex.equals("function");
+	}
+
 }

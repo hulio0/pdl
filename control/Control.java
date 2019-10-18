@@ -27,6 +27,7 @@ public class Control {
 		
 		// Ahora si, creamos los ficheros de salida
 		File ficheroALexico = new File( dirActual , "Salida Analizador Lexico.txt");
+		File ficheroTS = new File( dirActual , "Salida Tabla de Símbolos.txt");
 		File ficheroASintactico = new File( dirActual , "Salida Analizador Sintactico.txt");
 		File ficheroASemantico = new File( dirActual , "Salida Analizador Semantico.txt");
 		File ficheroErrores = new File( dirActual , "Salida Gestor de Errores.txt");
@@ -39,7 +40,7 @@ public class Control {
 		
 		// Ponemos en marcha los modulos
 		GestorErrores.iniciar(ficheroErrores);
-		AnalizadorLexico.iniciar(ficheroFuente, ficheroALexico);
+		AnalizadorLexico.iniciar(ficheroFuente, ficheroALexico, ficheroTS);
 		AnalizadorSintactico.iniciar(ficheroASintactico);
 	}
 	

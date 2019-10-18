@@ -12,8 +12,8 @@ public class Correspondencia {
 			HashBiMap.create(NUM_TOKENS);
 	
 	public static void iniciar() {
-		TABLA.put("BOOLEAN", 1);
-		TABLA.put("ELSE", 2);
+		TABLA.put("BOOLEAN", 1);		
+		TABLA.put("ELSE", 2);		
 		TABLA.put("FUNCTION", 3);
 		TABLA.put("IF", 4);
 		TABLA.put("INPUT", 5);
@@ -50,4 +50,5 @@ public class Correspondencia {
 	public static String de(int codigoTokenNumerico) {
 		return TABLA.inverse().get(codigoTokenNumerico);
 	}
+		
 }
