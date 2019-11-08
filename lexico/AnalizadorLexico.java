@@ -132,6 +132,11 @@ public class AnalizadorLexico {
 					
 					if( lex.equals("function") )
 						functionLeido = true;
+					
+					else if( lex.equals("if") || lex.equals("else") )
+						ifElseLeido = true;
+						
+						
 					if( esPalDeclaracion(lex) )
 						var=DEC;
 					
@@ -144,7 +149,7 @@ public class AnalizadorLexico {
 					
 					if( var == DEC ) {
 						if(pos!=null) { System.out.println("error var ya declarada"); terminarEjecucion(); }
-						else pos = TablaS.insert(lex);
+						pos = TablaS.insert(lex);
 					}
 					
 					else { // var == USO
@@ -263,7 +268,10 @@ public class AnalizadorLexico {
 				leer();
 				res = new Token(Correspondencia.de("LLA_CE"),"");
 				
-				TablaS.cerrarAmbito();
+				if( ifElseLeido )
+					ifElseLeido=false;
+				else
+					TablaS.cerrarAmbito();
 				
 				break;
 				
@@ -319,6 +327,7 @@ public class AnalizadorLexico {
 	private static final int USO = 0;
 	private static final int DEC = 1;
 	private static boolean functionLeido = false;
+	private static boolean ifElseLeido = false;
 	private static int var = USO;
 	private static boolean esPalDeclaracion(String lex) {
 		return lex.equals("int")||lex.equals("string")||lex.equals("boolean")||lex.equals("function");
