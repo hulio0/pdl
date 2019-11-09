@@ -9,15 +9,15 @@ public class ErrorCadenaVariasLineas implements Error{
 	private int linea;
 	
 	public ErrorCadenaVariasLineas(String cad,int linea) {
-		this.cad=cad;
+		this.cad=cad.replace("/n","");
 		this.linea=linea;
 	}
 
 	@Override
 	public String getDesc() {
-		return "Error LÉXICO-->(LINEA "+linea+") "
-		     + "Cadena ["+cad+"] incluye saltos de línea. "
-		     + "Las cadenas DEBEN declararse en una ÚNICA línea.";
+		return "Error LEXICO-->(LINEA "+linea+") "
+		     + "Cadena ["+cad+"] incluye saltos de linea. "
+		     + "Las cadenas DEBEN declararse en una UNICA linea.";
 	}
 
 }

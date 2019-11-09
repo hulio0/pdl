@@ -15,8 +15,8 @@ public class ErrorCharNoPer implements Error {
 
 	@Override
 	public String getDesc() {
-		return "Error LÉXICO-->(LINEA "+linea+") "
-		     + "Carácter '"+c+"' no está permitido en este contexto.";
+		return "Error LEXICO-->(LINEA "+linea+") "
+		     + "Caracter '"+c+"' no esta permitido en este contexto.";
 	}
 
 }

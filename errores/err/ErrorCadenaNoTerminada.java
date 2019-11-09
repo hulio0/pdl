@@ -15,7 +15,7 @@ public class ErrorCadenaNoTerminada implements Error{
 
 	@Override
 	public String getDesc() {
-		return "Error LÉXICO-->(LINEA "+linea+") "
+		return "Error LEXICO-->(LINEA "+linea+") "
 		     + "Cadena ["+cad+"] NO ha sido terminada con su comilla de CIERRE (').";
 	}
 	

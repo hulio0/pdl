@@ -12,12 +12,12 @@ public class Control {
 	
 	public static void iniciar(File dirActual, File ficheroFuente){
 		
-		// Creamos los ficheros de salida. Primero crearemos una carpeta
+		// Creamos los ficheros de salida: primero crearemos una carpeta
 		// para meterlos dentro. La carpeta se llamara SALIDA
 		dirActual = new File(dirActual,"SALIDA");
 		
 		// Si la carpeta ya existe (por ejemplo, por una ejecucion anterior)
-		// habra que eliminar todo su contenido. 
+		// habra que limpiar/eliminar todo su contenido. 
 		if( dirActual.exists() )
 			limpiar(dirActual);
 		
@@ -27,7 +27,7 @@ public class Control {
 		
 		// Ahora si, creamos los ficheros de salida
 		File ficheroALexico = new File( dirActual , "Salida Analizador Lexico.txt");
-		File ficheroTS = new File( dirActual , "Salida Tabla de Símbolos.txt");
+		File ficheroTS = new File( dirActual , "Salida Tabla de Simbolos.txt");
 		File ficheroASintactico = new File( dirActual , "Salida Analizador Sintactico.txt");
 		File ficheroASemantico = new File( dirActual , "Salida Analizador Semantico.txt");
 		File ficheroErrores = new File( dirActual , "Salida Gestor de Errores.txt");
