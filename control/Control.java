@@ -6,6 +6,7 @@ import java.io.IOException;
 import errores.GestorErrores;
 import lexico.AnalizadorLexico;
 import sintactico.AnalizadorSintactico;
+import tablasim.TablaS;
 
 // Clase que crea los ficheros de salida y pone en marcha todos los modulos del programa
 public class Control {
@@ -40,7 +41,8 @@ public class Control {
 		
 		// Ponemos en marcha los modulos
 		GestorErrores.iniciar(ficheroErrores);
-		AnalizadorLexico.iniciar(ficheroFuente, ficheroALexico, ficheroTS);
+		TablaS.iniciar(ficheroTS);
+		AnalizadorLexico.iniciar(ficheroFuente, ficheroALexico);
 		AnalizadorSintactico.iniciar(ficheroASintactico);
 	}
 	

@@ -12,7 +12,7 @@ public class AnalizadorSintactico {
 	public static void iniciar(File ficheroSalidaSint) {
 		salidaSint = new Salida(ficheroSalidaSint);
 
-		
+
 		while( AnalizadorLexico.genToken()!=null );
 	}
 

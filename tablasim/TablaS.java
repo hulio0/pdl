@@ -1,4 +1,4 @@
-package lexico.tablasim;
+package tablasim;
 
 import java.io.File;
 import java.util.HashMap;
@@ -6,9 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import control.Salida;
-import es.upm.aedlib.Position;
-import es.upm.aedlib.positionlist.NodePositionList;
-import es.upm.aedlib.positionlist.PositionList;
+
 
 public class TablaS {
 			
@@ -20,7 +18,7 @@ public class TablaS {
 		// Pero si buscamos por otro campo no queda otra que recorrer
 		private Map<Integer,FilaTS> tab;
 		
-		public Tabla(int id) {
+		public Tabla(int id) {			
 			this.id=id;
 			tab = new HashMap<Integer,FilaTS>();
 		}
@@ -59,74 +57,78 @@ public class TablaS {
 		
 	} // EOClaseTabla
 	
+	private static Salida salidaTS;
+	private static Tabla global;
+	private static Tabla local;
 	
-	// Cada tabla tendra un identificador numérico
+	// Cada tabla tendra un identificador numerico
 	private static int nextTable;
 	
 	// Iremos asignando a cada FILA que se cree un 
 	// identificador, ese identificador es el que 
-	// llevará cada token ID
+	// llevara cada token ID en su atributo
 	private static int nextRow;
 	
-	private static PositionList<Tabla> tablas;
-	
-	private static Salida salidaTS;
-					
 	public static void iniciar(File ficheroTS) {
 		salidaTS = new Salida(ficheroTS);
-		nextRow=1;
-		nextTable=1;
-		tablas = new NodePositionList<Tabla>();
-		
-		// Creamos la tabla global:
-		abrirAmbito();
+		global = new Tabla(0);
+		local = null;
+		nextTable = nextRow = 1;
 	}
-	
+		
 	public static void abrirAmbito() {
-		tablas.addLast( new Tabla(nextTable++) );
+		local = new Tabla(nextTable++);		
 	}
 	
 	public static void cerrarAmbito() {
-		salidaTS.escribir( tablas.last().toString() );
 		
-		tablas.remove( tablas.last() );
+		if( local!=null ) {
+			salidaTS.escribir( local.toString() );
+			local = null;
+		}
+		
+		else {
+			salidaTS.escribir( global.toString() );
+			global = null;
+		}
 	}
 
-	// Devuelve el id de la fila en la que se inserta.
-	// Este método lo utiliza el A. Léx
+	// Inserta en una nueva fila el lexema del token ID que quiere aÃ±adir
+	// el lÃ©xico. Este mÃ©todo devuelve el id que se le asigna a la nueva fila
 	public static int insert(String lex) {
-		
+
 		int idNuevaFila = nextRow++;
-		
 		FilaTS f = new FilaTS();
 		  f.setID(idNuevaFila);
 		  f.setLex(lex);
 		
-		// La última tabla de la PositionList es la actual.
-		// .last devuelve un Position<Tabla>, por ello el .element
-		tablas.last().element().insert(f);		
+		
+		// Si local estÃ¡ inicializada entonces es la tabla actual
+		if( local != null )
+			local.insert(f);
+		
+		// En caso contrario, la tabla actual es la global
+		else
+			global.insert(f);
+		
+		
 		return idNuevaFila;
 	}
 	
-	// Devuelve el id de la fila en la que está ubicado lex, teniendo
-	// prioridad la de ÁMBITO MÁS CERCANO. Si no hay ninguna fila con
-	// ese lexema en ninguna table entonces se devuelve null
+	
+	// Devuelve el id de la fila en la que esta ubicado lex, teniendo
+	// prioridad la de AMBITO MAS CERCANO. Si no hay ninguna fila con
+	// ese lexema en ninguna tabla entonces se devuelve null
 	public static Integer get(String lex) {
 		
-		FilaTS res=null;;
+		FilaTS res=null;
 		
-		Position<Tabla> tablaActual = tablas.last();  //Se está buscando 2 veces en la tabla actual (cambiar)
-		while( tablaActual!=null && (res=tablaActual.element().get(lex))==null )
-			tablaActual=tablas.prev(tablaActual);
+		if( local!=null )
+			res = local.get(lex);
+		else if( res == null )
+			res = global.get(lex);
 		
-		return ( res!=null ? res.getID() : null );
+		return ( res != null ? res.getID() : null );
+		
 	}
-	
-	// Solo busca en la tabla actual (la que representa el ámbito actual)
-	public static Integer currentScopeGet(String lex) {
-		FilaTS res = tablas.last().element().get(lex);
-		return ( res!=null ? res.getID() : null );
-	}
-	
-	
 }

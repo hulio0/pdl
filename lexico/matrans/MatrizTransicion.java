@@ -6,6 +6,8 @@ public class MatrizTransicion {
 	public static final int N_ESTADOS_NO_TERMINALES = 7;
 	public static final int N_SIMBOLOS = 21;
 	
+	// Estos son los simbolos que maneja la matriz
+	// (representan las columnas de la misma)
 	public static final int DEL 		 = 0;
 	public static final int CR 			 = 1;
 	public static final int LETRA 		 = 2;
@@ -220,12 +222,12 @@ public class MatrizTransicion {
 		mat[6][PAR_CE] 		 = irA6YLeer;
 		mat[6][LLAV_AB] 	 = irA6YLeer;
 		mat[6][LLAVE_CE] 	 = irA6YLeer;
-		mat[6][EOF]		 = new EntradaMatTrans(23,Accion.TERMINAR_EJECUCION);
+		mat[6][EOF]			 = new EntradaMatTrans(23,Accion.TERMINAR_EJECUCION);
 		mat[6][RESTO_CARACT] = irA6YLeer;
 	}
 	
 	// Dado un caracter devuelve el correspondiente indice de la matriz al que hace
-	// referencia. Ejemplo, dado '2' deberia de devolver DIGITO, que es el indice 3
+	// referencia. Ejemplo: dado '2' deberia de devolver DIGITO, que es el indice 3
 	public static int indiceMatriz(int ch) {
 		
 		if( ch == -1 )
@@ -241,7 +243,7 @@ public class MatrizTransicion {
 		
 		switch(c) {
 		
-		// Incluimos '\r' como delimitador para que el compilador
+		// Incluimos '\r' como delimitador para que el lexico
 		// se los salte. Esto para evitar problemas con aquello de
 		// que ficheros editados en Windows se codifican de modo que
 		// los saltos de linea se traducen en una secuencia de \r\n
@@ -289,7 +291,7 @@ public class MatrizTransicion {
 	
 	// Devuelve la siguiente transicion a ejecutar
 	public static EntradaMatTrans getNextTrans(int estadoActual, int charActual) {
-		return mat[estadoActual][indiceMatriz(charActual)];
+		return mat[estadoActual][ indiceMatriz(charActual) ];
 	}
 	
 }

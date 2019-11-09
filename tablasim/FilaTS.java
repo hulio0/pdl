@@ -1,6 +1,6 @@
-package lexico.tablasim;
+package tablasim;
 
-// Objeto que encapsula una fila de la tabla de símbolos
+// Objeto que encapsula una fila de la tabla de simbolos
 
 // TO-DO: Completar los atributos (las columnas, importante los getters)
 public class FilaTS {
@@ -10,8 +10,6 @@ public class FilaTS {
 	
 	
 	// Constructor por defecto
-	
-	
 	
 	public void setID(int idFila) { this.id=idFila; }
 	public void setLex(String lexema) { this.lex=lexema; }
