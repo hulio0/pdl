@@ -95,16 +95,19 @@ public class AnalizadorSintactico {
 		// Regla 6 [ T -> int ]
 		case Corresp.INT:
 			escribir(6);
+			pedirToken();
 			break;
 			
 		// Regla 7 [ T -> string ]
 		case Corresp.STRING:
 			escribir(7);
+			pedirToken();
 			break;
 			
 		// Regla 8 [ T -> boolean ]
 		case Corresp.BOOLEAN:
 			escribir(8);
+			pedirToken();
 			break;
 			
 		default:
@@ -187,9 +190,7 @@ public class AnalizadorSintactico {
 			System.out.println("ERROR Pr");
 		}
 	}
-	
-	private static final Set<Integer> followRp = followPr;
-	
+		
 	// Resto Parametros
 	private static void Rp() {
 		
@@ -203,7 +204,7 @@ public class AnalizadorSintactico {
 		// Regla 15 [ Rp -> , T id Rp ]
 		case Corresp.COMA:		// First(, T id Rp)
 			escribir(15);
-			//comprobarToken(Corresp.COMA);  // No es necesario
+			pedirToken();
 			T();
 			comprobarToken(Corresp.ID);
 			Rp();
@@ -214,8 +215,6 @@ public class AnalizadorSintactico {
 		}
 	}
 	
-	private static final Set<Integer> followC = new 
-			HashSet<Integer>( Arrays.asList( Corresp.PAR_CE ) );
 	
 	// Cuerpo-funcion
 	private static void C() {
@@ -314,7 +313,7 @@ public class AnalizadorSintactico {
 		// Regla 24 [ E2aux -> < E3 E2aux ]
 		case Corresp.MENOR:			// First(< E3 E2aux)
 			escribir(24);
-			//comprobarToken(Corresp.MENOR);
+			pedirToken();
 			E3();
 			E2aux();
 			
@@ -353,7 +352,7 @@ public class AnalizadorSintactico {
 		// Regla 27 [ E3aux -> + E4 E3aux ]
 		case Corresp.MAS:			// First(+ E4 E3aux)
 			escribir(27);
-			//comprobarToken(Corresp.MAS);
+			pedirToken();
 			E4();
 			E3aux();
 			break;
@@ -391,6 +390,7 @@ public class AnalizadorSintactico {
 		// Regla 30 [ E4aux -> - E5 E4aux ]
 		case Corresp.MENOS:			// First(- E5 E4aux)
 			escribir(30);
+			pedirToken();
 			E5();
 			E4aux();
 			break;
@@ -430,7 +430,7 @@ public class AnalizadorSintactico {
 		// Regla 33 [ E5aux -> ! E5aux ]
 		case Corresp.NEGACION:		// First(! E5aux)
 			escribir(33);
-			//comprobarToken(Corresp.NEGACION);
+			pedirToken();
 			E5aux();
 			break;
 			
@@ -448,7 +448,7 @@ public class AnalizadorSintactico {
 		// Regla 34 [ X -> ( E ) ]
 		case Corresp.PAR_CE:		// First( (E) )
 			escribir(34);
-			//comprobarToken(Corresp.PAR_AB);
+			pedirToken();
 			E();
 			comprobarToken(Corresp.PAR_CE);
 			break;
@@ -456,18 +456,20 @@ public class AnalizadorSintactico {
 		// Regla 35 [ X -> id Xaux ]
 		case Corresp.ID:			// First(id Xaux)
 			escribir(35);
-			//comprobarToken(Corresp.ID);
+			pedirToken();
 			Xaux();
 			break;
 			
 		// Regla 36 [ X -> entero ]
 		case Corresp.ENTERO:
 			escribir(36);
+			pedirToken();
 			break;
 			
 		// Regla 37 [ X -> cadena ]
 		case Corresp.CADENA:
 			escribir(37);
+			pedirToken();
 			break;
 			
 		default:
@@ -496,7 +498,7 @@ public class AnalizadorSintactico {
 		// Regla 39 [ Xaux -> ( A ) ]
 		case Corresp.PAR_AB:		// First( (A) ) 
 			escribir(39);
-			//comprobarToken(Corresp.PAR_AB);
+			pedirToken();
 			A();
 			comprobarToken(Corresp.PAR_CE);
 			break;
@@ -505,6 +507,7 @@ public class AnalizadorSintactico {
 		// Regla 40 [ Xaux -> -- ]
 		case Corresp.AUTO_DEC:
 			escribir(40);
+			pedirToken();
 			break;
 			
 		default:
@@ -522,14 +525,14 @@ public class AnalizadorSintactico {
 		// Regla 41 [ S -> id Saux ]
 		case Corresp.ID:		// First(id Saux)
 			escribir(41);
-			//comprobarToken(Corresp.ID);
+			pedirToken();
 			Saux();
 			break;
 			
 		// Regla 42 [ S -> print ( E ) ; ]
 		case Corresp.PRINT:		// First(print ( E ) ;)
 			escribir(42);
-			//comprobarToken(Corresp.PRINT);
+			pedirToken();
 			comprobarToken(Corresp.PAR_AB);
 			E();
 			comprobarToken(Corresp.PAR_CE);
@@ -540,7 +543,7 @@ public class AnalizadorSintactico {
 		// Regla 43 [ S -> input(id); ]
 		case Corresp.INPUT:		// First(input(id);)
 			escribir(43);
-			//comprobarToken(Corresp.INPUT);
+			pedirToken();
 			comprobarToken(Corresp.PAR_AB);
 			comprobarToken(Corresp.ID);
 			comprobarToken(Corresp.PAR_CE);
@@ -551,7 +554,7 @@ public class AnalizadorSintactico {
 		// Regla 44 [ S -> if ( E ) B ]
 		case Corresp.IF:		// First(if ( E ) B)
 			escribir(44);
-			//comprobarToken(Corresp.IF);
+			pedirToken();
 			comprobarToken(Corresp.PAR_AB);
 			E();
 			comprobarToken(Corresp.PAR_CE);
@@ -561,7 +564,7 @@ public class AnalizadorSintactico {
 		// Regla 45 [ S -> return Y ; ]
 		case Corresp.RETURN:	// First(return Y ;)
 			escribir(45);
-			//comprobarToken(Corresp.RETURN);
+			pedirToken();
 			Y();
 			comprobarToken(Corresp.PUNTO_COMA);
 			break;
@@ -595,7 +598,7 @@ public class AnalizadorSintactico {
 		// Regla 47 [ Saux -> = E ; ]
 		case Corresp.IGUAL:		// First(= E ;)
 			escribir(47);
-			//comprobarToken(Corresp.IGUAL);
+			pedirToken();
 			E();
 			comprobarToken(Corresp.PUNTO_COMA);
 			break;
@@ -604,7 +607,7 @@ public class AnalizadorSintactico {
 		// Regla 48 [ Saux -> ( A ) ; ]
 		case Corresp.PAR_AB:	// First(( A ) ;)
 			escribir(48);
-			//comprobarToken(Corresp.PAR_AB);
+			pedirToken();
 			A();
 			comprobarToken(Corresp.PAR_CE);
 			comprobarToken(Corresp.PUNTO_COMA);
@@ -680,7 +683,7 @@ public class AnalizadorSintactico {
 		// Regla 54 [ Ar -> , E Ar ]
 		case Corresp.COMA:			// First(, E Ar)
 			escribir(54);
-			//comprobarToken(Corresp.COMA);
+			pedirToken();
 			E();
 			Ar();
 			break;
@@ -710,7 +713,7 @@ public class AnalizadorSintactico {
 		// Regla 56 [ B -> { Cie } El ]
 		case Corresp.LLA_AB:	// First({ Cie } El]
 			escribir(56);
-			//comprobarToken(Corresp.LLA_AB);
+			pedirToken();
 			Cie();
 			comprobarToken(Corresp.LLA_CE);
 			El();
@@ -774,7 +777,7 @@ public class AnalizadorSintactico {
 		// Regla 60 [ El -> else B ]
 		case Corresp.ELSE:		// Fisrt(else B)
 			escribir(60);
-			//comprobarToken(Corresp.ELSE);
+			pedirToken();
 			B();
 			break;
 			
