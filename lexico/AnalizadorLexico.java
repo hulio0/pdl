@@ -33,7 +33,7 @@ public class AnalizadorLexico {
 		
 		
 		// Iniciamos los sub-modulos
-		Correspondencia.iniciar();
+		Corresp.iniciar();
 		MatrizTransicion.iniciar();
 		
 		// Empezamos: leemos el primer caracter del fichero
@@ -122,7 +122,7 @@ public class AnalizadorLexico {
 				
 			case GENERAR_PR_ID:
 				
-				pos = Correspondencia.getPalRes(lex);
+				pos = Corresp.getPalRes(lex);
 				if( pos !=null ) {
 					res = new Token(pos,"");
 				}
@@ -134,7 +134,7 @@ public class AnalizadorLexico {
 					if( pos == null )
 						pos = TablaS.insert(lex);
 					
-					res = new Token(Correspondencia.ID,pos);
+					res = new Token(Corresp.ID,pos);
 				}
 				// Liberamos el lexema
 				lex = "";
@@ -143,7 +143,7 @@ public class AnalizadorLexico {
 			case GENERAR_ENTERO:
 				
 				if(num<=Math.pow(2, 16)-1) {
-					res = new Token(Correspondencia.ENTERO,num);
+					res = new Token(Corresp.ENTERO,num);
 				} else {
 					GestorErrores.reportar(new
 							ErrorEnteroFueraDeRango(num,lineaActual));
@@ -156,74 +156,74 @@ public class AnalizadorLexico {
 				
 			case GENERAR_CADENA: 
 				leer();
-				res = new Token(Correspondencia.CADENA,"\""+lex+"\"");
+				res = new Token(Corresp.CADENA,"\""+lex+"\"");
 				
 				// Liberamos el lexema
 				lex="";
 				break;
 				
 			case GENERAR_MENOS:
-				res = new Token(Correspondencia.MENOS,"");
+				res = new Token(Corresp.MENOS,"");
 				break;
 				
 			case GENERAR_AUTO_DEC: 
 				leer();
-				res = new Token(Correspondencia.AUTO_DEC,"");
+				res = new Token(Corresp.AUTO_DEC,"");
 				break;
 				
 			case GENERAR_IGUAL:
 				leer();
-				res = new Token(Correspondencia.IGUAL,"");				
+				res = new Token(Corresp.IGUAL,"");				
 				break;
 				
 			case GENERAR_MAS:
 				leer();
-				res = new Token(Correspondencia.MAS,"");
+				res = new Token(Corresp.MAS,"");
 				break;
 				
 			case GENERAR_MAYOR:
 				leer();
-				res = new Token(Correspondencia.MAYOR,"");
+				res = new Token(Corresp.MAYOR,"");
 				break;
 				
 			case GENERAR_MENOR:
 				leer();
-				res = new Token(Correspondencia.MENOR,"");
+				res = new Token(Corresp.MENOR,"");
 				break;
 				
 			case GENERAR_NEGACION:
 				leer();
-				res = new Token(Correspondencia.NEGACION,"");
+				res = new Token(Corresp.NEGACION,"");
 				break;
 				
 			case GENERAR_COMA:
 				leer();		
-				res = new Token(Correspondencia.COMA,"");
+				res = new Token(Corresp.COMA,"");
 				break;
 				
 			case GENERAR_PUNTO_COMA:
 				leer();
-				res = new Token(Correspondencia.PUNTO_COMA,"");
+				res = new Token(Corresp.PUNTO_COMA,"");
 				break;
 				
 			case GENERAR_PAR_AB:
 				leer();
-				res = new Token(Correspondencia.PAR_AB,"");
+				res = new Token(Corresp.PAR_AB,"");
 				break;
 				
 			case GENERAR_PAR_CE:
 				leer();
-				res = new Token(Correspondencia.PAR_CE,"");
+				res = new Token(Corresp.PAR_CE,"");
 				break;
 				
 			case GENERAR_LLA_AB:
 				leer();
-				res = new Token(Correspondencia.de("LLA_AB"),"");
+				res = new Token(Corresp.de("LLA_AB"),"");
 				break;
 				
 			case GENERAR_LLA_CE:
 				leer();
-				res = new Token(Correspondencia.LLA_CE,"");
+				res = new Token(Corresp.LLA_CE,"");
 				break;
 				
 				
@@ -267,7 +267,7 @@ public class AnalizadorLexico {
 		
 		
 		// Antes de devolver el token lo escribimos en la salida
-		if( res!=null ) salidaLex.escribir( res.toString() );
+		if( res!=null ) salidaLex.escribir( res.toString() + "\n" );
 		
 		return res;
 	}

@@ -5,7 +5,7 @@ import java.util.Map;
 
 // Permite conocer la correspondencia entre el codigo
 // de token y el lexema asocicado al token
-public class Correspondencia {
+public class Corresp {
 	
 	public static final int BOOLEAN		= 1;
 	public static final int ELSE		= 2;
@@ -131,7 +131,7 @@ public class Correspondencia {
 	// Si es una palabra reservada devuelve su código, en caso
 	// contrario devuelve null
 	public static Integer getPalRes(String lex) {
-		Integer cod = Correspondencia.de( lex );
+		Integer cod = Corresp.de( lex );
 		
 		if( cod == null )
 			return null;

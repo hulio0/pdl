@@ -21,7 +21,7 @@ public class Token {
 			return "<"+id+","+atributo+">";
 			
 		case FRIENDLY:
-			return "<"+Correspondencia.friendlyDe(id)+","+atributo+">";
+			return "<"+Corresp.friendlyDe(id)+","+atributo+">";
 			
 		default:
 			return "ERROR MODO TOKEN";

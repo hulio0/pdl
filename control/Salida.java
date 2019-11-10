@@ -22,7 +22,7 @@ public class Salida {
 		// del fichero (asi no se esta cargando continuamente el contenido de este)
 		try( FileWriter fw = new FileWriter(this.fichero,true) )
 		{
-			fw.write( texto + "\n" ); 
+			fw.write( texto ); 
 		}
 		catch(IOException e) { e.printStackTrace(); }
 	}

@@ -17,7 +17,7 @@ public class GestorErrores {
 	}
 	
 	public static void reportar(Error e) {
-		salidaGestErr.escribir( e.getDesc() );
+		salidaGestErr.escribir( e.getDesc() + "\n" );
 	}
 
 }
