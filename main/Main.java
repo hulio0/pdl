@@ -11,7 +11,7 @@ public class Main {
 		
 		File dirActual = new File(System.getProperty("user.dir"));
 		
-		String nombreFicheroFuente = "Prueba.txt";
+		String nombreFicheroFuente = "PIdG83.txt";
 		if(args.length>0) {
 			nombreFicheroFuente = args[0];
 			

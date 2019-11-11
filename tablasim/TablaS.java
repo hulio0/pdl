@@ -83,12 +83,12 @@ public class TablaS {
 	public static void cerrarAmbito() {
 		
 		if( local!=null ) {
-			salidaTS.escribir( local.toString() );
+			salidaTS.escribir( local.toString() + "\n" );
 			local = null;
 		}
 		
 		else {
-			salidaTS.escribir( global.toString() );
+			salidaTS.escribir( global.toString() + "\n" );
 			global = null;
 		}
 	}
@@ -123,11 +123,15 @@ public class TablaS {
 		
 		FilaTS res=null;
 		
+		// Si estamos en un ámbito local buscamos allí
 		if( local!=null )
 			res = local.get(lex);
-		else if( res == null )
-			res = global.get(lex);
 		
+		// Si no lo encontramos en el local o estamos en un
+		// ámbito global pues buscamos en la tabla global
+		if( res == null )
+			res = global.get(lex);
+				
 		return ( res != null ? res.getID() : null );
 		
 	}

@@ -140,17 +140,21 @@ public class Corresp {
 		
 		case BOOLEAN:
 			return BOOLEAN;
+		case ELSE:
+			return ELSE;
 		case FUNCTION:
 			return FUNCTION;
 		case IF:
 			return IF;
+		case INPUT:
+			return INPUT;
 		case INT:
 			return INT;
 		case PRINT:
 			return PRINT;
 		case RETURN:
 			return RETURN;
-		case STRING:
+		case STRING: 
 			return STRING;
 		case VAR:
 			return VAR;

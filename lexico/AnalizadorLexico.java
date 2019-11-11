@@ -218,7 +218,7 @@ public class AnalizadorLexico {
 				
 			case GENERAR_LLA_AB:
 				leer();
-				res = new Token(Corresp.de("LLA_AB"),"");
+				res = new Token(Corresp.LLA_AB,"");
 				break;
 				
 			case GENERAR_LLA_CE:
@@ -261,8 +261,12 @@ public class AnalizadorLexico {
 		
 		
 		if( finAnalLexico ) {
-			TablaS.cerrarAmbito(); // Para que se escriba la tabla global
-			System.exit(0);	
+			TablaS.cerrarAmbito(); // Para que se escriba la tabla global // CAMBIAR, NO DEBERÍA DE HACERLO EL LÉXICO
+
+			
+			// Esto implica que hay error léxico
+			if( chLeidoInt != -1 )
+				System.exit(0);	
 		}
 		
 		
