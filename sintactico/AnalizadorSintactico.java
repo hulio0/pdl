@@ -15,6 +15,10 @@ public class AnalizadorSintactico {
 	// Sólo nos interesa saber qué token es
 	private static int codTokActual;
 	
+	// Permite conocer qué estructura estamos analizando
+	// actualmente (útil para dar mensajes de error más específicos)
+	private static Contexto contexto;
+	
 	public static void iniciar(File ficheroSalidaSint) {
 		salidaSint = new Salida(ficheroSalidaSint);
 		  salidaSint.escribir("D ");
@@ -539,14 +543,14 @@ public class AnalizadorSintactico {
 			break;
 		
 		
-		// Regla 43 [ S -> if ( E ) B ]
-		case Corresp.IF:		// First(if ( E ) B)
+		// Regla 43 [ S -> if ( E ) Bi ]
+		case Corresp.IF:		// First(if ( E ) Bi)
 			escribir(43);
 			pedirToken();
 			comprobarToken(Corresp.PAR_AB);
 			E();
 			comprobarToken(Corresp.PAR_CE);
-			B();
+			Bi();
 			break;
 			
 		// Regla 44 [ S -> return Y ; ]
@@ -644,15 +648,15 @@ public class AnalizadorSintactico {
 			escribir(50);
 			break;
 			
-		// Regla 51 [ A -> E Ar ]
-		case Corresp.PAR_AB:		// First(E Ar)
+		// Regla 51 [ A -> E Ra ]
+		case Corresp.PAR_AB:		// First(E Ra)
 		case Corresp.ID:
 		case Corresp.ENTERO:
 		case Corresp.CADENA:
 		case Corresp.NEGACION:
 			escribir(51);
 			E();
-			Ar();
+			Ra();
 			break;
 			
 		default:
@@ -661,21 +665,21 @@ public class AnalizadorSintactico {
 	}
 	
 	// Resto de argumentos funcion
-	private static void Ar() {
+	private static void Ra() {
 		
 		switch( codTokActual ) {
 		
-		// Regla 52 [ Ar -> lambda ]
-		case Corresp.PAR_CE:		// Follow(Ar)
+		// Regla 52 [ Ra -> lambda ]
+		case Corresp.PAR_CE:		// Follow(Ra)
 			escribir(52);
 			break;
 			
-		// Regla 53 [ Ar -> , E Ar ]
-		case Corresp.COMA:			// First(, E Ar)
+		// Regla 53 [ Ra -> , E Ra ]
+		case Corresp.COMA:			// First(, E Ra)
 			escribir(53);
 			pedirToken();
 			E();
-			Ar();
+			Ra();
 			break;
 			
 		default:
@@ -684,12 +688,12 @@ public class AnalizadorSintactico {
 		}
 	}
 	
-	// Bloque if-else
-	private static void B() {
+	// Bloque if
+	private static void Bi() {
 		
 		switch( codTokActual ) {
 		
-		// Regla 54 [ B -> S El ]
+		// Regla 54 [ Bi -> S El ]
 		case Corresp.ID:		// First(S El)
 		case Corresp.PRINT:
 		case Corresp.INPUT:
@@ -700,7 +704,7 @@ public class AnalizadorSintactico {
 			El();
 			break;
 			
-		// Regla 55 [ B -> { Cie } El ]
+		// Regla 55 [ Bi -> { Cie } El ]
 		case Corresp.LLA_AB:	// First({ Cie } El]
 			escribir(55);
 			pedirToken();
@@ -764,11 +768,11 @@ public class AnalizadorSintactico {
 			escribir(58);
 			break;
 		
-		// Regla 59 [ El -> else B ]
-		case Corresp.ELSE:		// Fisrt(else B)
+		// Regla 59 [ El -> else Be ]
+		case Corresp.ELSE:		// Fisrt(else Be)
 			escribir(59);
 			pedirToken();
-			B();
+			Be();
 			break;
 			
 		default:
@@ -777,7 +781,38 @@ public class AnalizadorSintactico {
 		}
 	}
 	
-
+	// Bloque else
+	private static void Be() {
+		
+		switch( codTokActual ) {
+		
+		// Regla 60 [ Be -> S ]
+		case Corresp.ID:		// First(S)
+		case Corresp.PRINT:
+		case Corresp.INPUT:
+		case Corresp.IF:
+		case Corresp.RETURN:
+			escribir(60);
+			S();
+			break;
+			
+		// Regla 61 [ Be -> { Cie } ]
+		case Corresp.LLA_AB:
+			escribir(61);
+			pedirToken();
+			Cie();
+			comprobarToken(Corresp.LLA_CE);
+			break;
+			
+		default:
+			System.out.println("Error");
+		
+		}
+		
+	}
+	
+	private static void error( Error e ) {
+	}
 	
 	private static void comprobarToken( int tokenEsperado ) {
 		

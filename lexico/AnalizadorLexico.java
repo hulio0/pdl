@@ -7,15 +7,17 @@ import java.io.FileReader;
 import java.io.IOException;
 import control.Salida;
 import errores.GestorErrores;
-import errores.err.ErrorCadenaNoTerminada;
-import errores.err.ErrorCadenaVariasLineas;
-import errores.err.ErrorCharNoPer;
-import errores.err.ErrorComentarioMalForm;
-import errores.err.ErrorEnteroFueraDeRango;
+import errores.Error;
+import errores.err.lex.ErrorCadenaNoTerminada;
+import errores.err.lex.ErrorCadenaVariasLineas;
+import errores.err.lex.ErrorCharNoPer;
+import errores.err.lex.ErrorComentarioMalForm;
+import errores.err.lex.ErrorEnteroFueraDeRango;
 import lexico.matrans.Accion;
 import lexico.matrans.EntradaMatTrans;
 import lexico.matrans.MatrizTransicion;
 import tablasim.TablaS;
+
 
 public class AnalizadorLexico {
 		
@@ -67,14 +69,18 @@ public class AnalizadorLexico {
 		
 	}
 	
-	// Flag que permite saber cuando parar de ejecutar
-	private static boolean finAnalLexico = false;
 	
 	private static void terminarEjecucion() {
-		finAnalLexico=true;
+		
+		// Para que se escriba la tabla global
+		TablaS.cerrarAmbito();
 		
 		try { ficheroFuente.close(); }
 		catch(IOException e) { e.printStackTrace(); }
+		
+		// Esto implica que ha habido un error léxico
+		if( chLeidoInt != -1 )
+			System.exit(0);	
 	}
 	
 	
@@ -142,13 +148,10 @@ public class AnalizadorLexico {
 								
 			case GENERAR_ENTERO:
 				
-				if(num<=Math.pow(2, 16)-1) {
+				if(num<=Math.pow(2, 16)-1)
 					res = new Token(Corresp.ENTERO,num);
-				} else {
-					GestorErrores.reportar(new
-							ErrorEnteroFueraDeRango(num,lineaActual));
-					terminarEjecucion();
-				}
+				else		
+					reportarError( new ErrorEnteroFueraDeRango(lineaActual));
 				
 				// Liberamos num
 				num = null;
@@ -228,28 +231,20 @@ public class AnalizadorLexico {
 				
 				
 			case ERR_CARACTER_NO_PERMITIDO:
-				GestorErrores.reportar(new 
-						ErrorCharNoPer(chLeidoOK,lineaActual));	
-				terminarEjecucion();
+				reportarError(new ErrorCharNoPer(chLeidoOK,lineaActual));
 				break;
 				
 			case ERR_COMENTARIO_MAL_FORMADO:
-				GestorErrores.reportar(new
-						ErrorComentarioMalForm(lineaActual));
-				terminarEjecucion();
+				reportarError(new ErrorComentarioMalForm(lineaActual));
 				break;
 				
 			
 			case ERR_CADENA_NO_TERMINADA:
-				GestorErrores.reportar(new
-						ErrorCadenaNoTerminada(lex,lineaActual));
-				terminarEjecucion();
+				reportarError(new ErrorCadenaNoTerminada(lex,lineaActual));
 				break;
 				
 			case ERR_CADENA_EN_VARIAS_LINEAS:
-				GestorErrores.reportar(new
-						ErrorCadenaVariasLineas(lex,lineaActual));
-				terminarEjecucion();
+				reportarError(new ErrorCadenaVariasLineas(lex,lineaActual));
 				break;
 				
 			case TERMINAR_EJECUCION:
@@ -260,22 +255,16 @@ public class AnalizadorLexico {
 		} // EOWhile
 		
 		
-		if( finAnalLexico ) {
-			TablaS.cerrarAmbito(); // Para que se escriba la tabla global // CAMBIAR, NO DEBERÍA DE HACERLO EL LÉXICO
-
-			
-			// Esto implica que hay error léxico
-			if( chLeidoInt != -1 )
-				System.exit(0);	
-		}
-		
-		
 		// Antes de devolver el token lo escribimos en la salida
 		if( res!=null ) salidaLex.escribir( res.toString() + "\n" );
-		
 		return res;
 	}
 	
 	private static int valor(char c) { return Integer.parseInt(c+""); }
+	
+	private static void reportarError(Error e) {
+		GestorErrores.reportar( e );
+		terminarEjecucion();
+	}
 
 }

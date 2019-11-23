@@ -34,6 +34,7 @@ public class Control {
 		File ficheroErrores = new File( dirActual , "Salida Gestor de Errores.txt");
 		try {
 			ficheroALexico.createNewFile();
+			ficheroTS.createNewFile();
 			ficheroASintactico.createNewFile();
 			ficheroASemantico.createNewFile();
 			ficheroErrores.createNewFile();

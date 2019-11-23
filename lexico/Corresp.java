@@ -122,9 +122,9 @@ public class Corresp {
 		case MENOR:
 			return "MENOR";
 		case MAYOR:
-			return "ERROR, CORRESPONDENCIA NO ENCONTRADA";
+			return "MAYOR";	
 		default:
-			return null;
+			return "ERROR, CORRESPONDENCIA NO ENCONTRADA";
 		}
 	}
 	

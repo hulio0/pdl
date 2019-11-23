@@ -1,4 +1,4 @@
-package errores.err;
+package errores;
 
 // El gestor de errores recibe implementaciones de
 // esta interfaz. Lo unico que se exige es que cada 

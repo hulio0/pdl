@@ -1,4 +1,6 @@
-package errores.err;
+package errores.err.lex;
+
+import errores.Error;
 
 public class ErrorCharNoPer implements Error {
 	
