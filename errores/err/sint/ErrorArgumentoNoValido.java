@@ -4,13 +4,12 @@ import errores.Error;
 
 public class ErrorArgumentoNoValido extends Error{
 
-	public ErrorArgumentoNoValido(String cad,int linea) {
+	public ErrorArgumentoNoValido(String recibido) {
 		super(Error.Tipo.SINTACTICO,
-			  linea,
-			  "No esperado [ "+cad+" ]. Paso de argumentos NO válido. "
+			  "No esperado [ "+recibido+" ]. Paso de argumentos NO válido. "
 			 +"Por favor, después del nombre de la función y entre paréntesis, "
 			 +"escribe como argumento una expresión o bien nada (según necesite la función) "
-			 +"Si deseas introducir múltiples argumentos, sepáralos por comas");
+			 +"Si la función requiere introducir múltiples argumentos, sepáralos por comas");
 	}
 	
 }

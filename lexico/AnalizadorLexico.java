@@ -5,9 +5,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.BigInteger;
+
+import control.Control;
 import control.Salida;
-import errores.GestorErrores;
 import errores.Error;
+import errores.GestorErrores;
 import errores.err.lex.ErrorCadenaNoTerminada;
 import errores.err.lex.ErrorCadenaVariasLineas;
 import errores.err.lex.ErrorCharNoPer;
@@ -33,11 +36,11 @@ public class AnalizadorLexico {
 		// Preparamos la salida del lexico
 		salidaLex = new Salida(ficheroSalidaLex);
 		
-		
 		// Iniciamos los sub-modulos
 		Corresp.iniciar();
 		MatrizTransicion.iniciar();
 		
+		// Leemos el primer caracter del fichero
 		leer();
 	}
 	
@@ -46,9 +49,9 @@ public class AnalizadorLexico {
 	// mandado cuando se alcanza el final del fichero (eof)
 	private static int chLeidoInt;
 	
-	// Cuando el caracter leido sea distinto de eof lo
-	// castearemos y guardaremos en esta variable
-	private static char chLeidoOK;
+	// Cuando el caracter leido sea distinto de eof lo castearemos
+	// y guardaremos en esta variable para manejarlo mejor
+	private static char chLeidoChar;
 	
 	// Llevamos una cuenta de las lineas para que el gestor
 	// de errores de mejores descripciones
@@ -60,36 +63,20 @@ public class AnalizadorLexico {
 		catch(IOException e) { e.printStackTrace(); }
 							
 		if( chLeidoInt != -1 ) {
-			chLeidoOK = (char) chLeidoInt;
+			chLeidoChar = (char) chLeidoInt;
 			
-			// Nos saltamos los retornos de carro
-			if( chLeidoOK == '\r' )
-				leer();
-			
-			else if( chLeidoOK == '\n' )
+			if( chLeidoChar == '\n' )
 				lineaActual++;
 		}
 		
 	}
 	
-	
-	private static void terminarEjecucion() {
-		
-		// Para que se escriba la tabla global (cambiar de aquí)
-		TablaS.cerrarAmbito();
-		
-		try { ficheroFuente.close(); }
-		catch(IOException e) { e.printStackTrace(); }
-		
-	}
-	
-	
 	public static Token genToken(){
-		Token res = null;
+		Token res=null;
 		
 		// Variables auxiliares:
 		
-		Integer num=null;
+		BigInteger num=null;
 		String lex="";	
 		Integer pos = null;	   // Cuando busquemos en TS o TPR guardaremos la respuesta aqui
 		
@@ -110,30 +97,34 @@ public class AnalizadorLexico {
 				break;
 				
 			case CONCATENAR:
-				lex+=chLeidoOK;
+				lex+=chLeidoChar;
 				leer();
 				break;
 				
 			case DECLARAR_NUM:
-				num = valor(chLeidoOK);
+				num = valor(chLeidoChar);
 				leer();
 				break;
 				
 			case INCREMENTAR_NUM:
-				num = num*10 + valor(chLeidoOK);
+				num = num.multiply( BigInteger.TEN );
+				num = num.add( valor(chLeidoChar) );
 				leer();
 				break;
 				
 			case GENERAR_PR_ID:
 				
+				// Si es una PR, pos almacenará
+				// el codigo de token correspondiente
 				pos = Corresp.getPalRes(lex);
 				if( pos !=null ) {
 					res = new Token(pos);
 				}
 	
-				// Si no es una PR entonces es un ID
+				// Si no es una PR entonces es un ID, pos
+				// almacenará la posición en la TS de dicho id
 				else{
-					pos = TablaS.get(lex);
+					pos = TablaS.getLexico(lex);
 					
 					if( pos == null )
 						pos = TablaS.insert(lex);
@@ -144,12 +135,11 @@ public class AnalizadorLexico {
 				lex = "";
 				break;
 								
-			case GENERAR_ENTERO:
-				
-				if(num<=Math.pow(2, 16)-1)
+			case GENERAR_ENTERO:				
+				if(num.compareTo(MAX_ENTERO)<=0)
 					res = new Token(Corresp.ENTERO,num);
 				else		
-					reportarError( new ErrorEnteroFueraDeRango(String.valueOf(num),lineaActual));
+					reportarError(new ErrorEnteroFueraDeRango(num));
 				
 				// Liberamos num
 				num = null;
@@ -229,45 +219,54 @@ public class AnalizadorLexico {
 				
 				
 			case ERR_CARACTER_NO_PERMITIDO:
-				reportarError(new ErrorCharNoPer(chLeidoOK,lineaActual));
+				reportarError(new ErrorCharNoPer(chLeidoChar));
 				break;
 				
 			case ERR_COMENTARIO_MAL_FORMADO:
-				reportarError(new ErrorComentarioMalForm(lineaActual));
+				reportarError(new ErrorComentarioMalForm());
 				break;
 				
-			
 			case ERR_CADENA_NO_TERMINADA:
-				reportarError(new ErrorCadenaNoTerminada(lex,lineaActual));
+				reportarError(new ErrorCadenaNoTerminada(lex));
 				break;
 				
 			case ERR_CADENA_EN_VARIAS_LINEAS:
-				reportarError(new ErrorCadenaVariasLineas(lex,lineaActual));
+				reportarError(new ErrorCadenaVariasLineas(lex));
 				break;
 				
-			case TERMINAR_EJECUCION:
-				terminarEjecucion();
+			case DEVOLVER_EOF:
+				// Devolverle null al sintactico es nuestra 
+				// manera de decir que hemos leido eof
+				res = null;
 				break;
 			} //EOSwitch
 			
 		} // EOWhile
 		
-		
-		// Antes de devolver el token lo escribimos en la salida
+		// Antes de devolver el token lo escribimos
+		// en la salida (si no es eof)
 		if( res!=null ) salidaLex.escribir( res.toString() + "\n" );
+		
 		return res;
 	}
 	
-	private static int valor(char c) { return Integer.parseInt(c+""); }
+	
+	private static final BigInteger MAX_ENTERO = new BigInteger(32768+""); // 2^15
+	private static BigInteger valor(char c) { return new BigInteger(c+""); }
 	
 	private static void reportarError(Error e) {
 		GestorErrores.reportar( e );
-		terminarEjecucion();
-		System.exit(1);
+		Control.terminarEjecucion();
 	}
 	
 	public static int lineaActual() {
 		return lineaActual;
 	}
+	
+	public static void terminarEjecucion() {		
+		try { ficheroFuente.close(); }
+		catch(IOException e) { e.printStackTrace(); }
+	}
+	
 
 }

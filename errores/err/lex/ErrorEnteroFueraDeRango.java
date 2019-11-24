@@ -1,13 +1,14 @@
 package errores.err.lex;
 
+import java.math.BigInteger;
+
 import errores.Error;
 
 public class ErrorEnteroFueraDeRango extends Error{
 	
-	public ErrorEnteroFueraDeRango(String num,int linea) {		
+	public ErrorEnteroFueraDeRango(BigInteger num) {		
 		super(Error.Tipo.LEXICO,
-			  linea,
-			  "Numero "+num+" fuera de rango.");
+			  "Numero ["+num+"] fuera de rango.");
 		
 	}
 }

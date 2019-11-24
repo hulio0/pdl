@@ -4,9 +4,8 @@ import errores.Error;
 
 public class ErrorCadenaNoTerminada extends Error{
 	
-	public ErrorCadenaNoTerminada(String cad,int linea) {
+	public ErrorCadenaNoTerminada(String cad) {
 		super(Error.Tipo.LEXICO, 
-			  linea,
-			  "Cadena ["+cad+"] NO ha sido terminada con su comilla de CIERRE ['].");
+			  "Cadena ["+cad+"] NO ha sido terminada con su comilla de CIERRE (').");
 	}	
 }

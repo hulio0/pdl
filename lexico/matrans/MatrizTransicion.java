@@ -64,7 +64,7 @@ public class MatrizTransicion {
 		mat[0][PAR_CE] 		 = new EntradaMatTrans(20, Accion.GENERAR_PAR_CE);
 		mat[0][LLAV_AB] 	 = new EntradaMatTrans(21, Accion.GENERAR_LLA_AB);
 		mat[0][LLAVE_CE] 	 = new EntradaMatTrans(22, Accion.GENERAR_LLA_CE);
-		mat[0][EOF] 	 	 = new EntradaMatTrans(23, Accion.TERMINAR_EJECUCION);
+		mat[0][EOF] 	 	 = new EntradaMatTrans(23, Accion.DEVOLVER_EOF);
 		mat[0][RESTO_CARACT] = new EntradaMatTrans(23, Accion.ERR_CARACTER_NO_PERMITIDO);
 	}
 	
@@ -222,7 +222,7 @@ public class MatrizTransicion {
 		mat[6][PAR_CE] 		 = irA6YLeer;
 		mat[6][LLAV_AB] 	 = irA6YLeer;
 		mat[6][LLAVE_CE] 	 = irA6YLeer;
-		mat[6][EOF]			 = new EntradaMatTrans(23,Accion.TERMINAR_EJECUCION);
+		mat[6][EOF]			 = new EntradaMatTrans(23,Accion.DEVOLVER_EOF);
 		mat[6][RESTO_CARACT] = irA6YLeer;
 	}
 	
@@ -242,17 +242,11 @@ public class MatrizTransicion {
 			return DIGITO;
 		
 		switch(c) {
-		
-		// Incluimos '\r' como delimitador para que el lexico
-		// se los salte. Esto para evitar problemas con aquello de
-		// que ficheros editados en Windows se codifican de modo que
-		// los saltos de linea se traducen en una secuencia de \r\n
-		// en vez de solo \n
-		case '\r':
 		case ' ':
 		case '\t':
 			return DEL;
 		case '\n':
+		case '\r':
 			return CR;
 		case '_':
 			return UNDERSCORE;

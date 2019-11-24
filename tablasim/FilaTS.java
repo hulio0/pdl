@@ -8,7 +8,6 @@ public class FilaTS {
 	private int id;
 	private String lex;
 	
-	
 	// Constructor por defecto
 	
 	public void setID(int idFila) { this.id=idFila; }

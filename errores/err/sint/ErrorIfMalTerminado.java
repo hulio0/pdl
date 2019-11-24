@@ -4,10 +4,9 @@ import errores.Error;
 
 public class ErrorIfMalTerminado extends Error{
 
-	public ErrorIfMalTerminado(String cad,int linea) {
+	public ErrorIfMalTerminado(String recibido) {
 		super(Error.Tipo.SINTACTICO,
-			  linea,
-			  "No esperado [ "+cad+" ], if mal terminado. "
+			  "No esperado [ "+recibido+" ], if mal terminado. "
 			 +"A continuación de un if puedes introducir una sentencia "
 			 +"o bien un bloque de ellas (que sean válidas) o bien un else.");
 		

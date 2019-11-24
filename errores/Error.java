@@ -1,5 +1,7 @@
 package errores;
 
+import lexico.AnalizadorLexico;
+
 public class Error {
 	
 	public static enum Tipo { LEXICO, SINTACTICO, SEMANTICO }
@@ -9,10 +11,14 @@ public class Error {
 	private String msg;
 	private Tipo tipo;
 	
-	public Error( Tipo tipo, int linea, String msg ) {
+	public Error( Tipo tipo, String msg ) {
 		this.tipo=tipo;
-		this.linea=linea;
 		this.msg=msg;
+		
+		// Los errores nada mas encontrarse se reportan. Luego,
+		// cuando llegamos a aquí, el lexico marca la linea en la
+		// se encontro
+		this.linea=AnalizadorLexico.lineaActual();
 	}
 	
 	public String toString() {

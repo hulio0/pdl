@@ -4,10 +4,12 @@ import errores.Error;
 
 public class ErrorSentenciaMalConstruida extends Error{
 	
-	public ErrorSentenciaMalConstruida(String cad,int linea) {
+	public ErrorSentenciaMalConstruida(String recibido) {
 		super(Error.Tipo.SINTACTICO,
-			  linea,
-			  "No esperado [ "+cad+" ]. Sentencia mal construida");
+			  "No esperado [ "+recibido+" ]. Sentencia mal construida. "
+			+ "Sólo se permiten asignaciones, llamadas a funciones, sentencias "
+			+ "de print, input, return y condicionales (if/else). Todas las sentencias "
+			+ "terminan con un punto y coma (;)");
 		
 	}
 

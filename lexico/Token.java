@@ -3,6 +3,9 @@ package lexico;
 public class Token {
 	
 	public static enum Modo { NORMAL, FRIENDLY };
+	
+	// Por defecto, mostramos los códigos numéricos
+	// de los tokens
 	private static Modo modo = Modo.NORMAL;
 	
 	private int id;
@@ -34,11 +37,9 @@ public class Token {
 				
 	}
 	
-	public static void setMode(Modo m) {
-		modo=m;
-	}
 	
 	public int id() { return id; }
 	public Object atrib() { return atributo; }
-
+	
+	public static void setMode(Modo m) { modo=m; }
 }

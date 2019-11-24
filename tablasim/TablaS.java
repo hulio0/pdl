@@ -12,10 +12,10 @@ public class TablaS {
 			
 	private static class Tabla {	
 		
+		// Cada tabla cuando se crea tiene un
+		// identificaor numerico
 		private int id;
 		
-		// Si tenemos el id de la fila podemos acceder a ella en o(1). 
-		// Pero si buscamos por otro campo no queda otra que recorrer
 		private Map<Integer,FilaTS> tab;
 		
 		public Tabla(int id) {			
@@ -23,31 +23,44 @@ public class TablaS {
 			tab = new HashMap<Integer,FilaTS>();
 		}
 		
-		public int insert(FilaTS fila) {
-			int idFila = fila.getID();
-			  tab.put(idFila, fila);
-			  
-			return idFila;
+		public void insert(FilaTS fila) {
+			tab.put(fila.getID(), fila);
 		}
 		
-		public FilaTS get(String lexema) {
+		// Si llega un Integer estamos buscando por id de fila (inmediato)
+		// y si llega un String estamos buscando por otro campo (toca recorrer)
+		public FilaTS get(Object aBuscar) {
+			if( aBuscar instanceof Integer )
+				return getByRowID( (Integer) aBuscar );
+			else if( aBuscar instanceof String )
+				return getByLex( (String) aBuscar );
+			
+			// Esto nunca pasará porque solo hacemos public
+			// metodos de búsqueda que reciben Integer o bien String
+			else
+				throw new IllegalArgumentException();
+		}
+		
+		// Si tenemos el id de la fila podemos acceder a ella en o(1). 
+		private FilaTS getByRowID(Integer codFila) {
+			return tab.get(codFila);
+		}
+		
+		// Pero si buscamos por otro campo no queda otra que recorrer
+		private FilaTS getByLex(String lexema) {
 			FilaTS res=null;;
 			boolean found = false;
 			Iterator<FilaTS> it = tab.values().iterator();
 			
 			while( it.hasNext() && !found ) {
 				res = it.next();
-				found = res.getLex().equals(lexema);
+				if( res.getLex().equals(lexema) ) found=true;
 			}
-			
 			return ( found ? res : null );
 		}
 		
-		// Si tenemos el id el acceso es inmediato
-		public FilaTS get(int codID) {
-			return tab.get(codID);
-		}
-		
+		// TO-DO: Completar cuando se añadan el
+		// resto de columnas a FilaTS
 		public String toString() {
 			
 			String s = "TABLA #"+id+":\n";
@@ -56,7 +69,10 @@ public class TablaS {
 				s+="*'"+fila.getLex()+"'\n";
 				s+="+id:"+fila.getID()+"\n";
 			}
-			return s;
+			
+			// El ultimo salto de linea es para que 
+			// las tablas no queden muy juntas
+			return s + "\n";
 		}
 		
 		
@@ -76,8 +92,17 @@ public class TablaS {
 	
 	public static void iniciar(File ficheroTS) {
 		salidaTS = new Salida(ficheroTS);
+		
+		// La tabla global siempre tiene el id 0
+		// (pues es la primera que se crea)
 		global = new Tabla(0);
+		
+		// Inicialmente, lógicamente no hay tabla local
 		local = null;
+		
+		// La siguiente tabla que se cree tendrá id 1 y,
+		// por decisión de diseño, la primera fila que se
+		// cree tendra id 1
 		nextTable = nextRow = 1;
 	}
 		
@@ -88,14 +113,15 @@ public class TablaS {
 	public static void cerrarAmbito() {
 		
 		if( local!=null ) {
-			salidaTS.escribir( local.toString() + "\n" );
+			salidaTS.escribir(local.toString());
 			local = null;
 		}
 		
-		else {
-			salidaTS.escribir( global.toString() + "\n" );
-			global = null;
-		}
+		// Esto nunca pasara, pq el resto de modulos
+		// no lo permitiran. De hecho, cerrarAmbito solo
+		// se llama despues de haber abierto uno
+		else 
+			System.out.println("¡ERROR TS!");
 	}
 
 	// Inserta en una nueva fila el lexema del token ID que quiere añadir
@@ -120,36 +146,48 @@ public class TablaS {
 		return idNuevaFila;
 	}
 	
-	
-	// Devuelve el id de la fila en la que esta ubicado lex, teniendo
-	// prioridad la de AMBITO MAS CERCANO. Si no hay ninguna fila con
-	// ese lexema en ninguna tabla entonces se devuelve null
-	public static Integer get(String lex) {
-		
-		FilaTS res=null;
+	private static FilaTS get(Object aBuscar) {
+		FilaTS res = null;
 		
 		// Si estamos en un ámbito local buscamos allí
 		if( local!=null )
-			res = local.get(lex);
+			res = local.get(aBuscar);
 		
-		// Si no lo encontramos en el local o estamos en un
-		// ámbito global pues buscamos en la tabla global
+		// Si no lo encontramos en el local o si directamente no
+		// hay ambito local entonces buscamos en la tabla global
 		if( res == null )
-			res = global.get(lex);
+			res = global.get(aBuscar);
 				
+		return res;
+	}
+	
+	
+	// Metodo usado por el A. lexico. Devolvemos el codFila
+	// asociado a lex si esta en la TablaS y null e.o.c
+	public static Integer getLexico(String lex) {
+		FilaTS res = null;
+		  res = get( lex );
+		  
 		return ( res != null ? res.getID() : null );
 	}
 	
-	// Igual se podría compactar más
-	public static String get(int codID) {
-		FilaTS res=null;
-		
-		if( local!=null )
-			res = local.get(codID);
-		
-		if( res == null )
-			res = global.get(codID);
-				
+	// Metodo usado por el A. sintactico. Devolvemos el lexema
+	// de la fila correspondiente a codFila
+	public static String getSintactico(Integer codFila) {
+		FilaTS res = null;
+		  res = get( codFila );
+		  
+		// No es necesaria esta comprobación en teoria pq el 
+		// sintactico solo busca cosas que están ya en la tabla
 		return ( res != null ? res.getLex() : null );
 	}
+	
+	public static void terminarEjecucion() {
+		// Si esto ocurre es que ha habido algun error
+		// lexico, sintactico o semantico
+		if(local!=null) 
+			salidaTS.escribir(local.toString());
+		
+		salidaTS.escribir(global.toString());
+	}	
 }

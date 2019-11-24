@@ -4,9 +4,8 @@ import errores.Error;
 
 public class ErrorComentarioMalForm extends Error{
 		
-	public ErrorComentarioMalForm(int linea) {
+	public ErrorComentarioMalForm() {
 		super(Error.Tipo.LEXICO,
-			  linea,
 			  "Los comentarios DEBEN llevar dos barras (//). Solo se ha encontrado una (/).");
 	}
 }

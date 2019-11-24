@@ -7,7 +7,7 @@ import com.google.common.collect.HashBiMap;
 // de token y el lexema asocicado al token
 public class Corresp {
 	
-	private static final int N = 26;
+	private static final int N_TOKENS = 26;
 	
 	public static final int BOOLEAN		= 1;
 	public static final int ELSE		= 2;
@@ -36,7 +36,8 @@ public class Corresp {
 	public static final int MENOR		= 25;
 	public static final int MAYOR		= 26;
 		
-	private static final BiMap<String,Integer> LEX_TO_COD = HashBiMap.create(N);
+	private static final BiMap<String,Integer> LEX_TO_COD = 
+			HashBiMap.create(N_TOKENS);
 	
 	public static void iniciar() {
 		LEX_TO_COD.put("boolean", BOOLEAN);		
@@ -132,16 +133,18 @@ public class Corresp {
 		}
 	}
 	
-	// Si es una palabra reservada devuelve su código, en caso
-	// contrario devuelve null
+	// Metodo usado por el lexico para preguntar si un determinado lex.
+	// es una palabra reservada. Si lo es, devuelve su código de token y
+	// en caso contrario devuelve null
 	public static Integer getPalRes(String lex) {
 		Integer cod = Corresp.de( lex );
 		
-		// No es ni siquiera uno de nuestros "símbolos"
+		// No es ni siquiera un token
 		if( cod == null )
 			return null;
 		
-		// Es uno de nuestros "símbolos". Ahora toca filtrar
+		// Si llegamos aquí, lex hace match con un token, pero necesitamos
+		// que sea justo una pal. reservada. Así que filtramos:
 		switch( cod ) {
 		
 		case BOOLEAN:

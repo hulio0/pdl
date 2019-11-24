@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import errores.GestorErrores;
 import lexico.AnalizadorLexico;
+import semantico.AnalizadorSemantico;
 import sintactico.AnalizadorSintactico;
 import tablasim.TablaS;
 
@@ -27,11 +28,11 @@ public class Control {
 			dirActual.mkdir();
 		
 		// Ahora si, creamos los ficheros de salida
-		File ficheroALexico = new File( dirActual , "Salida Analizador Lexico.txt");
-		File ficheroTS = new File( dirActual , "Salida Tabla de Simbolos.txt");
-		File ficheroASintactico = new File( dirActual , "Salida Analizador Sintactico.txt");
-		File ficheroASemantico = new File( dirActual , "Salida Analizador Semantico.txt");
-		File ficheroErrores = new File( dirActual , "Salida Gestor de Errores.txt");
+		File ficheroALexico 	= new File( dirActual , "Salida_Analizador_Lexico.txt");
+		File ficheroTS 			= new File( dirActual , "Salida_Tabla_Simbolos.txt");
+		File ficheroASintactico = new File( dirActual , "Salida_Analizador_Sintactico.txt");
+		File ficheroASemantico 	= new File( dirActual , "Salida_Analizador_Semantico.txt");
+		File ficheroErrores 	= new File( dirActual , "Salida_Gestor_Errores.txt");
 		try {
 			ficheroALexico.createNewFile();
 			ficheroTS.createNewFile();
@@ -45,13 +46,25 @@ public class Control {
 		TablaS.iniciar(ficheroTS);
 		AnalizadorLexico.iniciar(ficheroFuente, ficheroALexico);
 		AnalizadorSintactico.iniciar(ficheroASintactico);
+		AnalizadorSemantico.iniciar(ficheroASemantico);
 	}
 	
 	// Elimina todos los ficheros del directorio que le pasemos.
-	// No elimina sub-carpetas pues .delete solo funciona con ellas
-	// cuando estan vacias
+	// No elimina sub-carpetas con info. dentro (no es nuestro caso)
+	// pues .delete solo funciona con ellas cuando estan vacias
 	private static void limpiar(File carpeta) {
 		for( File f : carpeta.listFiles() )
 			f.delete();
+	}
+	
+	// Llama a terminar ejecución de cada módulo y acaba el programa
+	public static void terminarEjecucion() {
+		GestorErrores.terminarEjecucion();
+		TablaS.terminarEjecucion();
+		AnalizadorLexico.terminarEjecucion();
+		AnalizadorSintactico.terminarEjecucion();
+		AnalizadorSemantico.terminarEjecucion();
+		
+		System.exit( ( GestorErrores.huboError() ? 1 : 0 ) );
 	}
 }

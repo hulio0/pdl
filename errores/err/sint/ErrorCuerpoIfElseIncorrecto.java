@@ -4,12 +4,12 @@ import errores.Error;
 
 public class ErrorCuerpoIfElseIncorrecto extends Error{
 	
-	public ErrorCuerpoIfElseIncorrecto(String cad,int linea) {
+	public ErrorCuerpoIfElseIncorrecto(String recibido) {
 		super(Error.Tipo.SINTACTICO,
-			  linea,
-			  "No esperado [ "+cad+" ]. Cuerpo expresión condicional (if/else) NO válido. "
-			 +"Dentro de las llaves sólo se permiten sentencias "
-			 +"o bien nada (aunque esto no tiene mucho sentido)");
+			  "No esperado [ "+recibido+" ]. Cuerpo de expresión "
+			 +"condicional (if/else) NO válido. Dentro de las llaves "
+			 +"sólo se permiten sentencias o bien nada (aunque hacer esto "
+			 +"último no tiene mucho sentido)");
 		
 	}
 	

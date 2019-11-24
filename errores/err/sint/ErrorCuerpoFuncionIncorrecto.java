@@ -4,12 +4,11 @@ import errores.Error;
 public class ErrorCuerpoFuncionIncorrecto extends Error {
 
 
-	public ErrorCuerpoFuncionIncorrecto(String cad,int linea) {
+	public ErrorCuerpoFuncionIncorrecto(String recibido) {
 		super(Error.Tipo.SINTACTICO,
-			  linea,
-			  "No esperado [ "+cad+" ]. Cuerpo función NO válida. "
-			 +"Dentro de una función sólo se permite declaración de "
-			 +"variables y sentencias");
+			  "No esperado [ "+recibido+" ]. Cuerpo función NO válido. "
+			 +"Dentro de una función sólo se permiten sentencias y declaración "
+			 +"de variables");
 		
 	}
 	

@@ -2,10 +2,13 @@ package sintactico;
 
 import java.io.File;
 
+import control.Control;
 import control.Salida;
 import errores.Error;
 import errores.GestorErrores;
 import errores.err.sint.ErrorArgumentoNoValido;
+import errores.err.sint.ErrorAsignacionOLlamadaMalConstruida;
+import errores.err.sint.ErrorCuerpoFuncionIncorrecto;
 import errores.err.sint.ErrorCuerpoIfElseIncorrecto;
 import errores.err.sint.ErrorCuerpoProgramaIncorrecto;
 import errores.err.sint.ErrorExpresionMalFormada;
@@ -24,9 +27,12 @@ import tablasim.TablaS;
 public class AnalizadorSintactico {
 	
 	private static Salida salidaSint;
-	
-	private static Token tActual;
+		
+	// Para la mayor parte del trabajo del sintáctico,
+	// nos basta con el código de token (el atributo solo
+	// es necesario a veces cuando hay errores)
 	private static int codTokActual;
+	private static Object atribTokActual;
 		
 	public static void iniciar(File ficheroSalidaSint) {
 		salidaSint = new Salida(ficheroSalidaSint);
@@ -39,8 +45,17 @@ public class AnalizadorSintactico {
 	
 	private static final int EOF = -1;
 	private static void pedirToken() {
-		tActual = AnalizadorLexico.genToken();
-		codTokActual = ( tActual != null ? tActual.id() : EOF );
+		Token t = AnalizadorLexico.genToken();
+		
+		if( t!=null ) {
+			codTokActual = t.id();
+			atribTokActual = t.atrib();
+		}
+		
+		else {
+			codTokActual = EOF;
+			atribTokActual = null; // Esto no es necesario
+		}		
 	}
 	
 	
@@ -77,13 +92,12 @@ public class AnalizadorSintactico {
 		// Regla 4 [ P -> eof ] 
 		case EOF:
 			escribir(4);
-			System.out.println("TODO ACEPTAR PROGRAMA");
+			System.out.println("ACEPTAR PROGRAMA");
+			Control.terminarEjecucion();
 			break;
 			
 		default:
-			reportarError(new 
-					  	  ErrorCuerpoProgramaIncorrecto(friendly(codTokActual),
-					  			  				   		AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorCuerpoProgramaIncorrecto( friendly(codTokActual) ));
 			
 			
 		}
@@ -125,9 +139,7 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			reportarError(new 
-					  ErrorTipoNoValido(friendly(codTokActual),
-										 	   AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorTipoNoValido( friendly(codTokActual) ));
 		
 		}
 	}
@@ -173,9 +185,7 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			reportarError(new 
-						  ErrorTipoNoValido(friendly(codTokActual),
-											 	   AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorTipoNoValido( friendly(codTokActual) ));
 		}
 		
 	}
@@ -203,9 +213,7 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			reportarError(new 
-						  ErrorParametroNoValido(friendly(codTokActual),
-								  				 AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorParametroNoValido( friendly(codTokActual) ));
 		}
 	}
 		
@@ -229,9 +237,7 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			reportarError(new 
-					  ErrorParametroNoValido(friendly(codTokActual),
-							  				 AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorParametroNoValido( friendly(codTokActual) ));
 		}
 	}
 	
@@ -265,9 +271,7 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			reportarError(new
-						  ErrorParametroNoValido(friendly(codTokActual),
-								  				 AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorCuerpoFuncionIncorrecto( friendly(codTokActual) ));
 		}
 		
 	}
@@ -303,9 +307,7 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			reportarError(new
-						  ErrorExpresionMalFormada(friendly(codTokActual),
-								  				   AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorExpresionMalFormada( friendly(codTokActual) ));
 		}
 		
 		
@@ -345,9 +347,7 @@ public class AnalizadorSintactico {
 			
 			
 		default:
-			reportarError(new
-					  ErrorExpresionMalFormada(friendly(codTokActual),
-							  				   AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorExpresionMalFormada( friendly(codTokActual) ));
 		}
 		
 		
@@ -386,9 +386,7 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			reportarError(new
-					  ErrorExpresionMalFormada(friendly(codTokActual),
-							  				   AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorExpresionMalFormada( friendly(codTokActual) ));
 		}
 	}
 	
@@ -426,9 +424,7 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			reportarError(new
-					  ErrorExpresionMalFormada(friendly(codTokActual),
-							  				   AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorExpresionMalFormada(friendly(codTokActual) ));
 		
 		}
 		
@@ -456,13 +452,8 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			reportarError(new
-					  ErrorExpresionMalFormada(friendly(codTokActual),
-							  				   AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorExpresionMalFormada(friendly(codTokActual) ));
 		}
-		
-		
-		
 		
 	}
 
@@ -499,9 +490,7 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			reportarError(new
-					  ErrorExpresionMalFormada(friendly(codTokActual),
-							  				   AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorExpresionMalFormada(friendly(codTokActual) ));
 			
 		}	
 	}
@@ -538,9 +527,7 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			reportarError(new
-					  ErrorExpresionMalFormada(friendly(codTokActual),
-							  				   AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorExpresionMalFormada(friendly(codTokActual) ));
 			
 		}
 		
@@ -599,45 +586,28 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			reportarError(new
-					  	  ErrorSentenciaMalConstruida(friendly(codTokActual),
-					  			  					  AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorSentenciaMalConstruida( friendly(codTokActual) ));
 		}
 		
 	}
 	
-	// Aux para quitar rec. izq. a S
+	// Aux para factorizar las reglas de S
 	private static void Saux() {
 		
 		switch( codTokActual ) {
-		
-		// Regla 45 [ Saux -> lambda ]
-		case Corresp.VAR:		// Follow(Saux)
-		case Corresp.INT:
-		case Corresp.STRING:
-		case Corresp.BOOLEAN:
-		case Corresp.ID:
-		case Corresp.PRINT:
-		case Corresp.INPUT:
-		case Corresp.IF:
-		case Corresp.RETURN:
-		case Corresp.LLA_CE:
-		case EOF:
-			escribir(45);
-			break;
 			
-		// Regla 46 [ Saux -> = E ; ]
+		// Regla 45 [ Saux -> = E ; ]
 		case Corresp.IGUAL:		// First(= E ;)
-			escribir(46);
+			escribir(45);
 			pedirToken();
 			E();
 			comprobarToken(Corresp.PUNTO_COMA);
 			break;
 			
 		
-		// Regla 47 [ Saux -> ( A ) ; ]
+		// Regla 46 [ Saux -> ( A ) ; ]
 		case Corresp.PAR_AB:	// First(( A ) ;)
-			escribir(47);
+			escribir(46);
 			pedirToken();
 			A();
 			comprobarToken(Corresp.PAR_CE);
@@ -645,9 +615,7 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			reportarError(new
-					  ErrorSentenciaMalConstruida(friendly(codTokActual),
-							  					  AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorAsignacionOLlamadaMalConstruida( friendly(codTokActual) ));
 			
 		}
 		
@@ -658,25 +626,23 @@ public class AnalizadorSintactico {
 		
 		switch( codTokActual ) {
 		
-		// Regla 48 [ Y -> lambda ]
+		// Regla 47 [ Y -> lambda ]
 		case Corresp.PUNTO_COMA:	// Follow(Y)
-			escribir(48);
+			escribir(47);
 			break;
 			
-		// Regla 49 [ Y -> E ]
+		// Regla 48 [ Y -> E ]
 		case Corresp.PAR_AB:		// First(E)
 		case Corresp.ID:
 		case Corresp.ENTERO:
 		case Corresp.CADENA:
 		case Corresp.NEGACION:
-			escribir(49);
+			escribir(48);
 			E();
 			break;
 			
 		default:
-			reportarError(new
-						  ErrorReturnIncorrecto(friendly(codTokActual),
-							  					AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorReturnIncorrecto( friendly(codTokActual) ));
 		}
 		
 	}
@@ -686,26 +652,24 @@ public class AnalizadorSintactico {
 		
 		switch( codTokActual ) {
 		
-		// Regla 50 [ A -> lambda ]
+		// Regla 49 [ A -> lambda ]
 		case Corresp.PAR_CE:		// Follow(A)
-			escribir(50);
+			escribir(49);
 			break;
 			
-		// Regla 51 [ A -> E Ra ]
+		// Regla 50 [ A -> E Ra ]
 		case Corresp.PAR_AB:		// First(E Ra)
 		case Corresp.ID:
 		case Corresp.ENTERO:
 		case Corresp.CADENA:
 		case Corresp.NEGACION:
-			escribir(51);
+			escribir(50);
 			E();
 			Ra();
 			break;
 			
 		default:
-			reportarError(new
-					  	  ErrorArgumentoNoValido(friendly(codTokActual),
-					  			  				 AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorArgumentoNoValido(friendly(codTokActual) ));
 		}
 	}
 	
@@ -714,23 +678,21 @@ public class AnalizadorSintactico {
 		
 		switch( codTokActual ) {
 		
-		// Regla 52 [ Ra -> lambda ]
+		// Regla 51 [ Ra -> lambda ]
 		case Corresp.PAR_CE:		// Follow(Ra)
-			escribir(52);
+			escribir(51);
 			break;
 			
-		// Regla 53 [ Ra -> , E Ra ]
+		// Regla 52 [ Ra -> , E Ra ]
 		case Corresp.COMA:			// First(, E Ra)
-			escribir(53);
+			escribir(52);
 			pedirToken();
 			E();
 			Ra();
 			break;
 			
 		default:
-			reportarError(new
-						  ErrorArgumentoNoValido(friendly(codTokActual),
-								  				 AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorArgumentoNoValido( friendly(codTokActual) ));
 		
 		}
 	}
@@ -740,20 +702,20 @@ public class AnalizadorSintactico {
 		
 		switch( codTokActual ) {
 		
-		// Regla 54 [ Bi -> S El ]
+		// Regla 53 [ Bi -> S El ]
 		case Corresp.ID:		// First(S El)
 		case Corresp.PRINT:
 		case Corresp.INPUT:
 		case Corresp.IF:
 		case Corresp.RETURN:
-			escribir(54);
+			escribir(53);
 			S();
 			El();
 			break;
 			
-		// Regla 55 [ Bi -> { Cie } El ]
+		// Regla 54 [ Bi -> { Cie } El ]
 		case Corresp.LLA_AB:	// First({ Cie } El]
-			escribir(55);
+			escribir(54);
 			pedirToken();
 			Cie();
 			comprobarToken(Corresp.LLA_CE);
@@ -761,10 +723,8 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			reportarError(new
-					  	  ErrorIfElseMalConstruido(friendly(codTokActual),
-					  			  				   AnalizadorLexico.lineaActual(),
-					  			  				   ErrorIfElseMalConstruido.IF ));
+			reportarError(new ErrorIfElseMalConstruido(friendly(codTokActual),
+					  			  				   	   ErrorIfElseMalConstruido.IF ));
 		
 		}
 		
@@ -775,26 +735,24 @@ public class AnalizadorSintactico {
 		
 		switch( codTokActual ) {
 		
-		// Regla 56 [ Cie -> lambda ]
+		// Regla 55 [ Cie -> lambda ]
 		case Corresp.LLA_CE:		// Follow(Cie)
-			escribir(56);
+			escribir(55);
 			break;
 			
-		// Regla 57 [ Cie -> S Cie ]
+		// Regla 56 [ Cie -> S Cie ]
 		case Corresp.ID:		// First(S Cie)
 		case Corresp.PRINT:
 		case Corresp.INPUT:
 		case Corresp.IF:
 		case Corresp.RETURN:
-			escribir(57);
+			escribir(56);
 			S();
 			Cie();
 			break;
 			
 		default:
-			reportarError(new
-					  	  ErrorCuerpoIfElseIncorrecto(friendly(codTokActual),
-					  			  				 	  AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorCuerpoIfElseIncorrecto( friendly(codTokActual) ));
 		
 		}
 		
@@ -805,7 +763,7 @@ public class AnalizadorSintactico {
 		
 		switch( codTokActual ) {
 		
-		// Regla 58 [ El -> lambda ]
+		// Regla 57 [ El -> lambda ]
 		case Corresp.VAR:		// Follow(El)
 		case Corresp.INT:
 		case Corresp.STRING:
@@ -817,20 +775,18 @@ public class AnalizadorSintactico {
 		case Corresp.RETURN:
 		case Corresp.LLA_CE:
 		case EOF:
-			escribir(58);
+			escribir(57);
 			break;
 		
-		// Regla 59 [ El -> else Be ]
+		// Regla 58 [ El -> else Be ]
 		case Corresp.ELSE:		// Fisrt(else Be)
-			escribir(59);
+			escribir(58);
 			pedirToken();
 			Be();
 			break;
 			
 		default:
-			reportarError(new
-						  ErrorIfMalTerminado(friendly(codTokActual),
-								  			  AnalizadorLexico.lineaActual() ));
+			reportarError(new ErrorIfMalTerminado( friendly(codTokActual) ));
 		
 		}
 	}
@@ -840,29 +796,27 @@ public class AnalizadorSintactico {
 		
 		switch( codTokActual ) {
 		
-		// Regla 60 [ Be -> S ]
+		// Regla 59 [ Be -> S ]
 		case Corresp.ID:		// First(S)
 		case Corresp.PRINT:
 		case Corresp.INPUT:
 		case Corresp.IF:
 		case Corresp.RETURN:
-			escribir(60);
+			escribir(59);
 			S();
 			break;
 			
-		// Regla 61 [ Be -> { Cie } ]
+		// Regla 60 [ Be -> { Cie } ]
 		case Corresp.LLA_AB:
-			escribir(61);
+			escribir(60);
 			pedirToken();
 			Cie();
 			comprobarToken(Corresp.LLA_CE);
 			break;
 			
 		default:
-			reportarError(new
-				  	  	  ErrorIfElseMalConstruido(friendly(codTokActual),
-				  	  			  				   AnalizadorLexico.lineaActual(),
-				  	  			  				   ErrorIfElseMalConstruido.IF ));
+			reportarError(new ErrorIfElseMalConstruido(friendly(codTokActual),
+				  	  			  				   	   ErrorIfElseMalConstruido.ELSE ));
 		
 		}
 		
@@ -875,10 +829,8 @@ public class AnalizadorSintactico {
 			pedirToken();
 		
 		else
-			reportarError(new
-						  ErrorTokenNoEsperado(friendly(codTokActual),
-								  			   AnalizadorLexico.lineaActual(),
-								  			   friendly(tokenEsperado) ));
+			reportarError(new ErrorTokenNoEsperado(friendly(codTokActual),
+								  			   	   friendly(tokenEsperado) ));
 	}	
 	
 	private static void escribir( int numeroRegla ) {
@@ -887,25 +839,38 @@ public class AnalizadorSintactico {
 	
 	private static void reportarError( Error e ) {
 		GestorErrores.reportar( e );
-		System.exit(1);
+		Control.terminarEjecucion();
 	}
 	
+	// Muestra el token correspondiente a codToken en la manera
+	// en la que el lexico lo leyo. Por ejemplo, el token PUNTO_COMA
+	// corresponde con ";" y ENTERO corresponde con el numero que se leyo
 	private static String friendly(int codToken) {
 		
 		switch( codToken ) {
 		
-		// Únicos casos donde importa el atributo
+		// Los únicos casos en los que importa el atributo son
+		// ENTERO,CADENA e ID. El resto, la clase Corresp tiene lo
+		// que buscamos de la forma que queremos
+		
 		case Corresp.ENTERO:
 		case Corresp.CADENA:
-			return tActual.atrib().toString();
-		case Corresp.ID:
-			return TablaS.get( (Integer) tActual.atrib() );
+			return atribTokActual.toString();
 			
+		// Siempre encontraremos el id en la TS
+		case Corresp.ID:
+			return TablaS.getSintactico( (Integer) atribTokActual );
+			
+		case EOF:
+			return "Fin del fichero";
 		default:
 			return Corresp.de(codToken);
 		
 		}
-		
+	}
+	
+	public static void terminarEjecucion() {
+		// Nothing to do
 	}
 
 }
