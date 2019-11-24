@@ -10,7 +10,7 @@ import control.Salida;
 
 public class TablaS {
 			
-	private static class Tabla {
+	private static class Tabla {	
 		
 		private int id;
 		
@@ -41,6 +41,11 @@ public class TablaS {
 			}
 			
 			return ( found ? res : null );
+		}
+		
+		// Si tenemos el id el acceso es inmediato
+		public FilaTS get(int codID) {
+			return tab.get(codID);
 		}
 		
 		public String toString() {
@@ -133,6 +138,18 @@ public class TablaS {
 			res = global.get(lex);
 				
 		return ( res != null ? res.getID() : null );
+	}
+	
+	// Igual se podría compactar más
+	public static String get(int codID) {
+		FilaTS res=null;
 		
+		if( local!=null )
+			res = local.get(codID);
+		
+		if( res == null )
+			res = global.get(codID);
+				
+		return ( res != null ? res.getLex() : null );
 	}
 }

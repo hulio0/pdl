@@ -229,7 +229,7 @@ public class MatrizTransicion {
 	// Dado un caracter devuelve el correspondiente indice de la matriz al que hace
 	// referencia. Ejemplo: dado '2' deberia de devolver DIGITO, que es el indice 3
 	public static int indiceMatriz(int ch) {
-		
+			
 		if( ch == -1 )
 			return EOF;
 		

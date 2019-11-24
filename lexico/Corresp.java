@@ -1,11 +1,13 @@
 package lexico;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 // Permite conocer la correspondencia entre el codigo
 // de token y el lexema asocicado al token
 public class Corresp {
+	
+	private static final int N = 26;
 	
 	public static final int BOOLEAN		= 1;
 	public static final int ELSE		= 2;
@@ -34,9 +36,7 @@ public class Corresp {
 	public static final int MENOR		= 25;
 	public static final int MAYOR		= 26;
 		
-	private static final Map<String,Integer> LEX_TO_COD = new
-			HashMap<String,Integer>();
-	
+	private static final BiMap<String,Integer> LEX_TO_COD = HashBiMap.create(N);
 	
 	public static void iniciar() {
 		LEX_TO_COD.put("boolean", BOOLEAN);		
@@ -65,8 +65,12 @@ public class Corresp {
 	}
 	
 	
-	public static Integer de( String lex ) {
+	public static Integer de(String lex) {
 		return LEX_TO_COD.get(lex);
+	}
+	
+	public static String de(Integer cod) {
+		return LEX_TO_COD.inverse().get(cod);
 	}
 	
 	public static String friendlyDe( int cod ) {
@@ -133,31 +137,24 @@ public class Corresp {
 	public static Integer getPalRes(String lex) {
 		Integer cod = Corresp.de( lex );
 		
+		// No es ni siquiera uno de nuestros "símbolos"
 		if( cod == null )
 			return null;
 		
+		// Es uno de nuestros "símbolos". Ahora toca filtrar
 		switch( cod ) {
 		
 		case BOOLEAN:
-			return BOOLEAN;
 		case ELSE:
-			return ELSE;
 		case FUNCTION:
-			return FUNCTION;
 		case IF:
-			return IF;
 		case INPUT:
-			return INPUT;
 		case INT:
-			return INT;
 		case PRINT:
-			return PRINT;
 		case RETURN:
-			return RETURN;
 		case STRING: 
-			return STRING;
 		case VAR:
-			return VAR;
+			return cod;
 		default:
 			return null;
 		}

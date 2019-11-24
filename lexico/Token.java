@@ -13,6 +13,11 @@ public class Token {
 		this.atributo=atributo;
 	}
 	
+	public Token(int id) {
+		this.id=id;
+		this.atributo="";
+	}
+	
 	public String toString() {
 		
 		switch( modo )

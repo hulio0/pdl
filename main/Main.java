@@ -15,7 +15,7 @@ public class Main {
 		if(args.length>0) {
 			nombreFicheroFuente = args[0];
 			
-			if(args.length>1 && args[1].equals("friendly"))
+			if(args.length>1 && args[1].equals("--friendly"))
 				Token.setMode(Token.Modo.FRIENDLY);
 		}
 		

@@ -38,7 +38,6 @@ public class AnalizadorLexico {
 		Corresp.iniciar();
 		MatrizTransicion.iniciar();
 		
-		// Empezamos: leemos el primer caracter del fichero
 		leer();
 	}
 	
@@ -59,11 +58,15 @@ public class AnalizadorLexico {
 		
 		try { chLeidoInt = ficheroFuente.read(); } 
 		catch(IOException e) { e.printStackTrace(); }
-		
+							
 		if( chLeidoInt != -1 ) {
 			chLeidoOK = (char) chLeidoInt;
 			
-			if( chLeidoOK == '\n' )
+			// Nos saltamos los retornos de carro
+			if( chLeidoOK == '\r' )
+				leer();
+			
+			else if( chLeidoOK == '\n' )
 				lineaActual++;
 		}
 		
@@ -72,20 +75,16 @@ public class AnalizadorLexico {
 	
 	private static void terminarEjecucion() {
 		
-		// Para que se escriba la tabla global
+		// Para que se escriba la tabla global (cambiar de aquí)
 		TablaS.cerrarAmbito();
 		
 		try { ficheroFuente.close(); }
 		catch(IOException e) { e.printStackTrace(); }
 		
-		// Esto implica que ha habido un error léxico
-		if( chLeidoInt != -1 )
-			System.exit(0);	
 	}
 	
 	
 	public static Token genToken(){
-		
 		Token res = null;
 		
 		// Variables auxiliares:
@@ -99,8 +98,7 @@ public class AnalizadorLexico {
 		Accion toDo = null;  			
 
 		// Los estados no terminales son 0,1,..,6
-		while( estadoActual <=6 ) {
-			
+		while( estadoActual <=6 ) {			
 			entrada = MatrizTransicion.getNextTrans(estadoActual,chLeidoInt);	
 			  estadoActual = entrada.estado();
 			  toDo = entrada.accion();
@@ -130,7 +128,7 @@ public class AnalizadorLexico {
 				
 				pos = Corresp.getPalRes(lex);
 				if( pos !=null ) {
-					res = new Token(pos,"");
+					res = new Token(pos);
 				}
 	
 				// Si no es una PR entonces es un ID
@@ -151,7 +149,7 @@ public class AnalizadorLexico {
 				if(num<=Math.pow(2, 16)-1)
 					res = new Token(Corresp.ENTERO,num);
 				else		
-					reportarError( new ErrorEnteroFueraDeRango(lineaActual));
+					reportarError( new ErrorEnteroFueraDeRango(String.valueOf(num),lineaActual));
 				
 				// Liberamos num
 				num = null;
@@ -166,67 +164,67 @@ public class AnalizadorLexico {
 				break;
 				
 			case GENERAR_MENOS:
-				res = new Token(Corresp.MENOS,"");
+				res = new Token(Corresp.MENOS);
 				break;
 				
 			case GENERAR_AUTO_DEC: 
 				leer();
-				res = new Token(Corresp.AUTO_DEC,"");
+				res = new Token(Corresp.AUTO_DEC);
 				break;
 				
 			case GENERAR_IGUAL:
 				leer();
-				res = new Token(Corresp.IGUAL,"");				
+				res = new Token(Corresp.IGUAL);				
 				break;
 				
 			case GENERAR_MAS:
 				leer();
-				res = new Token(Corresp.MAS,"");
+				res = new Token(Corresp.MAS);
 				break;
 				
 			case GENERAR_MAYOR:
 				leer();
-				res = new Token(Corresp.MAYOR,"");
+				res = new Token(Corresp.MAYOR);
 				break;
 				
 			case GENERAR_MENOR:
 				leer();
-				res = new Token(Corresp.MENOR,"");
+				res = new Token(Corresp.MENOR);
 				break;
 				
 			case GENERAR_NEGACION:
 				leer();
-				res = new Token(Corresp.NEGACION,"");
+				res = new Token(Corresp.NEGACION);
 				break;
 				
 			case GENERAR_COMA:
 				leer();		
-				res = new Token(Corresp.COMA,"");
+				res = new Token(Corresp.COMA);
 				break;
 				
 			case GENERAR_PUNTO_COMA:
 				leer();
-				res = new Token(Corresp.PUNTO_COMA,"");
+				res = new Token(Corresp.PUNTO_COMA);
 				break;
 				
 			case GENERAR_PAR_AB:
 				leer();
-				res = new Token(Corresp.PAR_AB,"");
+				res = new Token(Corresp.PAR_AB);
 				break;
 				
 			case GENERAR_PAR_CE:
 				leer();
-				res = new Token(Corresp.PAR_CE,"");
+				res = new Token(Corresp.PAR_CE);
 				break;
 				
 			case GENERAR_LLA_AB:
 				leer();
-				res = new Token(Corresp.LLA_AB,"");
+				res = new Token(Corresp.LLA_AB);
 				break;
 				
 			case GENERAR_LLA_CE:
 				leer();
-				res = new Token(Corresp.LLA_CE,"");
+				res = new Token(Corresp.LLA_CE);
 				break;
 				
 				
@@ -265,6 +263,11 @@ public class AnalizadorLexico {
 	private static void reportarError(Error e) {
 		GestorErrores.reportar( e );
 		terminarEjecucion();
+		System.exit(1);
+	}
+	
+	public static int lineaActual() {
+		return lineaActual;
 	}
 
 }

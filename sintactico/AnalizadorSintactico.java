@@ -3,6 +3,19 @@ package sintactico;
 import java.io.File;
 
 import control.Salida;
+import errores.Error;
+import errores.GestorErrores;
+import errores.err.sint.ErrorArgumentoNoValido;
+import errores.err.sint.ErrorCuerpoIfElseIncorrecto;
+import errores.err.sint.ErrorCuerpoProgramaIncorrecto;
+import errores.err.sint.ErrorExpresionMalFormada;
+import errores.err.sint.ErrorIfElseMalConstruido;
+import errores.err.sint.ErrorIfMalTerminado;
+import errores.err.sint.ErrorParametroNoValido;
+import errores.err.sint.ErrorReturnIncorrecto;
+import errores.err.sint.ErrorSentenciaMalConstruida;
+import errores.err.sint.ErrorTipoNoValido;
+import errores.err.sint.ErrorTokenNoEsperado;
 import lexico.AnalizadorLexico;
 import lexico.Corresp;
 import lexico.Token;
@@ -12,13 +25,9 @@ public class AnalizadorSintactico {
 	
 	private static Salida salidaSint;
 	
-	// Sólo nos interesa saber qué token es
+	private static Token tActual;
 	private static int codTokActual;
-	
-	// Permite conocer qué estructura estamos analizando
-	// actualmente (útil para dar mensajes de error más específicos)
-	private static Contexto contexto;
-	
+		
 	public static void iniciar(File ficheroSalidaSint) {
 		salidaSint = new Salida(ficheroSalidaSint);
 		  salidaSint.escribir("D ");
@@ -30,8 +39,8 @@ public class AnalizadorSintactico {
 	
 	private static final int EOF = -1;
 	private static void pedirToken() {
-		Token t = AnalizadorLexico.genToken();
-		codTokActual = ( t != null ? t.id() : EOF );
+		tActual = AnalizadorLexico.genToken();
+		codTokActual = ( tActual != null ? tActual.id() : EOF );
 	}
 	
 	
@@ -72,7 +81,11 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR P");
+			reportarError(new 
+					  	  ErrorCuerpoProgramaIncorrecto(friendly(codTokActual),
+					  			  				   		AnalizadorLexico.lineaActual() ));
+			
+			
 		}
 	}
 	
@@ -112,7 +125,9 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR T");
+			reportarError(new 
+					  ErrorTipoNoValido(friendly(codTokActual),
+										 	   AnalizadorLexico.lineaActual() ));
 		
 		}
 	}
@@ -158,7 +173,9 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR T2");
+			reportarError(new 
+						  ErrorTipoNoValido(friendly(codTokActual),
+											 	   AnalizadorLexico.lineaActual() ));
 		}
 		
 	}
@@ -186,7 +203,9 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR Pr");
+			reportarError(new 
+						  ErrorParametroNoValido(friendly(codTokActual),
+								  				 AnalizadorLexico.lineaActual() ));
 		}
 	}
 		
@@ -210,7 +229,9 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR Rp");
+			reportarError(new 
+					  ErrorParametroNoValido(friendly(codTokActual),
+							  				 AnalizadorLexico.lineaActual() ));
 		}
 	}
 	
@@ -244,7 +265,9 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR C");
+			reportarError(new
+						  ErrorParametroNoValido(friendly(codTokActual),
+								  				 AnalizadorLexico.lineaActual() ));
 		}
 		
 	}
@@ -280,7 +303,9 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR Eaux");
+			reportarError(new
+						  ErrorExpresionMalFormada(friendly(codTokActual),
+								  				   AnalizadorLexico.lineaActual() ));
 		}
 		
 		
@@ -320,7 +345,9 @@ public class AnalizadorSintactico {
 			
 			
 		default:
-			System.out.println("ERROR E2aux");
+			reportarError(new
+					  ErrorExpresionMalFormada(friendly(codTokActual),
+							  				   AnalizadorLexico.lineaActual() ));
 		}
 		
 		
@@ -359,7 +386,9 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR E3aux");
+			reportarError(new
+					  ErrorExpresionMalFormada(friendly(codTokActual),
+							  				   AnalizadorLexico.lineaActual() ));
 		}
 	}
 	
@@ -397,7 +426,9 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR E4aux");
+			reportarError(new
+					  ErrorExpresionMalFormada(friendly(codTokActual),
+							  				   AnalizadorLexico.lineaActual() ));
 		
 		}
 		
@@ -425,7 +456,9 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR E5");
+			reportarError(new
+					  ErrorExpresionMalFormada(friendly(codTokActual),
+							  				   AnalizadorLexico.lineaActual() ));
 		}
 		
 		
@@ -466,7 +499,9 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR X");
+			reportarError(new
+					  ErrorExpresionMalFormada(friendly(codTokActual),
+							  				   AnalizadorLexico.lineaActual() ));
 			
 		}	
 	}
@@ -503,7 +538,9 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR Xaux");
+			reportarError(new
+					  ErrorExpresionMalFormada(friendly(codTokActual),
+							  				   AnalizadorLexico.lineaActual() ));
 			
 		}
 		
@@ -562,7 +599,9 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR X");
+			reportarError(new
+					  	  ErrorSentenciaMalConstruida(friendly(codTokActual),
+					  			  					  AnalizadorLexico.lineaActual() ));
 		}
 		
 	}
@@ -606,7 +645,9 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR Saux");
+			reportarError(new
+					  ErrorSentenciaMalConstruida(friendly(codTokActual),
+							  					  AnalizadorLexico.lineaActual() ));
 			
 		}
 		
@@ -633,7 +674,9 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR Y");
+			reportarError(new
+						  ErrorReturnIncorrecto(friendly(codTokActual),
+							  					AnalizadorLexico.lineaActual() ));
 		}
 		
 	}
@@ -660,7 +703,9 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR A");	
+			reportarError(new
+					  	  ErrorArgumentoNoValido(friendly(codTokActual),
+					  			  				 AnalizadorLexico.lineaActual() ));
 		}
 	}
 	
@@ -683,7 +728,9 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR Ar");
+			reportarError(new
+						  ErrorArgumentoNoValido(friendly(codTokActual),
+								  				 AnalizadorLexico.lineaActual() ));
 		
 		}
 	}
@@ -714,7 +761,10 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR B");
+			reportarError(new
+					  	  ErrorIfElseMalConstruido(friendly(codTokActual),
+					  			  				   AnalizadorLexico.lineaActual(),
+					  			  				   ErrorIfElseMalConstruido.IF ));
 		
 		}
 		
@@ -742,7 +792,9 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR Cie");
+			reportarError(new
+					  	  ErrorCuerpoIfElseIncorrecto(friendly(codTokActual),
+					  			  				 	  AnalizadorLexico.lineaActual() ));
 		
 		}
 		
@@ -776,7 +828,9 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("ERROR El");
+			reportarError(new
+						  ErrorIfMalTerminado(friendly(codTokActual),
+								  			  AnalizadorLexico.lineaActual() ));
 		
 		}
 	}
@@ -805,13 +859,13 @@ public class AnalizadorSintactico {
 			break;
 			
 		default:
-			System.out.println("Error");
+			reportarError(new
+				  	  	  ErrorIfElseMalConstruido(friendly(codTokActual),
+				  	  			  				   AnalizadorLexico.lineaActual(),
+				  	  			  				   ErrorIfElseMalConstruido.IF ));
 		
 		}
 		
-	}
-	
-	private static void error( Error e ) {
 	}
 	
 	private static void comprobarToken( int tokenEsperado ) {
@@ -821,11 +875,37 @@ public class AnalizadorSintactico {
 			pedirToken();
 		
 		else
-			System.out.println("TO-DO, ERROR TOKEN NO ESPERADO");
+			reportarError(new
+						  ErrorTokenNoEsperado(friendly(codTokActual),
+								  			   AnalizadorLexico.lineaActual(),
+								  			   friendly(tokenEsperado) ));
 	}	
 	
 	private static void escribir( int numeroRegla ) {
 		salidaSint.escribir(numeroRegla + " ");
+	}
+	
+	private static void reportarError( Error e ) {
+		GestorErrores.reportar( e );
+		System.exit(1);
+	}
+	
+	private static String friendly(int codToken) {
+		
+		switch( codToken ) {
+		
+		// Únicos casos donde importa el atributo
+		case Corresp.ENTERO:
+		case Corresp.CADENA:
+			return tActual.atrib().toString();
+		case Corresp.ID:
+			return TablaS.get( (Integer) tActual.atrib() );
+			
+		default:
+			return Corresp.de(codToken);
+		
+		}
+		
 	}
 
 }
