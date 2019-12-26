@@ -15,12 +15,13 @@ public class Control {
 	public static void iniciar(File dirActual, File ficheroFuente){
 		
 		// Creamos los ficheros de salida: primero crearemos una carpeta
-		// para meterlos dentro. La carpeta se llamara SALIDA
-		dirActual = new File(dirActual,"SALIDA");
+		// para meterlos dentro. La carpeta se llamará igual que el fichero fuente		
+		dirActual = new File( dirActual , extraerNombre(ficheroFuente) );	
+		
 		
 		// Si la carpeta ya existe (por ejemplo, por una ejecucion anterior)
 		// habra que limpiar/eliminar todo su contenido. 
-		if( dirActual.exists() )
+		if( dirActual.exists() && dirActual.isDirectory() )
 			limpiar(dirActual);
 		
 		// Creamos la carpeta
@@ -31,13 +32,11 @@ public class Control {
 		File ficheroALexico 	= new File( dirActual , "Salida_Analizador_Lexico.txt");
 		File ficheroTS 			= new File( dirActual , "Salida_Tabla_Simbolos.txt");
 		File ficheroASintactico = new File( dirActual , "Salida_Analizador_Sintactico.txt");
-		File ficheroASemantico 	= new File( dirActual , "Salida_Analizador_Semantico.txt");
 		File ficheroErrores 	= new File( dirActual , "Salida_Gestor_Errores.txt");
 		try {
 			ficheroALexico.createNewFile();
 			ficheroTS.createNewFile();
 			ficheroASintactico.createNewFile();
-			ficheroASemantico.createNewFile();
 			ficheroErrores.createNewFile();
 		} catch(IOException e) { e.printStackTrace(); }
 		
@@ -46,7 +45,7 @@ public class Control {
 		TablaS.iniciar(ficheroTS);
 		AnalizadorLexico.iniciar(ficheroFuente, ficheroALexico);
 		AnalizadorSintactico.iniciar(ficheroASintactico);
-		AnalizadorSemantico.iniciar(ficheroASemantico);
+		//AnalizadorSemantico.iniciar(ficheroASemantico);	//TODO quitar paquete semantico e incluirlo en sintactico
 	}
 	
 	// Elimina todos los ficheros del directorio que le pasemos.
@@ -65,6 +64,20 @@ public class Control {
 		AnalizadorSintactico.terminarEjecucion();
 		AnalizadorSemantico.terminarEjecucion();
 		
-		System.exit( ( GestorErrores.huboError() ? 1 : 0 ) );
+		if( GestorErrores.huboError() ) {
+			System.out.println("Se han encontrado errores en el fichero fuente");
+			System.exit(1);
+		}
+		
+		else {
+			System.out.println("Todo OK");
+			System.exit(0);
+		}
+		
+	}
+	
+	private static String extraerNombre(File fichero) {
+		String nombreFich = fichero.getName();
+		return nombreFich.substring(0, nombreFich.lastIndexOf("."));
 	}
 }
