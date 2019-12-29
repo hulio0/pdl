@@ -2,7 +2,9 @@ package errores;
 
 import lexico.AnalizadorLexico;
 
-public class Error {
+// Clase padre de todo error. Implementa el formato
+// de mensaje de cada error
+public abstract class Error {
 	
 	public static enum Tipo { LEXICO, SINTACTICO, SEMANTICO }
 	
@@ -21,6 +23,7 @@ public class Error {
 		this.linea=AnalizadorLexico.lineaActual();
 	}
 	
+	@Override
 	public String toString() {
 		return "Error "+tipo+"-->(LINEA "+linea+"): " + msg;
 	}

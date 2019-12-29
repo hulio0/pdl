@@ -9,6 +9,5 @@ public class ErrorEnteroFueraDeRango extends Error{
 	public ErrorEnteroFueraDeRango(BigInteger num) {
 		super(Error.Tipo.LEXICO,
 			  "Numero ["+num+"] fuera de rango. El número máximo permitido es 32768");
-
 	}
 }

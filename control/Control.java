@@ -5,8 +5,7 @@ import java.io.IOException;
 
 import errores.GestorErrores;
 import lexico.AnalizadorLexico;
-import semantico.AnalizadorSemantico;
-import sintactico.AnalizadorSintactico;
+import sintsem.AnalizadorSintSem;
 import tablasim.TablaS;
 
 // Clase que crea los ficheros de salida y pone en marcha todos los modulos del programa
@@ -15,7 +14,7 @@ public class Control {
 	public static void iniciar(File dirActual, File ficheroFuente){
 		
 		// Creamos los ficheros de salida: primero crearemos una carpeta
-		// para meterlos dentro. La carpeta se llamará igual que el fichero fuente		
+		// para meterlos dentro. La carpeta se llamará igual que el fichero fuente	
 		dirActual = new File( dirActual , extraerNombre(ficheroFuente) );	
 		
 		
@@ -29,9 +28,9 @@ public class Control {
 			dirActual.mkdir();
 		
 		// Ahora si, creamos los ficheros de salida
-		File ficheroALexico 	= new File( dirActual , "Salida_Analizador_Lexico.txt");
-		File ficheroTS 			= new File( dirActual , "Salida_Tabla_Simbolos.txt");
-		File ficheroASintactico = new File( dirActual , "Salida_Analizador_Sintactico.txt");
+		File ficheroALexico 	= new File( dirActual , "Tokens.txt");
+		File ficheroTS 			= new File( dirActual , "Tabla_Simbolos.txt");
+		File ficheroASintactico = new File( dirActual , "Parse.txt");
 		File ficheroErrores 	= new File( dirActual , "Salida_Gestor_Errores.txt");
 		try {
 			ficheroALexico.createNewFile();
@@ -44,8 +43,33 @@ public class Control {
 		GestorErrores.iniciar(ficheroErrores);
 		TablaS.iniciar(ficheroTS);
 		AnalizadorLexico.iniciar(ficheroFuente, ficheroALexico);
-		AnalizadorSintactico.iniciar(ficheroASintactico);
-		//AnalizadorSemantico.iniciar(ficheroASemantico);	//TODO quitar paquete semantico e incluirlo en sintactico
+		AnalizadorSintSem.iniciar(ficheroASintactico);
+	}
+	
+	// Llama a terminar ejecución de cada módulo y acaba el programa
+	public static void terminarEjecucion() {
+		GestorErrores.terminarEjecucion();
+		TablaS.terminarEjecucion();
+		AnalizadorLexico.terminarEjecucion();
+		AnalizadorSintSem.terminarEjecucion();
+		
+		if( GestorErrores.huboError() ) {
+			System.out.println("Se han encontrado errores en el fichero fuente");
+			System.exit(1);
+		}
+		
+		else {
+			System.out.println("Programa aceptado");
+			System.exit(0);
+		}
+		
+	}
+	
+	// Le quita la extensión al nombre del fichero
+	// (Por ejemplo, Prueba.js -> Prueba)
+	private static String extraerNombre(File fichero) {
+		String nombreFich = fichero.getName();
+		return nombreFich.substring(0, nombreFich.lastIndexOf("."));
 	}
 	
 	// Elimina todos los ficheros del directorio que le pasemos.
@@ -54,30 +78,5 @@ public class Control {
 	private static void limpiar(File carpeta) {
 		for( File f : carpeta.listFiles() )
 			f.delete();
-	}
-	
-	// Llama a terminar ejecución de cada módulo y acaba el programa
-	public static void terminarEjecucion() {
-		GestorErrores.terminarEjecucion();
-		TablaS.terminarEjecucion();
-		AnalizadorLexico.terminarEjecucion();
-		AnalizadorSintactico.terminarEjecucion();
-		AnalizadorSemantico.terminarEjecucion();
-		
-		if( GestorErrores.huboError() ) {
-			System.out.println("Se han encontrado errores en el fichero fuente");
-			System.exit(1);
-		}
-		
-		else {
-			System.out.println("Todo OK");
-			System.exit(0);
-		}
-		
-	}
-	
-	private static String extraerNombre(File fichero) {
-		String nombreFich = fichero.getName();
-		return nombreFich.substring(0, nombreFich.lastIndexOf("."));
 	}
 }

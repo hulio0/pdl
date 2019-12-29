@@ -4,8 +4,7 @@ public class Token {
 	
 	public static enum Modo { NORMAL, FRIENDLY };
 	
-	// Por defecto, mostramos los códigos numéricos
-	// de los tokens
+	// Por defecto, mostramos los códigos numéricos de los tokens
 	private static Modo modo = Modo.NORMAL;
 	
 	private int id;
@@ -21,6 +20,7 @@ public class Token {
 		this.atributo="";
 	}
 	
+	@Override
 	public String toString() {
 		
 		switch( modo )

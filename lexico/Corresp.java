@@ -74,14 +74,14 @@ public class Corresp {
 		return LEX_TO_COD.inverse().get(cod);
 	}
 	
-	public static String friendlyDe( int cod ) {
+	public static String friendlyDe(Integer cod) {
 		switch(cod) {
 		case BOOLEAN:
-			return "BOOL";
+			return "BOOLEAN";
 		case ELSE:
 			return "ELSE";
 		case FUNCTION:
-			return "FUNC";
+			return "FUNCTION";
 		case IF:
 			return "IF";
 		case INPUT:
@@ -91,17 +91,17 @@ public class Corresp {
 		case PRINT:
 			return "PRINT";
 		case RETURN:
-			return "RET";
+			return "RETURN";
 		case STRING:
-			return "STR";
+			return "STRING";
 		case VAR:
 			return "VAR";
 		case AUTO_DEC:
 			return "AUT_DEC";
 		case ENTERO:
-			return "ENT";
+			return "ENTERO";
 		case CADENA:
-			return "CAD";
+			return "CADENA";
 		case ID:
 			return "ID";
 		case IGUAL:
@@ -109,7 +109,7 @@ public class Corresp {
 		case COMA:
 			return "COMA";
 		case PUNTO_COMA:
-			return "PUNT_COM";
+			return "PUNTO_COMA";
 		case PAR_AB:
 			return "PAR_AB";
 		case PAR_CE:
@@ -123,7 +123,7 @@ public class Corresp {
 		case MENOS:
 			return "MENOS";
 		case NEGACION:
-			return "NEGAC";
+			return "NEGACION";
 		case MENOR:
 			return "MENOR";
 		case MAYOR:
@@ -134,9 +134,9 @@ public class Corresp {
 	}
 	
 	// Metodo usado por el lexico para preguntar si un determinado lex.
-	// es una palabra reservada. Si lo es, devuelve su código de token y
-	// en caso contrario devuelve null
-	public static Integer getPalRes(String lex) {
+	// es una palabra reservada. Si lo es, devuelve su código de token, y
+	// en caso contrario, devuelve null
+	public static Integer esPalReservada(String lex) {
 		Integer cod = Corresp.de( lex );
 		
 		// No es ni siquiera un token

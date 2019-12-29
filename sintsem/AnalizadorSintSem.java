@@ -1,4 +1,4 @@
-package sintactico;
+package sintsem;
 
 import java.io.File;
 
@@ -22,21 +22,21 @@ import errores.err.sint.ErrorTokenNoEsperado;
 import lexico.AnalizadorLexico;
 import lexico.Corresp;
 import lexico.Token;
+import sintsem.tipo.Tipo;
+import sintsem.tipo.Tupla;
 import tablasim.TablaS;
 
-public class AnalizadorSintactico {
+public class AnalizadorSintSem {
 
+	// El semántico no tiene salida
 	private static Salida salidaSint;
 
-	// Para la mayor parte del trabajo del sintáctico,
-	// nos basta con el código de token (el atributo solo
-	// es necesario a veces cuando hay errores)
 	private static int codTokActual;
 	private static Object atribTokActual;
 
 	public static void iniciar(File ficheroSalidaSint) {
 		salidaSint = new Salida(ficheroSalidaSint);
-		  salidaSint.escribir("D ");
+		salidaSint.escribir("D ");
 
 		pedirToken();
 
@@ -54,7 +54,10 @@ public class AnalizadorSintactico {
 
 		else {
 			codTokActual = EOF;
-			atribTokActual = null; // Esto no es necesario
+			
+			// eof no es un token en sí. Dejamos a null su "atributo"
+			// pero podríamos ignorarlo ya que no afecta en nada
+			atribTokActual = null;
 		}
 	}
 
@@ -97,7 +100,7 @@ public class AnalizadorSintactico {
 			break;
 
 		default:
-			reportarError(new ErrorCuerpoProgramaIncorrecto( friendly(codTokActual) ));
+			reportarError(new ErrorCuerpoProgramaIncorrecto( lexema(codTokActual) ));
 
 		}
 	}
@@ -107,39 +110,47 @@ public class AnalizadorSintactico {
 
 		// Regla 5 [ D -> var T id ; ], única regla
 		escribir(5);
+		
 		comprobarToken( Corresp.VAR );
-		T();
-		comprobarToken( Corresp.ID );
+		
+		zonaDeclaracion = true;
+		
+		Tipo tipoT = T();
+		Integer posTS = comprobarToken(Corresp.ID);
 		comprobarToken(Corresp.PUNTO_COMA);
-
+		
+		TablaS.agregarTipoDesp(posTS, tipoT);
+		zonaDeclaracion = false;
 	}
 
-	// Tipo
-	private static void T() {
-
+	// Tipo (devuelve el tipo de T, valga la redundancia)
+	private static Tipo T() {
 		switch( codTokActual ) {
 
 		// Regla 6 [ T -> int ]
 		case Corresp.INT:
 			escribir(6);
 			pedirToken();
-			break;
+			
+			return Tipo.Entero;
 
 		// Regla 7 [ T -> string ]
 		case Corresp.STRING:
 			escribir(7);
 			pedirToken();
-			break;
+			
+			return Tipo.Cadena;
 
 		// Regla 8 [ T -> boolean ]
 		case Corresp.BOOLEAN:
 			escribir(8);
 			pedirToken();
-			break;
+			
+			return Tipo.Logico;
 
 		default:
-			reportarError(new ErrorTipoNoValido( friendly(codTokActual) ));
-
+			reportarError(new ErrorTipoNoValido( lexema(codTokActual) ));
+			return null;
 		}
 	}
 
@@ -148,57 +159,69 @@ public class AnalizadorSintactico {
 
 		// Regla 9 [ F -> function T2 id ( Pr ) { C } ], única regla
 		escribir(9);
+		
 		comprobarToken(Corresp.FUNCTION);
-		T2();
-		comprobarToken(Corresp.ID);
+		Tipo tipoT2 = T2();
+		Integer posTS = comprobarToken(Corresp.ID);
+		
+		zonaDeclaracion = true;
+		
 		comprobarToken(Corresp.PAR_AB);
-
-		TablaS.abrirAmbito();
-
-		Pr();
+		Tupla tuplaTiposPr = Pr();
 		comprobarToken(Corresp.PAR_CE);
 		comprobarToken(Corresp.LLA_AB);
-		C();
+		
+		zonaDeclaracion = false;
+		TablaS.agregarTipoFuncion(posTS, tuplaTiposPr, tipoT2);
+		TablaS.abrirAmbito(tipoT2);
+		
+		boolean tieneReturnC = C(false);
 		comprobarToken(Corresp.LLA_CE);
 
+		if( !tieneReturnC && tipoT2 != Tipo.Vacio ) {
+			System.out.println("ERROR, Falta sentencia return");
+			System.exit(1);
+		}
 		TablaS.cerrarAmbito();
 	}
 
 
-	// Tipo + "void"
-	private static void T2() {
+	// Tipo + "void" (devuelve su tipo)
+	private static Tipo T2() {
 
 		switch( codTokActual ) {
 
 		// Regla 10 [ T2 -> lambda ]
 		case Corresp.ID:		// Follow(T2)
 			escribir(10);
-			break;
+			return Tipo.Vacio;
 
 		// Regla 11 [ T2 -> T ]
 		case Corresp.INT:		// First(T)
 		case Corresp.STRING:
 		case Corresp.BOOLEAN:
 			escribir(11);
-			T();
-			break;
+			Tipo tipoDeT = T();
+			return tipoDeT;
 
 		default:
-			reportarError(new ErrorTipoNoValido( friendly(codTokActual) ));
+			reportarError(new ErrorTipoNoValido( lexema(codTokActual) ));
+			return null;
 		}
 
 	}
 
 
-	// Parametro
-	private static void Pr() {
+	// Parametro (Devuelve su tupla de tipos)
+	private static Tupla Pr() {
 
 		switch( codTokActual ) {
 
 		// Regla 12 [ Pr -> lambda ]
 		case Corresp.PAR_CE:	// Follow(Pr)
 			escribir(12);
-			break;
+			
+			return Tupla.vacia();
 
 
 		// Regla 13 [ Pr -> T id Rp ]
@@ -206,44 +229,62 @@ public class AnalizadorSintactico {
 		case Corresp.STRING:
 		case Corresp.BOOLEAN:
 			escribir(13);
-			T();
-			comprobarToken(Corresp.ID);
-			Rp();
-			break;
+			
+			Tipo tipoT = T();
+			Integer posTS = comprobarToken(Corresp.ID);
+			
+			TablaS.agregarTipoDesp(posTS, tipoT);
+			
+			Tupla tuplaRp = Rp();
+			
+			if( tuplaRp.estaVacia() )
+				return new Tupla(tipoT);
+			else
+				return new Tupla(tipoT,tuplaRp);
 
 		default:
-			reportarError(new ErrorParametroNoValido( friendly(codTokActual) ));
+			reportarError(new ErrorParametroNoValido( lexema(codTokActual) ));
+			return null;
 		}
 	}
 
 	// Resto Parametros
-	private static void Rp() {
+	private static Tupla Rp() {
 
 		switch( codTokActual ) {
 
 		// Regla 14 [ Rp -> lambda ]
 		case Corresp.PAR_CE:	// Follow(Rp)
 			escribir(14);
-			break;
+			
+			return Tupla.vacia();
 
 		// Regla 15 [ Rp -> , T id Rp ]
 		case Corresp.COMA:		// First(, T id Rp)
 			escribir(15);
+			
 			pedirToken();
-			T();
-			comprobarToken(Corresp.ID);
-			Rp();
-			break;
+			Tipo tipoT = T();
+			Integer posTS = comprobarToken(Corresp.ID);
+			
+			TablaS.agregarTipoDesp(posTS, tipoT);
+			
+			Tupla tuplaRp = Rp();
+			
+			if( tuplaRp.estaVacia() )
+				return Tupla.vacia();
+			else
+				return new Tupla(tipoT, tuplaRp);
 
 		default:
-			reportarError(new ErrorParametroNoValido( friendly(codTokActual) ));
+			reportarError(new ErrorParametroNoValido( lexema(codTokActual) ));
+			return null;
 		}
 	}
 
 
-	// Cuerpo-funcion
-	private static void C() {
-
+	// Cuerpo-funcion (devuelve si tiene return)
+	private static boolean C(boolean returnEncontrado) {
 		switch( codTokActual ) {
 
 		// Regla 16 [ C -> lambda ]
@@ -254,9 +295,14 @@ public class AnalizadorSintactico {
 		// Regla 17 [ C -> DC ]
 		case Corresp.VAR:		// First(DC)
 			escribir(17);
+			
+			if(returnEncontrado) {
+				System.out.println("TODO, Error Código inalcanzable");
+				System.exit(1);
+			}
+			
 			D();
-			C();
-			break;
+			return C(false);	
 
 		// Regla 18 [ C -> SC ]
 		case Corresp.ID:		// First(SC)
@@ -265,14 +311,20 @@ public class AnalizadorSintactico {
 		case Corresp.IF:
 		case Corresp.RETURN:
 			escribir(18);
-			S();
-			C();
-			break;
+			
+			if(returnEncontrado) {
+				System.out.println("TODO, Error Código inalcanzable");
+				System.exit(1);
+			}
+			
+			boolean esReturnS = S();
+			return C(esReturnS);
 
 		default:
-			reportarError(new ErrorCuerpoFuncionIncorrecto( friendly(codTokActual) ));
+			reportarError(new ErrorCuerpoFuncionIncorrecto( lexema(codTokActual) ));
 		}
-
+		
+		return returnEncontrado;
 	}
 
 	// Expresion (>,<)
@@ -297,24 +349,22 @@ public class AnalizadorSintactico {
 			escribir(20);
 			break;
 
-		// Regla 21 [ Eaux -> > E2 Eaux ]
-		case Corresp.MAYOR:			// Fist(> E2 Eaux)
+		// Regla 21 [ Eaux -> > E2 ]
+		case Corresp.MAYOR:			// Fist(> E2 )
 			escribir(21);
 			pedirToken();
 			E2();
-			Eaux();
 			break;
 
-		// Regla 22 [ Eaux -> < E2 Eaux [
+		// Regla 22 [ Eaux -> < E2 ]
 		case Corresp.MENOR:
 			escribir(22);
 			pedirToken();
 			E2();
-			Eaux();
 			break;
 
 		default:
-			reportarError(new ErrorExpresionMalFormada( friendly(codTokActual) ));
+			reportarError(new ErrorExpresionMalFormada( lexema(codTokActual) ));
 		}
 
 
@@ -364,7 +414,7 @@ public class AnalizadorSintactico {
 
 
 		default:
-			reportarError(new ErrorExpresionMalFormada( friendly(codTokActual) ));
+			reportarError(new ErrorExpresionMalFormada( lexema(codTokActual) ));
 		}
 	}
 
@@ -390,7 +440,7 @@ public class AnalizadorSintactico {
 			break;
 
 		default:
-			reportarError(new ErrorExpresionMalFormada(friendly(codTokActual) ));
+			reportarError(new ErrorExpresionMalFormada(lexema(codTokActual) ));
 		}
 
 	}
@@ -428,7 +478,7 @@ public class AnalizadorSintactico {
 			break;
 
 		default:
-			reportarError(new ErrorExpresionMalFormada(friendly(codTokActual) ));
+			reportarError(new ErrorExpresionMalFormada(lexema(codTokActual) ));
 
 		}
 	}
@@ -465,14 +515,14 @@ public class AnalizadorSintactico {
 			break;
 
 		default:
-			reportarError(new ErrorExpresionMalFormada(friendly(codTokActual) ));
+			reportarError(new ErrorExpresionMalFormada(lexema(codTokActual) ));
 
 		}
 
 	}
 
 	// Sentencia
-	private static void S() {
+	private static boolean S() {
 
 		switch( codTokActual ) {
 
@@ -524,7 +574,7 @@ public class AnalizadorSintactico {
 			break;
 
 		default:
-			reportarError(new ErrorSentenciaMalConstruida( friendly(codTokActual) ));
+			reportarError(new ErrorSentenciaMalConstruida( lexema(codTokActual) ));
 		}
 
 	}
@@ -553,7 +603,7 @@ public class AnalizadorSintactico {
 			break;
 
 		default:
-			reportarError(new ErrorAsignacionOLlamadaMalConstruida( friendly(codTokActual) ));
+			reportarError(new ErrorAsignacionOLlamadaMalConstruida( lexema(codTokActual) ));
 
 		}
 
@@ -580,7 +630,7 @@ public class AnalizadorSintactico {
 			break;
 
 		default:
-			reportarError(new ErrorReturnIncorrecto( friendly(codTokActual) ));
+			reportarError(new ErrorReturnIncorrecto( lexema(codTokActual) ));
 		}
 
 	}
@@ -607,7 +657,7 @@ public class AnalizadorSintactico {
 			break;
 
 		default:
-			reportarError(new ErrorArgumentoNoValido(friendly(codTokActual) ));
+			reportarError(new ErrorArgumentoNoValido(lexema(codTokActual) ));
 		}
 	}
 
@@ -630,7 +680,7 @@ public class AnalizadorSintactico {
 			break;
 
 		default:
-			reportarError(new ErrorArgumentoNoValido( friendly(codTokActual) ));
+			reportarError(new ErrorArgumentoNoValido( lexema(codTokActual) ));
 
 		}
 	}
@@ -661,7 +711,7 @@ public class AnalizadorSintactico {
 			break;
 
 		default:
-			reportarError(new ErrorIfElseMalConstruido(friendly(codTokActual),
+			reportarError(new ErrorIfElseMalConstruido(lexema(codTokActual),
 					  			  				   	   ErrorIfElseMalConstruido.IF ));
 
 		}
@@ -690,7 +740,7 @@ public class AnalizadorSintactico {
 			break;
 
 		default:
-			reportarError(new ErrorCuerpoIfElseIncorrecto( friendly(codTokActual) ));
+			reportarError(new ErrorCuerpoIfElseIncorrecto( lexema(codTokActual) ));
 
 		}
 
@@ -724,7 +774,7 @@ public class AnalizadorSintactico {
 			break;
 
 		default:
-			reportarError(new ErrorIfMalTerminado( friendly(codTokActual) ));
+			reportarError(new ErrorIfMalTerminado( lexema(codTokActual) ));
 
 		}
 	}
@@ -753,25 +803,35 @@ public class AnalizadorSintactico {
 			break;
 
 		default:
-			reportarError(new ErrorIfElseMalConstruido(friendly(codTokActual),
+			reportarError(new ErrorIfElseMalConstruido(lexema(codTokActual),
 				  	  			  				   	   ErrorIfElseMalConstruido.ELSE ));
 
 		}
 
 	}
 
-	private static void comprobarToken( int tokenEsperado ) {
+	
+	// Devuelve la posTS si el token esperado es un ID y
+	// la comprobación ha salido correctamente. En el resto de
+	// casos devuelve null
+	private static Integer comprobarToken(int tokenEsperado) {
 
 		// Ok, pedimos otro token y seguimos
-		if( codTokActual == tokenEsperado ) {
+		if(codTokActual == tokenEsperado) {
 			pedirToken();
-		} else {
-			reportarError(new ErrorTokenNoEsperado(friendly(codTokActual),
-								  			   	   friendly(tokenEsperado) ));
-		}
+			
+			if( codTokActual == Corresp.ID )
+				return (Integer) atribTokActual;
+			
+		} 
+		else
+			reportarError(new ErrorTokenNoEsperado(lexema(codTokActual),
+								  			   	   lexema(tokenEsperado)) );
+		
+		return null;
 	}
 
-	private static void escribir( int numeroRegla ) {
+	private static void escribir(int numeroRegla) {
 		salidaSint.escribir(numeroRegla + " ");
 	}
 
@@ -780,16 +840,16 @@ public class AnalizadorSintactico {
 		Control.terminarEjecucion();
 	}
 
-	// Muestra el token correspondiente a codToken en la manera
-	// en la que el lexico lo leyo. Por ejemplo, el token PUNTO_COMA
-	// corresponde con ";" y ENTERO corresponde con el numero que se leyo
-	private static String friendly(int codToken) {
+	// Devuelve el lexema correspondiente al código de token que le pasamos.
+	// Por ejemplo, con PUNTO_COMA devolveria ";" , con ENTERO devolveria el
+	// numero que leyo el lexico, etc.
+	private static String lexema(int codToken) {
 
 		switch( codToken ) {
 
 		// Los únicos casos en los que importa el atributo son
-		// ENTERO,CADENA e ID. El resto, la clase Corresp tiene lo
-		// que buscamos de la forma que queremos
+		// ENTERO,CADENA e ID. El resto, la clase Corresp nos
+		// da ya el lexema correspondiente
 
 		case Corresp.ENTERO:
 		case Corresp.CADENA:
@@ -797,7 +857,7 @@ public class AnalizadorSintactico {
 
 		// Siempre encontraremos el id en la TS
 		case Corresp.ID:
-			return TablaS.getSintactico( (Integer) atribTokActual );
+			return TablaS.getLexemaSintactico( (Integer) atribTokActual );
 
 		case EOF:
 			return "Fin del fichero";
@@ -808,7 +868,15 @@ public class AnalizadorSintactico {
 	}
 
 	public static void terminarEjecucion() {
-		// Nothing to do
+		// A priori no hay nada que cerrar/salvar.
+		// Ponemos el método por consistencia (todas las clases
+		// principales de cada módulo lo tienen así que...)
+	}
+	
+	//-----------------------Vainas del semántico--------------------------------
+	private static boolean zonaDeclaracion = false;
+	public static boolean estoyEnDeclaracion() {
+		return zonaDeclaracion;
 	}
 
 }

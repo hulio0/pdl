@@ -55,7 +55,7 @@ public class AnalizadorLexico {
 	private static char chLeidoChar;
 
 	// Llevamos una cuenta de las lineas para que el gestor
-	// de errores de mejores descripciones
+	// de errores pueda dar mejores descripciones
 	private static int lineaActual = 1;
 
 	private static void leer() {
@@ -89,8 +89,8 @@ public class AnalizadorLexico {
 		// Los estados no terminales son 0,1,..,6
 		while( estadoActual <=6 ) {
 			entrada = MatrizTransicion.getNextTrans(estadoActual,chLeidoInt);
-			  estadoActual = entrada.estado();
-			  toDo = entrada.accion();
+			estadoActual = entrada.estado();
+			toDo = entrada.accion();
 
 			switch( toDo ){
 
@@ -118,18 +118,19 @@ public class AnalizadorLexico {
 
 				// Si es una PR, pos almacenará
 				// el codigo de token correspondiente
-				pos = Corresp.getPalRes(lex);
-				if( pos !=null ) {
+				pos = Corresp.esPalReservada(lex);
+				if( pos != null )
 					res = new Token(pos);
-				}
-
+				
+				// TODO error variable ya declarada
+				
 				// Si no es una PR entonces es un ID, pos
 				// almacenará la posición en la TS de dicho id
 				else{
-					pos = TablaS.getLexico(lex);
+					pos = TablaS.getPosTSLexico(lex);
 
 					if( pos == null ) {
-						pos = TablaS.insert(lex);
+						pos = TablaS.insertar(lex);
 					}
 
 					res = new Token(Corresp.ID,pos);
@@ -139,18 +140,16 @@ public class AnalizadorLexico {
 				break;
 
 			case GENERAR_ENTERO:
-				if(num.compareTo(MAX_ENTERO)<=0) {
+				if(num.compareTo(MAX_ENTERO_PERMITIDO)<=0)
 					res = new Token(Corresp.ENTERO,num);
-				} else {
+				else
 					reportarError(new ErrorEnteroFueraDeRango(num));
-				}
 
 				// Liberamos num
 				num = null;
 				break;
 
 			case GENERAR_CADENA:
-
 				if( lex.length() <=64 ) {
 					leer();
 					res = new Token(Corresp.CADENA,"\""+lex+"\"");
@@ -225,7 +224,6 @@ public class AnalizadorLexico {
 				res = new Token(Corresp.LLA_CE);
 				break;
 
-
 			case ERR_CARACTER_NO_PERMITIDO:
 				reportarError(new ErrorCharNoPer(chLeidoChar));
 				break;
@@ -253,15 +251,14 @@ public class AnalizadorLexico {
 
 		// Antes de devolver el token lo escribimos
 		// en la salida (si no es eof)
-		if( res!=null ) {
+		if( res!=null )
 			salidaLex.escribir( res.toString() + "\n" );
-		}
 
 		return res;
 	}
 
 
-	private static final BigInteger MAX_ENTERO = new BigInteger(32768+""); // 2^15
+	private static final BigInteger MAX_ENTERO_PERMITIDO = new BigInteger(32768+""); // 2^15
 	private static BigInteger valor(char c) { return new BigInteger(c+""); }
 
 	private static void reportarError(Error e) {

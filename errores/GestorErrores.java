@@ -6,7 +6,8 @@ import control.Salida;
 
 // Es el que recibe los errores de los diferentes modulos.
 // Basicamente se encarga de escribir las descripciones de
-// los errores en el fichero de errores
+// los errores en el fichero de errores. Tambien permite
+// consultar si se ha producido un error o no.
 public class GestorErrores {
 	
 	private static Salida salidaGestErr;
