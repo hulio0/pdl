@@ -8,8 +8,8 @@ public class ErrorCuerpoIfElseIncorrecto extends Error{
 		super(Error.Tipo.SINTACTICO,
 			  "No esperado [ "+recibido+" ]. Cuerpo de expresión "
 			 +"condicional (if/else) NO válido. Dentro de las llaves "
-			 +"sólo se permiten sentencias o bien nada (aunque hacer esto "
-			 +"último no tiene mucho sentido)");
+			 +"sólo se permiten sentencias (no declaraciones) o bien "
+			 +"nada (aunque hacer esto último no tiene mucho sentido).");
 		
 	}
 	

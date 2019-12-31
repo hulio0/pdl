@@ -19,10 +19,17 @@ public abstract class Error {
 		
 		// Los errores nada mas encontrarse se reportan. Luego,
 		// cuando llegamos a aquí, el lexico marca la linea en la
-		// se encontro
+		// se encontro (esto no siempre es válido para algunos errores
+		// semánticos. Por ello se proporciona el otro constructor)
 		this.linea=AnalizadorLexico.lineaActual();
 	}
 	
+	public Error(int lineaSemantico, String msg) {
+		this.tipo=Tipo.SEMANTICO;
+		this.msg=msg;
+		this.linea=lineaSemantico;
+	}
+
 	@Override
 	public String toString() {
 		return "Error "+tipo+"-->(LINEA "+linea+"):\n\n " + msg;

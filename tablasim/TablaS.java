@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import control.Salida;
+import sintsem.AnalizadorSintSem;
 import sintsem.tipo.Tipo;
 
 
@@ -162,9 +163,16 @@ public class TablaS {
 	
 	
 	// Usado por el léxico, solo busca en la TS actual
+	// salvo que estemos en un ambito local, no lo hayamos
+	// encontrado en la tabla local y NO estemos declarando
 	public static Integer getPosTSLexico(String lex) {
 		FilaTS res = null;
-		res = actual.getByLex(lex);
+		res = actual.getByLex(lex);	
+		
+		// Solo 
+		if(res==null && estoyEnFuncion() && !AnalizadorSintSem.estoyEnDeclaracion())
+			res = global.getByLex(lex);
+		
 		return ( res != null ? res.getID() : null );
 	}
 	
@@ -206,20 +214,7 @@ public class TablaS {
 		
 		return res.getTipo();	
  	}
-	
-//	public static Tupla getParam(Integer posTS) {
-//		FilaTS res = null;
-//		res = getByPS(posTS);
-//		return ( res != null ? res.getParams() : null );
-//	}
-//	
-//	public static Tipo getTipoRetorno(Integer posTS) {
-//		FilaTS res = null;
-//		res = getByPS(posTS);
-//		return ( res != null ? res.getTipoRetorno() : null );
-//	}
-	
-	
+
 	public static void agregarTipoDesp(Integer posTS,Tipo t) {	
 		actual.agregarTipoDesp(posTS,t);
 	}

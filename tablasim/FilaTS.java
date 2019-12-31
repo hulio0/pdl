@@ -1,5 +1,6 @@
 package tablasim;
 
+import errores.GestorErrores;
 import sintsem.tipo.Tipo;
 import sintsem.tipo.Tipo.Funcion;
 import sintsem.tipo.Tupla;
@@ -26,8 +27,13 @@ public class FilaTS {
 	@Override
 	public String toString() {
 		String res = "*'"+lex+"'\n"
-					+"\t+id:"+id+"\n"
-					+"\t+Tipo:'"+tipo+"'\n";
+					+"\t+id:"+id+"\n";
+					
+		
+		if(GestorErrores.huboError())
+			return res;
+		
+		res+="\t+Tipo:'"+tipo+"'\n";
 		
 		if( !tipo.esFuncion() ) {
 			res+="\t+Despl:"+desplazamiento+"\n";	

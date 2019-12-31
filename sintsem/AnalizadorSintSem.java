@@ -8,7 +8,14 @@ import errores.Error;
 import errores.GestorErrores;
 import errores.err.sem.ErrorCodigoInalcanzable;
 import errores.err.sem.ErrorFaltaSentenciaReturn;
+import errores.err.sem.ErrorIfNoValido;
+import errores.err.sem.ErrorInputNoValido;
 import errores.err.sem.ErrorNoEsUnaFuncion;
+import errores.err.sem.ErrorPosDecrementoNoValido;
+import errores.err.sem.ErrorPrintNoValido;
+import errores.err.sem.ErrorReturnFueraSitio;
+import errores.err.sem.ErrorTipoAsignacionIncompatible;
+import errores.err.sem.ErrorTipoReturnIncompatibleFuncion;
 import errores.err.sem.ErrorTiposArgumentosNoValidos;
 import errores.err.sem.ErrorTiposExpresionMayorMenor;
 import errores.err.sem.ErrorTiposExpresionNegacion;
@@ -73,7 +80,13 @@ public class AnalizadorSintSem {
 		// Buscamos el lex. en la TS, siempre 
 		// encontraremos la entrada correspondiente
 		case Corresp.ID:
-			return TablaS.getLexema( (Integer) atribTokActual );
+			if( codTokActual == Corresp.ID )
+				return TablaS.getLexema( (Integer) atribTokActual );
+			
+			// Caso en el que esperábamos un
+			// identificador y no nos lo han mandado
+			else
+				return "ID";
 
 		case EOF:
 			return "Fin de fichero";
@@ -200,6 +213,8 @@ public class AnalizadorSintSem {
 		Tipo tipoRetorno = T2();
 		Integer posTS = (Integer) comprobarToken(Corresp.ID);
 		
+		int linea = guardarLinea();
+		
 		zonaDeclaracion = true;		// Regla semántica
 		TablaS.abrirAmbito(tipoRetorno);
 		
@@ -218,7 +233,7 @@ public class AnalizadorSintSem {
 		comprobarToken(Corresp.LLA_CE);
 
 		if( !tieneReturnCuerpo && !tipoRetorno.esVacio() )  // Regla semántica
-			reportarError( new ErrorFaltaSentenciaReturn() );
+			reportarError( new ErrorFaltaSentenciaReturn(linea) );
 		
 	}
 
@@ -263,7 +278,7 @@ public class AnalizadorSintSem {
 		case Corresp.STRING:
 		case Corresp.BOOLEAN:
 			escribir(13);
-			
+					
 			Tipo tipoPrimerParam = T();
 			Integer posTS = (Integer) comprobarToken(Corresp.ID);
 			
@@ -277,7 +292,7 @@ public class AnalizadorSintSem {
 				return new Tupla(tipoPrimerParam,tiposRestoParam);
 
 		default:
-			reportarError(new ErrorParametroNoValido( lexema(codTokActual) ));
+			reportarError(new ErrorParametroNoValido(lexema(codTokActual) ));
 			return null;
 		}
 	}
@@ -295,7 +310,7 @@ public class AnalizadorSintSem {
 		// Regla 15 [ Rp -> , T id Rp ]
 		case Corresp.COMA:		// First(, T id Rp)
 			escribir(15);
-			
+						
 			comprobarToken(Corresp.COMA);
 			Tipo tipoParam = T();
 			Integer posTS = (Integer) comprobarToken(Corresp.ID);
@@ -310,7 +325,7 @@ public class AnalizadorSintSem {
 				return new Tupla(tipoParam, tipoRestoParam);
 
 		default:
-			reportarError(new ErrorParametroNoValido( lexema(codTokActual) ));
+			reportarError(new ErrorParametroNoValido(lexema(codTokActual) ));
 			return null;
 		}
 	}
@@ -530,11 +545,13 @@ public class AnalizadorSintSem {
 		case Corresp.NEGACION:		// First(! X)
 			escribir(27);
 			
+			int linea = guardarLinea();
+			
 			comprobarToken(Corresp.NEGACION);
 			tipoX = X();
 			
 			if( !tipoX.esLogico() )
-				reportarError( new ErrorTiposExpresionNegacion(tipoX) );
+				reportarError( new ErrorTiposExpresionNegacion(linea,tipoX) );
 			
 			return Tipo.logico();
 			
@@ -598,6 +615,8 @@ public class AnalizadorSintSem {
 
 	// Aux para quitar rec. izq. a X
 	private static Tipo Xaux(Tipo tipoID) {
+		
+		int linea;
 
 		switch( codTokActual ) {
 
@@ -616,11 +635,12 @@ public class AnalizadorSintSem {
 		case Corresp.PAR_AB:		// First( (A) )
 			escribir(34);
 			
-			if( !tipoID.esFuncion() ) {
-				reportarError( new ErrorNoEsUnaFuncion(lexema(codTokActual), 
-													   tipoID));
-			}
-						
+			if( !tipoID.esFuncion() ) 
+				reportarError( new ErrorNoEsUnaFuncion(tipoID));
+			
+					
+			linea = guardarLinea();
+			
 			comprobarToken(Corresp.PAR_AB);
 			Tupla tiposArgumentos = A();
 			comprobarToken(Corresp.PAR_CE);
@@ -628,7 +648,8 @@ public class AnalizadorSintSem {
 			Tupla tiposParametrosFun = ((Tipo.Funcion) tipoID).getParams();	// Regla semántica
 			Tipo tipoRetornoFun = ((Tipo.Funcion) tipoID).getTipoRetorno();
 			if( !tiposArgumentos.equals(tiposParametrosFun) ) {
-				reportarError( new ErrorTiposArgumentosNoValidos(tiposArgumentos,
+				reportarError( new ErrorTiposArgumentosNoValidos(linea,
+																 tiposArgumentos,
 																 tiposParametrosFun));												 
 			}
 			return tipoRetornoFun;
@@ -637,13 +658,14 @@ public class AnalizadorSintSem {
 		// Regla 35 [ Xaux -> -- ]
 		case Corresp.AUTO_DEC:
 			escribir(35);
-			pedirToken();
 			
+			linea = guardarLinea();
+			
+			comprobarToken(Corresp.AUTO_DEC);
 			if( !tipoID.esEntero() ) {
-				System.out.println("Error, postDecremento no válido");
-				System.exit(1);
+				reportarError( new ErrorPosDecrementoNoValido(linea,
+															  tipoID) );
 			}
-			
 			return Tipo.entero();
 		
 			
@@ -657,6 +679,8 @@ public class AnalizadorSintSem {
 
 	// Sentencia
 	private static Boolean S() {
+		
+		int linea;
 		
 		boolean esReturn;
 		
@@ -678,16 +702,18 @@ public class AnalizadorSintSem {
 		// Regla 37 [ S -> print ( E ) ; ]
 		case Corresp.PRINT:		// First(print ( E ) ;)
 			escribir(37);
-			pedirToken();
+			
+			linea = guardarLinea();
+			
+			comprobarToken(Corresp.PRINT);
 			comprobarToken(Corresp.PAR_AB);
 			tipoE = E();
 			comprobarToken(Corresp.PAR_CE);
 			comprobarToken(Corresp.PUNTO_COMA);
 			
-			if( !tipoE.esCadena() && !tipoE.esEntero() ) {
-				System.out.println("Error, print no válido");
-				System.exit(1);
-			}
+			if( !tipoE.esCadena() && !tipoE.esEntero() )
+				reportarError(new ErrorPrintNoValido(linea, tipoE));
+			
 			esReturn = false;
 			break;
 
@@ -695,17 +721,18 @@ public class AnalizadorSintSem {
 		// Regla 38 [ S -> input(id); ]
 		case Corresp.INPUT:		// First(input(id);)
 			escribir(38);
-			pedirToken();
+			
+			linea = guardarLinea();
+			
+			comprobarToken(Corresp.INPUT);
 			comprobarToken(Corresp.PAR_AB);
 			posTS = (Integer) comprobarToken(Corresp.ID);
 			comprobarToken(Corresp.PAR_CE);
 			comprobarToken(Corresp.PUNTO_COMA);
 			
 			tipoID = TablaS.getTipo(posTS);
-			if( !tipoID.esCadena() && !tipoID.esEntero() ) {
-				System.out.println("Error, print no válido");
-				System.exit(1);
-			}
+			if( !tipoID.esCadena() && !tipoID.esEntero() ) 
+				reportarError(new ErrorInputNoValido(linea,tipoID));
 			
 			esReturn = false;
 			break;
@@ -714,18 +741,18 @@ public class AnalizadorSintSem {
 		// Regla 39 [ S -> if ( E ) Bi ]
 		case Corresp.IF:		// First(if ( E ) Bi)
 			escribir(39);
-			pedirToken();
+			
+			linea = guardarLinea();
+			
+			comprobarToken(Corresp.IF);
 			comprobarToken(Corresp.PAR_AB);
 			tipoE = E();
 			comprobarToken(Corresp.PAR_CE);
 			
-			if( !tipoE.esLogico() ) {
-				System.out.println("Error if, no es una expresión lógica");
-				System.exit(1);
-			}
+			if( !tipoE.esLogico() ) 
+				reportarError(new ErrorIfNoValido(linea, tipoE));
 			
 			boolean tieneIfElseReturn = Bi();
-			
 			if( TablaS.estoyEnFuncion() && tieneIfElseReturn )
 				return true;
 			
@@ -735,21 +762,21 @@ public class AnalizadorSintSem {
 		// Regla 40 [ S -> return Y ; ]
 		case Corresp.RETURN:	// First(return Y ;)
 			escribir(40);
-			pedirToken();
 			
-			if( !TablaS.estoyEnFuncion() ) {
-				System.out.println("Error, return mal posicionado");
-				System.exit(1);
-			}
+			linea = guardarLinea();
+			
+			comprobarToken(Corresp.RETURN);
+			if( !TablaS.estoyEnFuncion() )
+				reportarError(new ErrorReturnFueraSitio(linea));
 			
 			Tipo tipoY = Y();
 			comprobarToken(Corresp.PUNTO_COMA);
 			
 			if( tipoY != TablaS.tipoRetornoEsperado() ) {
-				System.out.println("Error, return no matchea función");
-				System.exit(1);
+				reportarError(new ErrorTipoReturnIncompatibleFuncion(linea,
+																	 tipoY,
+																	 TablaS.tipoRetornoEsperado()));
 			}
-			
 			esReturn = true;
 			break;
 
@@ -762,14 +789,18 @@ public class AnalizadorSintSem {
 
 	// Aux para factorizar las reglas de S
 	private static void Saux(Tipo tipoID) {
+		
+		int linea;
 
 		switch( codTokActual ) {
 
 		// Regla 41 [ Saux -> = E ; ]
 		case Corresp.IGUAL:		// First(= E ;)
 			escribir(41);
-			pedirToken();
 			
+			linea = guardarLinea();
+			
+			comprobarToken(Corresp.IGUAL);
 			Tipo tipoE = E();
 			comprobarToken(Corresp.PUNTO_COMA);
 			
@@ -777,10 +808,10 @@ public class AnalizadorSintSem {
 				tipoE = ((Tipo.Funcion) tipoE).getTipoRetorno();
 			
 			if( tipoE != tipoID ) {				
-				System.out.println("Error, tipo asignación no compatible");
-				System.exit(1);
+				reportarError(new ErrorTipoAsignacionIncompatible(linea,
+																  tipoID,
+																  tipoE));
 			}
-			
 			break;
 
 
@@ -788,10 +819,11 @@ public class AnalizadorSintSem {
 		case Corresp.PAR_AB:	// First(( A ) ;)
 			escribir(42);
 			
-			if( !tipoID.esFuncion() ) {
-				System.out.println("Error, llamada a función no válida. NO es una función");
-				System.exit(1);
-			}
+			if( !tipoID.esFuncion() ) 
+				reportarError(new ErrorNoEsUnaFuncion(tipoID));
+			
+			
+			linea = guardarLinea();
 			
 			comprobarToken(Corresp.PAR_AB);
 			Tupla tiposArgumentos = A();
@@ -800,7 +832,8 @@ public class AnalizadorSintSem {
 			
 			Tupla tiposParametrosFun = ((Tipo.Funcion) tipoID).getParams();	// Regla semántica
 			if( !tiposArgumentos.equals(tiposParametrosFun) ) {
-				reportarError( new ErrorTiposArgumentosNoValidos(tiposArgumentos,
+				reportarError( new ErrorTiposArgumentosNoValidos(linea,
+																 tiposArgumentos,
 																 tiposParametrosFun));												 
 			}
 
@@ -954,10 +987,8 @@ public class AnalizadorSintSem {
 		case Corresp.RETURN:
 			escribir(52);
 			
-			if(returnEncontrado) {
-				System.out.println("Error, código inalcanzable if-else");
-				System.exit(1);
-			}
+			if(returnEncontrado)
+				reportarError( new ErrorCodigoInalcanzable() );
 			
 			boolean esReturnS = S();
 			return Cie(esReturnS);
@@ -1058,4 +1089,6 @@ public class AnalizadorSintSem {
 	private static boolean zonaDeclaracion = false;
 	public static boolean estoyEnDeclaracion() { return zonaDeclaracion; }
 
+	private static int guardarLinea() { return AnalizadorLexico.lineaActual(); }
+	
 }

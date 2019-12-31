@@ -5,7 +5,7 @@ public class Tipo {
 	private Integer tamano;
 	private String nombre;
 	
-	protected Tipo(Integer tamano,String nombre) {
+	private Tipo(Integer tamano,String nombre) {
 		this.tamano = tamano;
 		this.nombre = nombre;
 	}

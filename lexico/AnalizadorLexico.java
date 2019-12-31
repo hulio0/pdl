@@ -133,7 +133,7 @@ public class AnalizadorLexico {
 					if( pos == null ) {
 						pos = TablaS.insertar(lex);
 					}
-					else if( AnalizadorSintSem.estoyEnDeclaracion() ) {						
+					else if( AnalizadorSintSem.estoyEnDeclaracion() ) {		
 						reportarError(new ErrorVariableYaDeclarada(lex));
 					}
 
