@@ -17,6 +17,7 @@ import errores.err.lex.ErrorCadenaVariasLineas;
 import errores.err.lex.ErrorCharNoPer;
 import errores.err.lex.ErrorComentarioMalForm;
 import errores.err.lex.ErrorEnteroFueraDeRango;
+import errores.err.sem.ErrorVariableYaDeclarada;
 import lexico.matrans.Accion;
 import lexico.matrans.EntradaMatTrans;
 import lexico.matrans.MatrizTransicion;
@@ -133,8 +134,7 @@ public class AnalizadorLexico {
 						pos = TablaS.insertar(lex);
 					}
 					else if( AnalizadorSintSem.estoyEnDeclaracion() ) {						
-						System.out.println("Error variable ya declarada");
-						System.exit(1);
+						reportarError(new ErrorVariableYaDeclarada(lex));
 					}
 
 					res = new Token(Corresp.ID,pos);
@@ -245,9 +245,8 @@ public class AnalizadorLexico {
 				break;
 
 			case DEVOLVER_EOF:
-				// Devolverle null al sintactico es nuestra
-				// manera de decir que hemos leido eof
-				res = null;
+				// Usamos internamente un token eof
+				res = Token.eof();
 				break;
 			} //EOSwitch
 
@@ -255,7 +254,7 @@ public class AnalizadorLexico {
 
 		// Antes de devolver el token lo escribimos
 		// en la salida (si no es eof)
-		if( res!=null )
+		if( !res.esEOF() )
 			salidaLex.escribir( res.toString() + "\n" );
 
 		return res;

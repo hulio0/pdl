@@ -41,5 +41,11 @@ public class Token {
 	public int id() { return id; }
 	public Object atrib() { return atributo; }
 	
-	public static void setMode(Modo m) { modo=m; }
+	public static void setMode(Modo m) { modo=m; }	
+	
+	public static final int EOF = -1;
+	public static Token eof() { return new Token(EOF); }
+	
+	public boolean esEOF() { return this.id == EOF; }
+	
 }

@@ -35,7 +35,7 @@ public class Corresp {
 	public static final int NEGACION	= 24;
 	public static final int MENOR		= 25;
 	public static final int MAYOR		= 26;
-		
+			
 	private static final BiMap<String,Integer> LEX_TO_COD = 
 			HashBiMap.create(N_TOKENS);
 	
@@ -127,7 +127,7 @@ public class Corresp {
 		case MENOR:
 			return "MENOR";
 		case MAYOR:
-			return "MAYOR";	
+			return "MAYOR";				
 		default:
 			return "ERROR, CORRESPONDENCIA NO ENCONTRADA";
 		}

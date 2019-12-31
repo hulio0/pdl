@@ -188,7 +188,7 @@ public class TablaS {
 	}
 
 	// Usado por el sintáctico, busca en todas las tablas que puede
-	public static String getLexemaSintactico(Integer posTS) {
+	public static String getLexema(Integer posTS) {
 		FilaTS res = null;
 		res = getByPS(posTS);
 		return ( res != null ? res.getLex() : null );
@@ -199,10 +199,9 @@ public class TablaS {
 	// el tipo sea null (caso en el que intentamos usar un ID
 	// que no ha sido declarado aún, en cuyo caso se interpreta
 	// que es entero y global)
-	public static Tipo getTipoSemantico(Integer posTS) {
+	public static Tipo getTipo(Integer posTS) {		
 		FilaTS res = null;
 		res = getByPS(posTS);
-		
 		if( res.getTipo() == null ) {
 			
 			if( estoyEnFuncion() ) {
@@ -217,7 +216,7 @@ public class TablaS {
 		return res.getTipo();	
  	}
 	
-	public static Tupla getParamSemantico(Integer posTS) {
+	public static Tupla getParam(Integer posTS) {
 		FilaTS res = null;
 		res = getByPS(posTS);
 		return ( res != null ? res.getParams() : null );

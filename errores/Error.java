@@ -25,7 +25,7 @@ public abstract class Error {
 	
 	@Override
 	public String toString() {
-		return "Error "+tipo+"-->(LINEA "+linea+"): " + msg;
+		return "Error "+tipo+"-->(LINEA "+linea+"):\n\n " + msg;
 	}
 
 }

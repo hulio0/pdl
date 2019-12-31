@@ -49,16 +49,15 @@ public class Tupla {
 	public int numElem() { return this.tipos.size(); }
 	public Tipo get(int index) { return this.tipos.get(index); }
 	
-//	@Override
-//	public String toString() {
-//		
-//		if(estaVacia())
-//			return "Vacio";
-//		
-//		String res = "";
-//		for(int i=0;i<tipos.size()-1;i++)
-//			res+=tipos.get(i)+"x";
-//		return res+tipos.get( tipos.size()-1 );
-//	}
-	
+	@Override
+	public String toString() {
+		
+		if( tipos.size() == 0 )
+			return "void";
+		
+		String res = "";
+		for(int i=0;i<tipos.size()-1;i++)
+			res+=tipos.get(i)+" x ";
+		return res+tipos.get( tipos.size()-1 );
+	}
 }
