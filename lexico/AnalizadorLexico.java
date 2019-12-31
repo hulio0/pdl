@@ -20,6 +20,7 @@ import errores.err.lex.ErrorEnteroFueraDeRango;
 import lexico.matrans.Accion;
 import lexico.matrans.EntradaMatTrans;
 import lexico.matrans.MatrizTransicion;
+import sintsem.AnalizadorSintSem;
 import tablasim.TablaS;
 
 
@@ -122,15 +123,18 @@ public class AnalizadorLexico {
 				if( pos != null )
 					res = new Token(pos);
 				
-				// TODO error variable ya declarada
 				
 				// Si no es una PR entonces es un ID, pos
 				// almacenará la posición en la TS de dicho id
 				else{
 					pos = TablaS.getPosTSLexico(lex);
-
+					
 					if( pos == null ) {
 						pos = TablaS.insertar(lex);
+					}
+					else if( AnalizadorSintSem.estoyEnDeclaracion() ) {						
+						System.out.println("Error variable ya declarada");
+						System.exit(1);
 					}
 
 					res = new Token(Corresp.ID,pos);

@@ -28,6 +28,30 @@ public class FilaTS {
 	public int getID() { return id; }
 	public String getLex() { return lex; }
 	public Tipo getTipo() { return tipo; }
+	public Tupla getParams() { return parametros; }
+	public Tipo getTipoRetorno() { return tipoRetorno; }
 
-	//TODO implementar toString aquí y no en TS
+	@Override
+	public String toString() {
+		String res = "*'"+lex+"'\n"
+					+"\t+id:"+id+"\n"
+					+"\t+Tipo:'"+tipo+"'\n";
+		
+		if( tipo != Tipo.Funcion) {
+			res+="\t+Despl:"+desplazamiento+"\n";	
+		}else {
+			res+="\t+numParam:"+parametros.numElem()+"\n";
+			
+			for(int i=0;i<parametros.numElem();i++)
+				res+="\t\t+TipoParam"+dosDigitos(i+1)+":'"+parametros.get(i)+"'\n";
+			
+			res+="\t+TipoRetorno:'"+tipoRetorno+"'\n";
+		}
+	
+		return res;
+	}
+	
+	private String dosDigitos(int i) {
+		return String.format("%02d",i);
+	}
 }

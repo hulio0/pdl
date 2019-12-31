@@ -110,17 +110,16 @@ public class AnalizadorSintSem {
 
 		// Regla 5 [ D -> var T id ; ], única regla
 		escribir(5);
-		
-		comprobarToken( Corresp.VAR );
-		
 		zonaDeclaracion = true;
 		
+		comprobarToken( Corresp.VAR );
+				
 		Tipo tipoT = T();
 		Integer posTS = comprobarToken(Corresp.ID);
-		comprobarToken(Corresp.PUNTO_COMA);
-		
-		TablaS.agregarTipoDesp(posTS, tipoT);
+				
 		zonaDeclaracion = false;
+		comprobarToken(Corresp.PUNTO_COMA);	
+		TablaS.agregarTipoDesp(posTS, tipoT);
 	}
 
 	// Tipo (devuelve el tipo de T, valga la redundancia)
@@ -165,15 +164,15 @@ public class AnalizadorSintSem {
 		Integer posTS = comprobarToken(Corresp.ID);
 		
 		zonaDeclaracion = true;
+		TablaS.abrirAmbito(tipoT2);
 		
 		comprobarToken(Corresp.PAR_AB);
-		Tupla tuplaTiposPr = Pr();
+		Tupla tuplaTiposPr = Pr();		
 		comprobarToken(Corresp.PAR_CE);
 		comprobarToken(Corresp.LLA_AB);
 		
 		zonaDeclaracion = false;
 		TablaS.agregarTipoFuncion(posTS, tuplaTiposPr, tipoT2);
-		TablaS.abrirAmbito(tipoT2);
 		
 		boolean tieneReturnC = C(false);
 		comprobarToken(Corresp.LLA_CE);
@@ -236,7 +235,7 @@ public class AnalizadorSintSem {
 			TablaS.agregarTipoDesp(posTS, tipoT);
 			
 			Tupla tuplaRp = Rp();
-			
+						
 			if( tuplaRp.estaVacia() )
 				return new Tupla(tipoT);
 			else
@@ -272,7 +271,7 @@ public class AnalizadorSintSem {
 			Tupla tuplaRp = Rp();
 			
 			if( tuplaRp.estaVacia() )
-				return Tupla.vacia();
+				return new Tupla(tipoT);
 			else
 				return new Tupla(tipoT, tuplaRp);
 
@@ -328,17 +327,29 @@ public class AnalizadorSintSem {
 	}
 
 	// Expresion (>,<)
-	private static void E() {
+	private static Tipo E() {
 
 		// Regla 19 [ E -> E2 Eaux ], unica regla
 		escribir(19);
-		E2();
-		Eaux();
+		
+		Tipo tipoE2 = E2();
+		Tipo tipoEaux = Eaux();
 
+		if( tipoEaux == Tipo.Vacio )
+			return tipoE2;
+		else if( tipoE2 == Tipo.Entero )
+			return Tipo.Logico;
+		else {
+			System.out.println("Error, expresión mayor/menor no válida");
+			System.exit(1);
+			return null;
+		}
 	}
 
 	// Aux para quitar rec izq de E
-	private static void Eaux() {
+	private static Tipo Eaux() {
+		
+		Tipo tipoE2;
 
 		switch( codTokActual ) {
 
@@ -347,24 +358,41 @@ public class AnalizadorSintSem {
 		case Corresp.PUNTO_COMA:
 		case Corresp.COMA:
 			escribir(20);
-			break;
+			
+			return Tipo.Vacio;
 
 		// Regla 21 [ Eaux -> > E2 ]
 		case Corresp.MAYOR:			// Fist(> E2 )
 			escribir(21);
 			pedirToken();
-			E2();
-			break;
-
+			tipoE2 = E2();
+			
+			if( tipoE2 != Tipo.Entero ) {
+				System.out.println("Error, expresión mayor/menor no válida");
+				System.exit(1);
+				return null;
+			}
+			else
+				return Tipo.Logico; // Con que sea != de Vacío nos vale
+				
+			
 		// Regla 22 [ Eaux -> < E2 ]
 		case Corresp.MENOR:
 			escribir(22);
 			pedirToken();
-			E2();
-			break;
+			tipoE2 = E2();
+			
+			if( tipoE2 != Tipo.Entero ) {
+				System.out.println("Error, expresión mayor/menor no válida");
+				System.exit(1);
+				return null;
+			}
+			else
+				return Tipo.Logico; // Con que sea != de Vacío nos vale
 
 		default:
 			reportarError(new ErrorExpresionMalFormada( lexema(codTokActual) ));
+			return null;
 		}
 
 
@@ -372,17 +400,29 @@ public class AnalizadorSintSem {
 	}
 
 	// Expresion (+,-)
-	private static void E2() {
+	private static Tipo E2() {
 
 		// Regla 23 [ E2 -> E3 E2aux ], unica regla
 		escribir(23);
-		E3();
-		E2aux();
-
+		
+		Tipo tipoE3 = E3();
+		Tipo tipoE2aux= E2aux();
+		
+		if( tipoE2aux == Tipo.Vacio )
+			return tipoE3;
+		else if( tipoE3 == Tipo.Entero )
+			return Tipo.Entero;
+		else {
+			System.out.println("Error, suma/resta no válida");
+			System.exit(1);
+			return null;
+		}
 	}
 
 	// Aux para quitar rec izq de E2
-	private static void E2aux() {
+	private static Tipo E2aux() {
+		
+		Tipo tipoE3;
 
 		switch( codTokActual ) {
 
@@ -393,33 +433,48 @@ public class AnalizadorSintSem {
 		case Corresp.MAYOR:
 		case Corresp.MENOR:
 			escribir(24);
-			break;
+			
+			return Tipo.Vacio;
 
 		// Regla 25 [ E2aux -> + E3 E2aux ]
 		case Corresp.MAS:			// First(+ E3 E2aux)
 			escribir(25);
 			pedirToken();
-			E3();
-			E2aux();
-			break;
-
+			tipoE3 = E3();
+			
+			if( tipoE3 != Tipo.Entero ) {
+				System.out.println("Expresión suma, resta no válida");
+				System.exit(1);
+				return null;
+			}
+			
+			return E2aux();
 
 		// Regla 26 [ E2aux -> - E3 E2aux ]
 		case Corresp.MENOS:			// First(- E3 E2aux)
 			escribir(26);
 			pedirToken();
-			E3();
-			E2aux();
-			break;
+			tipoE3 = E3();
+			
+			if( tipoE3 != Tipo.Entero ) {
+				System.out.println("Expresión suma, resta no válida");
+				System.exit(1);
+				return null;
+			}
+			
+			return E2aux();
 
 
 		default:
 			reportarError(new ErrorExpresionMalFormada( lexema(codTokActual) ));
+			return null;
 		}
 	}
 
 	// Expresión (!)
-	private static void E3() {
+	private static Tipo E3() {
+		
+		Tipo tipoX;
 
 		switch( codTokActual ) {
 
@@ -427,8 +482,14 @@ public class AnalizadorSintSem {
 		case Corresp.NEGACION:		// First(! X)
 			escribir(27);
 			pedirToken();
-			X();
-			break;
+			tipoX = X();
+			
+			if( tipoX != Tipo.Logico ) {
+				System.out.println("Error, negación no válida");
+				System.exit(1);
+			}
+			return Tipo.Logico;
+			
 
 		// Regla 28 [ E3 -> X ]
 		case Corresp.PAR_AB:		// First(X)
@@ -436,17 +497,18 @@ public class AnalizadorSintSem {
 		case Corresp.ENTERO:
 		case Corresp.CADENA:
 			escribir(28);
-			X();
-			break;
+			return X();
+			
 
 		default:
 			reportarError(new ErrorExpresionMalFormada(lexema(codTokActual) ));
+			return null;
 		}
 
 	}
 
 	// Constante o su resultado es una constante
-	private static void X() {
+	private static Tipo X() {
 
 		switch( codTokActual ) {
 
@@ -454,37 +516,46 @@ public class AnalizadorSintSem {
 		case Corresp.PAR_AB:		// First( (E) )
 			escribir(29);
 			pedirToken();
-			E();
+			Tipo tipoE = E();
 			comprobarToken(Corresp.PAR_CE);
-			break;
+			
+			return tipoE;
 
 		// Regla 30 [ X -> id Xaux ]
 		case Corresp.ID:			// First(id Xaux)
 			escribir(30);
-			pedirToken();
-			Xaux();
-			break;
+		
+			Integer posTS = comprobarToken(Corresp.ID);
+			Tipo tipoID = TablaS.getTipoSemantico( posTS );
+			
+			if( tipoID == Tipo.Funcion ) {
+				tipoID.setParam( TablaS.getParamSemantico(posTS) );
+				tipoID.setTipoRetorno( TablaS.getTipoRetorno(posTS) );
+			}
+			
+			return Xaux(tipoID);
 
 		// Regla 31 [ X -> entero ]
 		case Corresp.ENTERO:
 			escribir(31);
 			pedirToken();
-			break;
+			return Tipo.Entero;
 
 		// Regla 32 [ X -> cadena ]
 		case Corresp.CADENA:
 			escribir(32);
 			pedirToken();
-			break;
+			return Tipo.Cadena;
 
 		default:
 			reportarError(new ErrorExpresionMalFormada(lexema(codTokActual) ));
+			return null;
 
 		}
 	}
 
 	// Aux para quitar rec. izq. a X
-	private static void Xaux() {
+	private static Tipo Xaux(Tipo tipoID) {
 
 		switch( codTokActual ) {
 
@@ -497,25 +568,46 @@ public class AnalizadorSintSem {
 		case Corresp.MAS:
 		case Corresp.MENOS:
 			escribir(33);
-			break;
+			return tipoID;
 
 		// Regla 34 [ Xaux -> ( A ) ]
 		case Corresp.PAR_AB:		// First( (A) )
 			escribir(34);
 			pedirToken();
-			A();
+			
+			if( tipoID != Tipo.Funcion ) {
+				System.out.println("Error, llamada a función no válida. NO es una función");
+				System.exit(1);
+				return null;
+			}
+			
+			Tupla tuplaA = A();
 			comprobarToken(Corresp.PAR_CE);
-			break;
+			
+			if( !tuplaA.equals(tipoID.getParam()) ) {
+				System.out.println("Error, argumentos no válidos");
+				System.exit(1);
+			}
+			
+			return tipoID.getTipoRetorno();
 
 
 		// Regla 35 [ Xaux -> -- ]
 		case Corresp.AUTO_DEC:
 			escribir(35);
 			pedirToken();
-			break;
-
+			
+			if( tipoID != Tipo.Entero ) {
+				System.out.println("Error, postDecremento no válido");
+				System.exit(1);
+			}
+			
+			return Tipo.Entero;
+		
+			
 		default:
 			reportarError(new ErrorExpresionMalFormada(lexema(codTokActual) ));
+			return null;
 
 		}
 
@@ -523,25 +615,41 @@ public class AnalizadorSintSem {
 
 	// Sentencia
 	private static boolean S() {
-
+		
+		Integer posTS;
+		Tipo tipoID, tipoE;
+		
 		switch( codTokActual ) {
 
 		// Regla 36 [ S -> id Saux ]
 		case Corresp.ID:		// First(id Saux)
 			escribir(36);
-			pedirToken();
-			Saux();
-			break;
+			
+			posTS = comprobarToken(Corresp.ID); // Redundante pero bueno
+			tipoID = TablaS.getTipoSemantico( posTS );
+			
+			if( tipoID == Tipo.Funcion ) {
+				tipoID.setParam( TablaS.getParamSemantico(posTS) );
+				tipoID.setTipoRetorno( TablaS.getTipoRetorno(posTS) );
+			}
+			
+			Saux(tipoID);
+			return false;
 
 		// Regla 37 [ S -> print ( E ) ; ]
 		case Corresp.PRINT:		// First(print ( E ) ;)
 			escribir(37);
 			pedirToken();
 			comprobarToken(Corresp.PAR_AB);
-			E();
+			tipoE = E();
 			comprobarToken(Corresp.PAR_CE);
 			comprobarToken(Corresp.PUNTO_COMA);
-			break;
+			
+			if( tipoE != Tipo.Cadena && tipoE != Tipo.Entero ) {
+				System.out.println("Error, print no válido");
+				System.exit(1);
+			}
+			return false;
 
 
 		// Regla 38 [ S -> input(id); ]
@@ -549,10 +657,17 @@ public class AnalizadorSintSem {
 			escribir(38);
 			pedirToken();
 			comprobarToken(Corresp.PAR_AB);
-			comprobarToken(Corresp.ID);
+			posTS = comprobarToken(Corresp.ID);
 			comprobarToken(Corresp.PAR_CE);
 			comprobarToken(Corresp.PUNTO_COMA);
-			break;
+			
+			tipoID = TablaS.getTipoSemantico(posTS);
+			if( tipoID != Tipo.Cadena && tipoID != Tipo.Entero ) {
+				System.out.println("Error, print no válido");
+				System.exit(1);
+			}
+			
+			return false;
 
 
 		// Regla 39 [ S -> if ( E ) Bi ]
@@ -560,27 +675,50 @@ public class AnalizadorSintSem {
 			escribir(39);
 			pedirToken();
 			comprobarToken(Corresp.PAR_AB);
-			E();
+			tipoE = E();
 			comprobarToken(Corresp.PAR_CE);
-			Bi();
-			break;
+			
+			if( tipoE != Tipo.Logico ) {
+				System.out.println("Error if, no es una expresión lógica");
+				System.exit(1);
+			}
+			
+			boolean tieneIfElseReturn = Bi();
+			
+			if( TablaS.estoyEnFuncion() && tieneIfElseReturn )
+				return true;
+			
+			return false;
 
 		// Regla 40 [ S -> return Y ; ]
 		case Corresp.RETURN:	// First(return Y ;)
 			escribir(40);
 			pedirToken();
-			Y();
+			
+			if( !TablaS.estoyEnFuncion() ) {
+				System.out.println("Error, return mal posicionado");
+				System.exit(1);
+			}
+			
+			Tipo tipoY = Y();
 			comprobarToken(Corresp.PUNTO_COMA);
-			break;
+			
+			if( tipoY != TablaS.tipoRetornoEsperado() ) {
+				System.out.println("Error, return no matchea función");
+				System.exit(1);
+			}
+			
+			return true;
 
 		default:
 			reportarError(new ErrorSentenciaMalConstruida( lexema(codTokActual) ));
+			return false;
 		}
 
 	}
 
 	// Aux para factorizar las reglas de S
-	private static void Saux() {
+	private static void Saux(Tipo tipoID) {
 
 		switch( codTokActual ) {
 
@@ -588,8 +726,18 @@ public class AnalizadorSintSem {
 		case Corresp.IGUAL:		// First(= E ;)
 			escribir(41);
 			pedirToken();
-			E();
+			
+			Tipo tipoE = E();
 			comprobarToken(Corresp.PUNTO_COMA);
+			
+			if(tipoE==Tipo.Funcion)
+				tipoE = tipoE.getTipoRetorno();
+			
+			if( tipoE != tipoID ) {				
+				System.out.println("Error, tipo asignación no compatible");
+				System.exit(1);
+			}
+			
 			break;
 
 
@@ -597,9 +745,21 @@ public class AnalizadorSintSem {
 		case Corresp.PAR_AB:	// First(( A ) ;)
 			escribir(42);
 			pedirToken();
-			A();
+			
+			if( tipoID != Tipo.Funcion ) {
+				System.out.println("Error, llamada a función no válida. NO es una función");
+				System.exit(1);
+			}
+			
+			Tupla tuplaA = A();
 			comprobarToken(Corresp.PAR_CE);
 			comprobarToken(Corresp.PUNTO_COMA);
+						
+			if( !tuplaA.equals(tipoID.getParam()) ) {
+				System.out.println("Error, argumentos no válidos");
+				System.exit(1);
+			}
+			
 			break;
 
 		default:
@@ -610,14 +770,14 @@ public class AnalizadorSintSem {
 	}
 
 	// X + "void"
-	private static void Y() {
+	private static Tipo Y() {
 
 		switch( codTokActual ) {
 
 		// Regla 43 [ Y -> lambda ]
 		case Corresp.PUNTO_COMA:	// Follow(Y)
 			escribir(43);
-			break;
+			return Tipo.Vacio;
 
 		// Regla 44 [ Y -> E ]
 		case Corresp.PAR_AB:		// First(E)
@@ -626,24 +786,24 @@ public class AnalizadorSintSem {
 		case Corresp.CADENA:
 		case Corresp.NEGACION:
 			escribir(44);
-			E();
-			break;
+			return E();
 
 		default:
 			reportarError(new ErrorReturnIncorrecto( lexema(codTokActual) ));
+			return null;
 		}
 
 	}
 
 	// Argumento funcion
-	private static void A() {
+	private static Tupla A() {
 
 		switch( codTokActual ) {
 
 		// Regla 45 [ A -> lambda ]
 		case Corresp.PAR_CE:		// Follow(A)
 			escribir(45);
-			break;
+			return Tupla.vacia();
 
 		// Regla 46 [ A -> E Ra ]
 		case Corresp.PAR_AB:		// First(E Ra)
@@ -652,41 +812,53 @@ public class AnalizadorSintSem {
 		case Corresp.CADENA:
 		case Corresp.NEGACION:
 			escribir(46);
-			E();
-			Ra();
-			break;
+			Tipo tipoE = E();
+			Tupla tuplaRa = Ra();
+			
+			if( tuplaRa.estaVacia() )
+				return new Tupla(tipoE);
+			else
+				return new Tupla(tipoE,tuplaRa);
 
 		default:
 			reportarError(new ErrorArgumentoNoValido(lexema(codTokActual) ));
+			return null;
 		}
 	}
 
 	// Resto de argumentos funcion
-	private static void Ra() {
+	private static Tupla Ra() {
 
 		switch( codTokActual ) {
 
 		// Regla 47 [ Ra -> lambda ]
 		case Corresp.PAR_CE:		// Follow(Ra)
 			escribir(47);
-			break;
+			return Tupla.vacia();
 
 		// Regla 48 [ Ra -> , E Ra ]
 		case Corresp.COMA:			// First(, E Ra)
 			escribir(48);
 			pedirToken();
-			E();
-			Ra();
-			break;
+			Tipo tipoE = E();
+			Tupla tuplaRa = Ra();
+			
+			if( tuplaRa.estaVacia() )
+				return new Tupla(tipoE);
+			else
+				return new Tupla(tipoE,tuplaRa);
 
 		default:
 			reportarError(new ErrorArgumentoNoValido( lexema(codTokActual) ));
+			return null;
 
 		}
 	}
 
 	// Bloque if
-	private static void Bi() {
+	private static boolean Bi() {
+		
+		boolean esReturnS, tieneReturnElse, tieneReturnCuerpo;
 
 		switch( codTokActual ) {
 
@@ -697,29 +869,31 @@ public class AnalizadorSintSem {
 		case Corresp.IF:
 		case Corresp.RETURN:
 			escribir(49);
-			S();
-			El();
-			break;
+			esReturnS = S();
+			tieneReturnElse = El();
+			return esReturnS && tieneReturnElse;
 
 		// Regla 50 [ Bi -> { Cie } El ]
 		case Corresp.LLA_AB:	// First({ Cie } El]
 			escribir(50);
 			pedirToken();
-			Cie();
+			
+			tieneReturnCuerpo = Cie(false);
 			comprobarToken(Corresp.LLA_CE);
-			El();
-			break;
+			tieneReturnElse = El();
+			return tieneReturnCuerpo && tieneReturnElse;
 
 		default:
 			reportarError(new ErrorIfElseMalConstruido(lexema(codTokActual),
 					  			  				   	   ErrorIfElseMalConstruido.IF ));
+			return false;
 
 		}
 
 	}
 
 	// Cuerpo if-else
-	private static void Cie() {
+	private static boolean Cie(boolean returnEncontrado) {
 
 		switch( codTokActual ) {
 
@@ -735,19 +909,25 @@ public class AnalizadorSintSem {
 		case Corresp.IF:
 		case Corresp.RETURN:
 			escribir(52);
-			S();
-			Cie();
-			break;
+			
+			if(returnEncontrado) {
+				System.out.println("Error, código inalcanzable if-else");
+				System.exit(1);
+			}
+			
+			boolean esReturnS = S();
+			return Cie(esReturnS);
 
 		default:
 			reportarError(new ErrorCuerpoIfElseIncorrecto( lexema(codTokActual) ));
-
 		}
+		
+		return returnEncontrado;
 
 	}
 
 	// Else
-	private static void El() {
+	private static boolean El() {
 
 		switch( codTokActual ) {
 
@@ -764,23 +944,24 @@ public class AnalizadorSintSem {
 		case Corresp.LLA_CE:
 		case EOF:
 			escribir(53);
-			break;
+			return false;
 
 		// Regla 54 [ El -> else Be ]
 		case Corresp.ELSE:		// Fisrt(else Be)
 			escribir(54);
 			pedirToken();
-			Be();
-			break;
+			boolean tieneReturnBe = Be();
+			return tieneReturnBe;
 
 		default:
 			reportarError(new ErrorIfMalTerminado( lexema(codTokActual) ));
+			return false;
 
 		}
 	}
 
 	// Bloque else
-	private static void Be() {
+	private static boolean Be() {
 
 		switch( codTokActual ) {
 
@@ -791,20 +972,24 @@ public class AnalizadorSintSem {
 		case Corresp.IF:
 		case Corresp.RETURN:
 			escribir(55);
-			S();
-			break;
+			boolean esReturnS = S();
+			return esReturnS;
 
 		// Regla 56 [ Be -> { Cie } ]
 		case Corresp.LLA_AB:
 			escribir(56);
 			pedirToken();
-			Cie();
+			
+			boolean tieneReturnCuerpo = Cie(false);
+			
 			comprobarToken(Corresp.LLA_CE);
-			break;
+			
+			return tieneReturnCuerpo;
 
 		default:
 			reportarError(new ErrorIfElseMalConstruido(lexema(codTokActual),
 				  	  			  				   	   ErrorIfElseMalConstruido.ELSE ));
+			return false;
 
 		}
 
@@ -815,20 +1000,22 @@ public class AnalizadorSintSem {
 	// la comprobación ha salido correctamente. En el resto de
 	// casos devuelve null
 	private static Integer comprobarToken(int tokenEsperado) {
+		
+		Integer res = null;
 
 		// Ok, pedimos otro token y seguimos
 		if(codTokActual == tokenEsperado) {
+			
+			if( codTokActual == Corresp.ID ) 
+				res = (Integer) atribTokActual;
+			
 			pedirToken();
-			
-			if( codTokActual == Corresp.ID )
-				return (Integer) atribTokActual;
-			
 		} 
 		else
 			reportarError(new ErrorTokenNoEsperado(lexema(codTokActual),
 								  			   	   lexema(tokenEsperado)) );
 		
-		return null;
+		return res;
 	}
 
 	private static void escribir(int numeroRegla) {

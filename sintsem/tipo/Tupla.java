@@ -8,7 +8,7 @@ public class Tupla {
 	
 	private LinkedList<Tipo> tipos;
 
-	private Tupla() {}
+	private Tupla() { this.tipos = new LinkedList<>(); }
 	
 	public Tupla(Tipo t) {
 		this.tipos = new LinkedList<>();
@@ -25,6 +25,40 @@ public class Tupla {
 	}
 	
 	public static Tupla vacia() { return new Tupla(); }
-	public boolean estaVacia() { return tipos == null; }
+	public boolean estaVacia() { return tipos.size() == 0; }
+	
+	@Override
+	public boolean equals(Object otro) {
+			
+		if( !(otro instanceof Tupla) )
+			return false;
+		
+		Tupla otraTupla = (Tupla) otro;
+		
+		if( this.tipos.size() != otraTupla.tipos.size() )
+			return false;
+		
+		boolean iguales = true;
+		for(int i=0;i<tipos.size() && iguales;i++) {
+			if( this.tipos.get(i) != otraTupla.tipos.get(i) )
+				iguales=false;
+		}
+		return iguales;
+	}
+	
+	public int numElem() { return this.tipos.size(); }
+	public Tipo get(int index) { return this.tipos.get(index); }
+	
+//	@Override
+//	public String toString() {
+//		
+//		if(estaVacia())
+//			return "Vacio";
+//		
+//		String res = "";
+//		for(int i=0;i<tipos.size()-1;i++)
+//			res+=tipos.get(i)+"x";
+//		return res+tipos.get( tipos.size()-1 );
+//	}
 	
 }

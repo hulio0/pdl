@@ -26,7 +26,7 @@ public class TablaS {
 		public Tabla(int id) {
 			this.id=id;
 			this.desplazamiento = 0;
-			tab = new HashMap<Integer,FilaTS>();
+			tab = new HashMap<>();
 		}
 
 		public Tabla(int id, Tipo tipoRetornoEsperado) {
@@ -68,10 +68,8 @@ public class TablaS {
 
 			String s = "TABLA #"+id+":\n";
 
-			for( FilaTS fila : tab.values() ) {
-				s+="*'"+fila.getLex()+"'\n";
-				s+="+id:"+fila.getID()+"\n";
-			}
+			for( FilaTS fila : tab.values() )
+				s+=fila.toString()+"------------------------------\n";
 
 			// El ultimo salto de linea es para que
 			// las tablas no queden muy juntas
@@ -80,6 +78,7 @@ public class TablaS {
 
 		public void agregarTipoDesp(Integer posTS, Tipo t) {
 			FilaTS fila = tab.get(posTS);
+			
 			fila.setTipo(t);
 			fila.setDesp(desplazamiento);
 			desplazamiento += t.tamano();
@@ -218,8 +217,20 @@ public class TablaS {
 		return res.getTipo();	
  	}
 	
+	public static Tupla getParamSemantico(Integer posTS) {
+		FilaTS res = null;
+		res = getByPS(posTS);
+		return ( res != null ? res.getParams() : null );
+	}
 	
-	public static void agregarTipoDesp(Integer posTS,Tipo t) {
+	public static Tipo getTipoRetorno(Integer posTS) {
+		FilaTS res = null;
+		res = getByPS(posTS);
+		return ( res != null ? res.getTipoRetorno() : null );
+	}
+	
+	
+	public static void agregarTipoDesp(Integer posTS,Tipo t) {	
 		actual.agregarTipoDesp(posTS,t);
 	}
 	
