@@ -1,6 +1,7 @@
 package tablasim;
 
 import sintsem.tipo.Tipo;
+import sintsem.tipo.Tipo.Funcion;
 import sintsem.tipo.Tupla;
 
 // Objeto que encapsula una fila de la tabla de simbolos
@@ -11,10 +12,6 @@ public class FilaTS {
 	private Tipo tipo;
 	private Integer desplazamiento;
 
-	// Esto solo para funciones
-	private Tupla parametros;
-	private Tipo tipoRetorno;
-
 	// Constructor por defecto
 
 	public void setID(int idFila) { this.id=idFila; }
@@ -22,14 +19,9 @@ public class FilaTS {
 	public void setTipo(Tipo tipo) { this.tipo=tipo; }
 	public void setDesp(Integer desp) { this.desplazamiento=desp; }
 
-	public void setParam(Tupla params) { this.parametros = params; }
-	public void setTipoRet(Tipo tipoR) { this.tipoRetorno = tipoR; }
-
 	public int getID() { return id; }
 	public String getLex() { return lex; }
 	public Tipo getTipo() { return tipo; }
-	public Tupla getParams() { return parametros; }
-	public Tipo getTipoRetorno() { return tipoRetorno; }
 
 	@Override
 	public String toString() {
@@ -37,9 +29,13 @@ public class FilaTS {
 					+"\t+id:"+id+"\n"
 					+"\t+Tipo:'"+tipo+"'\n";
 		
-		if( tipo != Tipo.Funcion) {
+		if( !tipo.esFuncion() ) {
 			res+="\t+Despl:"+desplazamiento+"\n";	
 		}else {
+			
+			Tupla parametros = ((Funcion) tipo).getParams();
+			Tipo tipoRetorno = ((Funcion) tipo).getTipoRetorno();
+						
 			res+="\t+numParam:"+parametros.numElem()+"\n";
 			
 			for(int i=0;i<parametros.numElem();i++)

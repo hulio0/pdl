@@ -170,19 +170,19 @@ public class AnalizadorSintSem {
 		case Corresp.INT:
 			escribir(6);
 			comprobarToken(Corresp.INT);
-			return Tipo.Entero;
+			return Tipo.entero();
 
 		// Regla 7 [ T -> string ]
 		case Corresp.STRING:
 			escribir(7);
 			comprobarToken(Corresp.STRING);
-			return Tipo.Cadena;
+			return Tipo.cadena();
 
 		// Regla 8 [ T -> boolean ]
 		case Corresp.BOOLEAN:
 			escribir(8);
 			comprobarToken(Corresp.BOOLEAN);
-			return Tipo.Logico;
+			return Tipo.logico();
 
 		default:
 			reportarError(new ErrorTipoNoValido( lexema(codTokActual) ));
@@ -208,7 +208,7 @@ public class AnalizadorSintSem {
 		comprobarToken(Corresp.PAR_CE);
 		
 		zonaDeclaracion = false;	// Regla semántica
-		TablaS.agregarTipoFuncion(posTS, parametros, tipoRetorno);
+		TablaS.agregarTipoFunc(posTS, Tipo.funcion(parametros, tipoRetorno));
 		
 		comprobarToken(Corresp.LLA_AB);
 		boolean tieneReturnCuerpo = C(false);
@@ -217,7 +217,7 @@ public class AnalizadorSintSem {
 		
 		comprobarToken(Corresp.LLA_CE);
 
-		if( !tieneReturnCuerpo && tipoRetorno != Tipo.Vacio )  // Regla semántica
+		if( !tieneReturnCuerpo && !tipoRetorno.esVacio() )  // Regla semántica
 			reportarError( new ErrorFaltaSentenciaReturn() );
 		
 	}
@@ -231,7 +231,7 @@ public class AnalizadorSintSem {
 		// Regla 10 [ T2 -> lambda ]
 		case Corresp.ID:		// Follow(T2)
 			escribir(10);
-			return Tipo.Vacio;
+			return Tipo.vacio();
 
 		// Regla 11 [ T2 -> T ]
 		case Corresp.INT:		// First(T)
@@ -382,13 +382,13 @@ public class AnalizadorSintSem {
 		Tipo tipoEaux = Eaux();
 
 		// No hay expresión >,<
-		if( tipoEaux == Tipo.Vacio )
+		if( tipoEaux.esVacio() )
 			return tipoE2;
 		
 		// Si hay expresión >,< E2 tendrá
 		// que ser de tipo entero
-		else if( tipoE2 == Tipo.Entero )
-			return Tipo.Logico;
+		else if( tipoE2.esEntero() )
+			return Tipo.logico();
 		
 		else {
 			reportarError(new ErrorTiposExpresionMayorMenor(tipoE2));
@@ -408,7 +408,7 @@ public class AnalizadorSintSem {
 		case Corresp.PUNTO_COMA:
 		case Corresp.COMA:
 			escribir(20);
-			return Tipo.Vacio;
+			return Tipo.vacio();
 
 		// Regla 21 [ Eaux -> > E2 ]
 		case Corresp.MAYOR:			// Fist(> E2 )
@@ -417,10 +417,10 @@ public class AnalizadorSintSem {
 			comprobarToken(Corresp.MAYOR);
 			tipoE2 = E2();
 			
-			if( tipoE2 != Tipo.Entero )
+			if( !tipoE2.esEntero() )
 				reportarError(new ErrorTiposExpresionMayorMenor(tipoE2));
 			
-			return Tipo.Logico; // Con que sea != de Vacío nos vale
+			return Tipo.logico(); // Con que sea != de Vacío nos vale
 				
 			
 		// Regla 22 [ Eaux -> < E2 ]
@@ -430,10 +430,10 @@ public class AnalizadorSintSem {
 			comprobarToken(Corresp.MENOR);
 			tipoE2 = E2();
 			
-			if( tipoE2 != Tipo.Entero ) 
+			if( !tipoE2.esEntero() ) 
 				reportarError(new ErrorTiposExpresionMayorMenor(tipoE2));
 			
-			return Tipo.Logico; // Con que sea != de Vacío nos vale
+			return Tipo.logico(); // Con que sea != de Vacío nos vale
 
 		default:
 			reportarError(new ErrorExpresionMalFormada( lexema(codTokActual) ));
@@ -454,13 +454,13 @@ public class AnalizadorSintSem {
 		Tipo tipoE2aux= E2aux();
 		
 		// No hay expresión +,-
-		if( tipoE2aux == Tipo.Vacio )
+		if( tipoE2aux.esVacio() )
 			return tipoE3;
 		
 		// Si hay expresión +,- E3 tendrá
 		// que ser de tipo entero
-		else if( tipoE3 == Tipo.Entero )
-			return Tipo.Entero;
+		else if( tipoE3.esEntero() )
+			return Tipo.entero();
 		
 		else {
 			reportarError(new ErrorTiposExpresionSumaResta(tipoE3));
@@ -482,7 +482,7 @@ public class AnalizadorSintSem {
 		case Corresp.MAYOR:
 		case Corresp.MENOR:
 			escribir(24);
-			return Tipo.Vacio;
+			return Tipo.vacio();
 
 		// Regla 25 [ E2aux -> + E3 E2aux ]
 		case Corresp.MAS:			// First(+ E3 E2aux)
@@ -491,11 +491,11 @@ public class AnalizadorSintSem {
 			comprobarToken(Corresp.MAS);
 			tipoE3 = E3();
 			
-			if( tipoE3 != Tipo.Entero )
+			if( !tipoE3.esEntero() )
 				reportarError(new ErrorTiposExpresionSumaResta(tipoE3));
 			
 			E2aux();
-			return Tipo.Entero; // Con que sea != de Vacío nos vale
+			return Tipo.entero(); // Con que sea != de Vacío nos vale
 
 		// Regla 26 [ E2aux -> - E3 E2aux ]
 		case Corresp.MENOS:			// First(- E3 E2aux)
@@ -504,13 +504,13 @@ public class AnalizadorSintSem {
 			comprobarToken(Corresp.MENOS);
 			tipoE3 = E3();
 			
-			if( tipoE3 != Tipo.Entero )
+			if( !tipoE3.esEntero() )
 				reportarError(new ErrorTiposExpresionSumaResta(tipoE3));
 			
 			
 			E2aux();
 			
-			return Tipo.Entero; // Con que sea != de Vacío nos vale
+			return Tipo.entero(); // Con que sea != de Vacío nos vale
 
 
 		default:
@@ -533,10 +533,10 @@ public class AnalizadorSintSem {
 			comprobarToken(Corresp.NEGACION);
 			tipoX = X();
 			
-			if( tipoX != Tipo.Logico )
+			if( !tipoX.esLogico() )
 				reportarError( new ErrorTiposExpresionNegacion(tipoX) );
 			
-			return Tipo.Logico;
+			return Tipo.logico();
 			
 		// Regla 28 [ E3 -> X ]
 		case Corresp.PAR_AB:		// First(X)
@@ -575,23 +575,19 @@ public class AnalizadorSintSem {
 			Integer posTS = (Integer) comprobarToken(Corresp.ID);
 			
 			Tipo tipoID = TablaS.getTipo( posTS );	// Regla semántica
-			if( tipoID == Tipo.Funcion ) {
-				tipoID.setParam( TablaS.getParam(posTS) );
-				tipoID.setTipoRetorno( TablaS.getTipoRetorno(posTS) );
-			}
 			return Xaux(tipoID);
 
 		// Regla 31 [ X -> entero ]
 		case Corresp.ENTERO:
 			escribir(31);
 			comprobarToken(Corresp.ENTERO);
-			return Tipo.Entero;
+			return Tipo.entero();
 
 		// Regla 32 [ X -> cadena ]
 		case Corresp.CADENA:
 			escribir(32);
 			comprobarToken(Corresp.CADENA);
-			return Tipo.Cadena;
+			return Tipo.cadena();
 
 		default:
 			reportarError(new ErrorExpresionMalFormada(lexema(codTokActual) ));
@@ -620,22 +616,22 @@ public class AnalizadorSintSem {
 		case Corresp.PAR_AB:		// First( (A) )
 			escribir(34);
 			
-			if( tipoID != Tipo.Funcion ) {
+			if( !tipoID.esFuncion() ) {
 				reportarError( new ErrorNoEsUnaFuncion(lexema(codTokActual), 
 													   tipoID));
 			}
 						
 			comprobarToken(Corresp.PAR_AB);
-			Tupla tuplaA = A();
+			Tupla tiposArgumentos = A();
 			comprobarToken(Corresp.PAR_CE);
 			
-			if( !tuplaA.equals(tipoID.getParam()) ) {
-				reportarError( new ErrorTiposArgumentosNoValidos(tuplaA,
-																 tipoID.getParam()) );
-																 
+			Tupla tiposParametrosFun = ((Tipo.Funcion) tipoID).getParams();	// Regla semántica
+			Tipo tipoRetornoFun = ((Tipo.Funcion) tipoID).getTipoRetorno();
+			if( !tiposArgumentos.equals(tiposParametrosFun) ) {
+				reportarError( new ErrorTiposArgumentosNoValidos(tiposArgumentos,
+																 tiposParametrosFun));												 
 			}
-			
-			return tipoID.getTipoRetorno();
+			return tipoRetornoFun;
 
 
 		// Regla 35 [ Xaux -> -- ]
@@ -643,12 +639,12 @@ public class AnalizadorSintSem {
 			escribir(35);
 			pedirToken();
 			
-			if( tipoID != Tipo.Entero ) {
+			if( !tipoID.esEntero() ) {
 				System.out.println("Error, postDecremento no válido");
 				System.exit(1);
 			}
 			
-			return Tipo.Entero;
+			return Tipo.entero();
 		
 			
 		default:
@@ -660,7 +656,9 @@ public class AnalizadorSintSem {
 	}
 
 	// Sentencia
-	private static boolean S() {
+	private static Boolean S() {
+		
+		boolean esReturn;
 		
 		Integer posTS;
 		Tipo tipoID, tipoE;
@@ -672,15 +670,10 @@ public class AnalizadorSintSem {
 			escribir(36);
 						
 			posTS = (Integer) comprobarToken(Corresp.ID); // Redundante pero bueno
-			tipoID = TablaS.getTipo( posTS );
-			
-			if( tipoID == Tipo.Funcion ) {
-				tipoID.setParam( TablaS.getParam(posTS) );
-				tipoID.setTipoRetorno( TablaS.getTipoRetorno(posTS) );
-			}
-			
+			tipoID = TablaS.getTipo( posTS );			
 			Saux(tipoID);
-			return false;
+			esReturn = false;
+			break;
 
 		// Regla 37 [ S -> print ( E ) ; ]
 		case Corresp.PRINT:		// First(print ( E ) ;)
@@ -691,11 +684,12 @@ public class AnalizadorSintSem {
 			comprobarToken(Corresp.PAR_CE);
 			comprobarToken(Corresp.PUNTO_COMA);
 			
-			if( tipoE != Tipo.Cadena && tipoE != Tipo.Entero ) {
+			if( !tipoE.esCadena() && !tipoE.esEntero() ) {
 				System.out.println("Error, print no válido");
 				System.exit(1);
 			}
-			return false;
+			esReturn = false;
+			break;
 
 
 		// Regla 38 [ S -> input(id); ]
@@ -708,12 +702,13 @@ public class AnalizadorSintSem {
 			comprobarToken(Corresp.PUNTO_COMA);
 			
 			tipoID = TablaS.getTipo(posTS);
-			if( tipoID != Tipo.Cadena && tipoID != Tipo.Entero ) {
+			if( !tipoID.esCadena() && !tipoID.esEntero() ) {
 				System.out.println("Error, print no válido");
 				System.exit(1);
 			}
 			
-			return false;
+			esReturn = false;
+			break;
 
 
 		// Regla 39 [ S -> if ( E ) Bi ]
@@ -724,7 +719,7 @@ public class AnalizadorSintSem {
 			tipoE = E();
 			comprobarToken(Corresp.PAR_CE);
 			
-			if( tipoE != Tipo.Logico ) {
+			if( !tipoE.esLogico() ) {
 				System.out.println("Error if, no es una expresión lógica");
 				System.exit(1);
 			}
@@ -734,7 +729,8 @@ public class AnalizadorSintSem {
 			if( TablaS.estoyEnFuncion() && tieneIfElseReturn )
 				return true;
 			
-			return false;
+			esReturn = false;
+			break;
 
 		// Regla 40 [ S -> return Y ; ]
 		case Corresp.RETURN:	// First(return Y ;)
@@ -754,13 +750,14 @@ public class AnalizadorSintSem {
 				System.exit(1);
 			}
 			
-			return true;
+			esReturn = true;
+			break;
 
 		default:
 			reportarError(new ErrorSentenciaMalConstruida( lexema(codTokActual) ));
-			return false;
+			return null;
 		}
-
+		return esReturn;
 	}
 
 	// Aux para factorizar las reglas de S
@@ -776,8 +773,8 @@ public class AnalizadorSintSem {
 			Tipo tipoE = E();
 			comprobarToken(Corresp.PUNTO_COMA);
 			
-			if(tipoE==Tipo.Funcion)
-				tipoE = tipoE.getTipoRetorno();
+			if( tipoE.esFuncion() )
+				tipoE = ((Tipo.Funcion) tipoE).getTipoRetorno();
 			
 			if( tipoE != tipoID ) {				
 				System.out.println("Error, tipo asignación no compatible");
@@ -791,21 +788,22 @@ public class AnalizadorSintSem {
 		case Corresp.PAR_AB:	// First(( A ) ;)
 			escribir(42);
 			
-			if( tipoID != Tipo.Funcion ) {
+			if( !tipoID.esFuncion() ) {
 				System.out.println("Error, llamada a función no válida. NO es una función");
 				System.exit(1);
 			}
 			
 			comprobarToken(Corresp.PAR_AB);
-			Tupla tuplaA = A();
+			Tupla tiposArgumentos = A();
 			comprobarToken(Corresp.PAR_CE);
 			comprobarToken(Corresp.PUNTO_COMA);
 			
-			if( !tuplaA.equals(tipoID.getParam()) ) {
-				reportarError( new ErrorTiposArgumentosNoValidos(tuplaA,
-																 tipoID.getParam()) );													 
+			Tupla tiposParametrosFun = ((Tipo.Funcion) tipoID).getParams();	// Regla semántica
+			if( !tiposArgumentos.equals(tiposParametrosFun) ) {
+				reportarError( new ErrorTiposArgumentosNoValidos(tiposArgumentos,
+																 tiposParametrosFun));												 
 			}
-			
+
 			break;
 
 		default:
@@ -823,7 +821,7 @@ public class AnalizadorSintSem {
 		// Regla 43 [ Y -> lambda ]
 		case Corresp.PUNTO_COMA:	// Follow(Y)
 			escribir(43);
-			return Tipo.Vacio;
+			return Tipo.vacio();
 
 		// Regla 44 [ Y -> E ]
 		case Corresp.PAR_AB:		// First(E)

@@ -7,7 +7,6 @@ import java.util.Map;
 
 import control.Salida;
 import sintsem.tipo.Tipo;
-import sintsem.tipo.Tupla;
 
 
 public class TablaS {
@@ -82,14 +81,6 @@ public class TablaS {
 			fila.setTipo(t);
 			fila.setDesp(desplazamiento);
 			desplazamiento += t.tamano();
-		}
-
-		public void agregarTipoFuncion(Integer posTS, Tupla param, Tipo tipoR) {
-			FilaTS fila = tab.get(posTS);
-			fila.setTipo(Tipo.Funcion);
-			fila.setDesp(null);
-			fila.setParam(param);
-			fila.setTipoRet(tipoR);
 		}
 		
 		public void remove(Integer posTS) {
@@ -209,33 +200,35 @@ public class TablaS {
 				global.insert(res); 
 			}
 			
-			global.agregarTipoDesp(posTS, Tipo.Entero);			
-			return Tipo.Entero;
+			global.agregarTipoDesp(posTS, Tipo.entero());			
+			return Tipo.entero();
 		}
 		
 		return res.getTipo();	
  	}
 	
-	public static Tupla getParam(Integer posTS) {
-		FilaTS res = null;
-		res = getByPS(posTS);
-		return ( res != null ? res.getParams() : null );
-	}
-	
-	public static Tipo getTipoRetorno(Integer posTS) {
-		FilaTS res = null;
-		res = getByPS(posTS);
-		return ( res != null ? res.getTipoRetorno() : null );
-	}
+//	public static Tupla getParam(Integer posTS) {
+//		FilaTS res = null;
+//		res = getByPS(posTS);
+//		return ( res != null ? res.getParams() : null );
+//	}
+//	
+//	public static Tipo getTipoRetorno(Integer posTS) {
+//		FilaTS res = null;
+//		res = getByPS(posTS);
+//		return ( res != null ? res.getTipoRetorno() : null );
+//	}
 	
 	
 	public static void agregarTipoDesp(Integer posTS,Tipo t) {	
 		actual.agregarTipoDesp(posTS,t);
 	}
 	
-	public static void agregarTipoFuncion(Integer posTS,Tupla param,Tipo tipoR) {
-		global.agregarTipoFuncion(posTS, param,tipoR);
+	public static void agregarTipoFunc(Integer posTS,Tipo.Funcion tipoFun) {
+		FilaTS fila = global.getByPosTS(posTS);
+		fila.setTipo(tipoFun);
 	}
+	
 	
 	// Es imposible llamar a este método si no estamos en
 	// un ámbito local (el sintáctico lo evitará)

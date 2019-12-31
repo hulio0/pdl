@@ -6,26 +6,27 @@ import java.util.LinkedList;
 // siendo ti un tipo
 public class Tupla {
 	
-	private LinkedList<Tipo> tipos;
+	private LinkedList<Tipo> tipos = new LinkedList<>();
 
-	private Tupla() { this.tipos = new LinkedList<>(); }
+	private Tupla() {}
 	
-	public Tupla(Tipo t) {
-		this.tipos = new LinkedList<>();
+	public Tupla(Tipo t) { 
 		this.tipos.addFirst(t);
 	}
 	
 	// Dado un tipo t y una tupla con elementos t1xt2x...xtn
 	// crea una nueva tupla con elementos txt1xt2x...xtn
 	public Tupla(Tipo t,Tupla otraTupla) {
-		this.tipos = new LinkedList<>();
 		this.tipos.addLast(t);
 		for( Tipo tipo : otraTupla.tipos )
 			this.tipos.addLast(tipo);		
 	}
 	
 	public static Tupla vacia() { return new Tupla(); }
-	public boolean estaVacia() { return tipos.size() == 0; }
+	
+	public boolean estaVacia() { return this.tipos.size() == 0; }
+	public int numElem() { return this.tipos.size(); }
+	public Tipo get(int index) { return this.tipos.get(index); }
 	
 	@Override
 	public boolean equals(Object otro) {
@@ -40,19 +41,16 @@ public class Tupla {
 		
 		boolean iguales = true;
 		for(int i=0;i<tipos.size() && iguales;i++) {
-			if( this.tipos.get(i) != otraTupla.tipos.get(i) )
+			if( !this.tipos.get(i).equals( otraTupla.tipos.get(i)) )
 				iguales=false;
 		}
 		return iguales;
 	}
 	
-	public int numElem() { return this.tipos.size(); }
-	public Tipo get(int index) { return this.tipos.get(index); }
-	
 	@Override
 	public String toString() {
 		
-		if( tipos.size() == 0 )
+		if( this.estaVacia() )
 			return "void";
 		
 		String res = "";
