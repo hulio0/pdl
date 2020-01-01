@@ -31,7 +31,7 @@ public class Tipo {
 		private Tupla params;
 		private Tipo tipoRetorno;
 		
-		public Funcion(Tupla params,Tipo tipoRetorno) {
+		private Funcion(Tupla params,Tipo tipoRetorno) {
 			super(null,"funcion");
 			this.params=params;
 			this.tipoRetorno=tipoRetorno;

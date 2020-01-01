@@ -58,11 +58,6 @@ public class TablaS {
 			return ( found ? res : null );
 		}
 
-		// TODO: Completar cuando se añadan el
-		// resto de columnas a FilaTS
-		// EDIT, hacer esto en FilaTS y cambiar
-		// esto por un bucle que concatene con
-		// saltos de línea el toString de cada fila
 		@Override
 		public String toString() {
 

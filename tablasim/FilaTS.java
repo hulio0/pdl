@@ -28,31 +28,38 @@ public class FilaTS {
 	public String toString() {
 		String res = "*'"+lex+"'\n"
 					+"\t+id:"+id+"\n";
-					
-		
-		if(GestorErrores.huboError())
+
+
+		if(GestorErrores.huboError()) {
 			return res;
-		
+		}
+
 		res+="\t+Tipo:'"+tipo+"'\n";
-		
+
 		if( !tipo.esFuncion() ) {
-			res+="\t+Despl:"+desplazamiento+"\n";	
+			res+="\t+Despl:"+desplazamiento+"\n";
 		}else {
-			
+
 			Tupla parametros = ((Funcion) tipo).getParams();
 			Tipo tipoRetorno = ((Funcion) tipo).getTipoRetorno();
-						
+
 			res+="\t+numParam:"+parametros.numElem()+"\n";
-			
-			for(int i=0;i<parametros.numElem();i++)
+
+			for(int i=0;i<parametros.numElem();i++) {
 				res+="\t\t+TipoParam"+dosDigitos(i+1)+":'"+parametros.get(i)+"'\n";
-			
+			}
+
 			res+="\t+TipoRetorno:'"+tipoRetorno+"'\n";
+
+			// Esto de la etiqueta lo exige Draco, who knows why...
+			res+="\t+EtiqFuncion:'Et"+lex+dosDigitos(id)+"'\n";
 		}
-	
+
 		return res;
 	}
-	
+
+	// Muestra el entero con dos digitos. Por ejemplo
+	// 2 lo muestra como 02, 8 como 08 , etc.
 	private String dosDigitos(int i) {
 		return String.format("%02d",i);
 	}
