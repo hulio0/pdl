@@ -24,7 +24,9 @@ public class Tipo {
 	public static Tipo logico() { return LOGICO; }
 	public static Tipo vacio() { return VACIO; }
 	
-	public static Funcion funcion(Tupla params,Tipo tipoRetorno) { return new Funcion(params,tipoRetorno); } 
+	public static Funcion funcion(Tupla params,Tipo tipoRetorno) { 
+		return new Funcion(params,tipoRetorno);
+	} 
 	
 	public static class Funcion extends Tipo {
 

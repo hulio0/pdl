@@ -48,8 +48,6 @@ public class AnalizadorSintSem implements Modulo {
 
 	private static int codTokActual;
 	private static Object atribTokActual;
-	
-	private static final int EOF = Token.EOF;
 
 	public static void iniciar(File ficheroSalidaSint) {
 		salidaSint = new Salida(ficheroSalidaSint);
@@ -62,14 +60,14 @@ public class AnalizadorSintSem implements Modulo {
 
 	private static void pedirToken() {
 		Token t = AnalizadorLexico.genToken();
-		codTokActual = t.id();
-		atribTokActual = t.atrib();
+		  codTokActual = t.id();
+		  atribTokActual = t.atrib();
 	}
 	
-	// Devuelve el lexema correspondiente al código de token que le pasemos.
-	// Por ejemplo, con PUNTO_COMA devolveria ";" , con ELSE devolvería "else",
-	// con ENTERO devolveria el numero que leyó el lexico, etc. Este método es
-	// útil para los mensajes de error.
+	// Este método se utiliza para mandar mensajes de error más descriptivos (sólo
+	// se usa cuando hay un error). Devuelve el lexema correspondiente al código de
+	// token que le pasemos. Por ejemplo, con PUNTO_COMA devolveria ";" , con ELSE
+	// devolvería "else", con ENTERO devolveria el número que leyó el lexico, etc).
 	private static String lexema(int codToken) {
 
 		switch( codToken ) {
@@ -78,18 +76,23 @@ public class AnalizadorSintSem implements Modulo {
 		case Corresp.CADENA:
 			return atribTokActual.toString();
 
-		// Buscamos el lex. en la TS, siempre 
-		// encontraremos la entrada correspondiente
+		// Si buscamos el lexema de un ID recurrimos a la TS. (siempre encontraremos la
+		// fila correspondiente, aunque puede ocurrir que el error se haya producido porque
+		// esperábamos un ID y no lo hemos recibido, en cuyo caso no hay fila en la TS. que 
+		// buscar, por ello en el else devolvemos "ID")
 		case Corresp.ID:
+			
+			// Caso en el que sí hemos leído el token ID (el error
+			// es entonces semántico)
 			if( codTokActual == Corresp.ID )
 				return TablaS.getLexema( (Integer) atribTokActual );
 			
-			// Caso en el que esperábamos un
-			// identificador y no nos lo han mandado
+			// Caso en el que se produce un error porque esperábamos un
+			// identificador y no nos lo han mandado (error sintáctico)
 			else
 				return "ID";
 
-		case EOF:
+		case Corresp.EOF:
 			return "Fin de fichero";
 			
 		// En el resto de casos, Corresp nos da
@@ -147,7 +150,7 @@ public class AnalizadorSintSem implements Modulo {
 			break;
 
 		// Regla 4 [ P -> eof ]
-		case EOF:
+		case Corresp.EOF:
 			escribir(4);
 			Control.terminarEjecucion();  // Regla Semántica
 			break;
@@ -217,6 +220,7 @@ public class AnalizadorSintSem implements Modulo {
 		Integer posTS = (Integer) comprobarToken(Corresp.ID);
 		
 		int linea = guardarLinea();
+		
 		TablaS.abrirAmbito(tipoRetorno);	//Regla semántica
 		
 		comprobarToken(Corresp.PAR_AB);
@@ -229,6 +233,9 @@ public class AnalizadorSintSem implements Modulo {
 		comprobarToken(Corresp.LLA_AB);
 		boolean tieneReturnCuerpo = C(false);
 		
+		// Cerramos el ámbito antes de comprobar el token de }
+		// porque si justo el siguiente token de } es un id lo
+		// meterá en la tabla local erróneamente
 		TablaS.cerrarAmbito();		// Regla semántica
 		
 		comprobarToken(Corresp.LLA_CE);
@@ -397,7 +404,8 @@ public class AnalizadorSintSem implements Modulo {
 		Tipo tipoE2 = E2();
 		Tipo tipoEaux = Eaux();
 
-		// No hay expresión >,<
+		// Si Eaux es vacío entonces
+		// no hay expresión >,<
 		if( tipoEaux.esVacio() )
 			return tipoE2;
 		
@@ -647,13 +655,12 @@ public class AnalizadorSintSem implements Modulo {
 			comprobarToken(Corresp.PAR_CE);
 			
 			Tupla tiposParametrosFun = ((Tipo.Funcion) tipoID).getParams();	// Regla semántica
-			Tipo tipoRetornoFun = ((Tipo.Funcion) tipoID).getTipoRetorno();
 			if( !tiposArgumentos.equals(tiposParametrosFun) ) {
 				reportarError( new ErrorTiposArgumentosNoValidos(linea,
 																 tiposArgumentos,
 																 tiposParametrosFun));												 
 			}
-			return tipoRetornoFun;
+			return ((Tipo.Funcion) tipoID).getTipoRetorno();
 
 
 		// Regla 35 [ Xaux -> -- ]
@@ -694,7 +701,7 @@ public class AnalizadorSintSem implements Modulo {
 		case Corresp.ID:		// First(id Saux)
 			escribir(36);
 						
-			posTS = (Integer) comprobarToken(Corresp.ID); // Redundante pero bueno
+			posTS = (Integer) comprobarToken(Corresp.ID);
 			tipoID = TablaS.getTipo( posTS );			
 			Saux(tipoID);
 			esReturn = false;
@@ -754,11 +761,10 @@ public class AnalizadorSintSem implements Modulo {
 				reportarError(new ErrorIfNoValido(linea, tipoE));
 			
 			boolean tieneIfElseReturn = Bi();
-			if( TablaS.estoyEnFuncion() && tieneIfElseReturn )
-				return true;
+			//if( TablaS.estoyEnFuncion() && tieneIfElseReturn )
+			//	return true;
 			
-			esReturn = false;
-			break;
+			return tieneIfElseReturn;
 
 		// Regla 40 [ S -> return Y ; ]
 		case Corresp.RETURN:	// First(return Y ;)
@@ -808,11 +814,12 @@ public class AnalizadorSintSem implements Modulo {
 			if( tipoE.esFuncion() )
 				tipoE = ((Tipo.Funcion) tipoE).getTipoRetorno();
 			
-			if( tipoE != tipoID ) {				
+			
+			if( tipoE != tipoID )			
 				reportarError(new ErrorTipoAsignacionIncompatible(linea,
 																  tipoID,
 																  tipoE));
-			}
+			
 			break;
 
 
@@ -1018,7 +1025,7 @@ public class AnalizadorSintSem implements Modulo {
 		case Corresp.IF:
 		case Corresp.RETURN:
 		case Corresp.LLA_CE:
-		case EOF:
+		case Corresp.EOF:
 			escribir(53);
 			return false;
 
@@ -1082,10 +1089,8 @@ public class AnalizadorSintSem implements Modulo {
 	}
 
 	public static void terminarEjecucion() {}
-	
 	private static boolean zonaDeclaracion = false;
 	public static boolean estoyEnDeclaracion() { return zonaDeclaracion; }
-
 	private static int guardarLinea() { return AnalizadorLexico.lineaActual(); }
 	
 }

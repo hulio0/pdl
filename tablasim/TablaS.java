@@ -9,87 +9,11 @@ import control.Modulo;
 import control.Salida;
 import sintsem.AnalizadorSintSem;
 import sintsem.tipo.Tipo;
+import tablasim.tabla.FilaTS;
+import tablasim.tabla.Tabla;
 
 
 public class TablaS implements Modulo {
-
-	private static class Tabla {
-
-		// Cada tabla cuando se crea tiene un
-		// identificador numerico
-		private int id;
-
-		private int desplazamiento;
-		private Tipo tipoRetornoEsperado;
-
-		private Map<Integer,FilaTS> tab;
-
-		public Tabla(int id) {
-			this.id=id;
-			this.desplazamiento = 0;
-			tab = new HashMap<>();
-		}
-
-		public Tabla(int id, Tipo tipoRetornoEsperado) {
-			this(id);
-			this.tipoRetornoEsperado = tipoRetornoEsperado;
-		}
-
-		public void insert(FilaTS fila) {
-			tab.put(fila.getID(), fila);
-		}
-
-		// Si tenemos el id de la fila podemos acceder a ella en o(1).
-		public FilaTS getByPosTS(Integer posTS) {
-			return tab.get(posTS);
-		}
-
-		// Pero si buscamos por lexema no queda otra que recorrer
-		public FilaTS getByLex(String lexema) {
-			FilaTS res=null;
-			boolean found = false;
-			Iterator<FilaTS> it = tab.values().iterator();
-
-			while( it.hasNext() && !found ) {
-				res = it.next();
-				if( res.getLex().equals(lexema) ) {
-					found=true;
-				}
-			}
-			return ( found ? res : null );
-		}
-
-		@Override
-		public String toString() {
-
-			String s = "TABLA #"+id+":\n";
-
-			for( FilaTS fila : tab.values() )
-				s+=fila.toString()+"------------------------------\n";
-
-			// El ultimo salto de linea es para que
-			// las tablas no queden muy juntas
-			return s + "\n";
-		}
-
-		public void agregarTipoDesp(Integer posTS, Tipo t) {
-			FilaTS fila = tab.get(posTS);
-			
-			fila.setTipo(t);
-			fila.setDesp(desplazamiento);
-			desplazamiento += t.tamano();
-		}
-		
-		public void remove(Integer posTS) {
-			tab.remove(posTS);
-		}
-		
-		public Tipo getTipoRetornoEsperado() {
-			return tipoRetornoEsperado;
-		}
-
-
-	} // EOClaseTabla
 
 	private static Salida salidaTS;
 	private static Tabla global;
@@ -137,7 +61,7 @@ public class TablaS implements Modulo {
 
 		// OBS: La tabla de símbolos global
 		// se escribe en el terminarEjecucion()
-		// de esta clase
+		// de este modulo
 	}
 	
 	public static boolean estoyEnFuncion() {
@@ -147,7 +71,6 @@ public class TablaS implements Modulo {
 	// Inserta en una nueva fila el lexema del token ID que quiere añadir
 	// el léxico. Este método devuelve el id que se le asigna a la nueva fila
 	public static int insertar(String lex) {
-
 		int idNuevaFila = nextRow++;
 		FilaTS f = new FilaTS();
 		  f.setID(idNuevaFila);
@@ -165,7 +88,6 @@ public class TablaS implements Modulo {
 		FilaTS res = null;
 		res = actual.getByLex(lex);	
 		
-		// Solo 
 		if(res==null && estoyEnFuncion() && !AnalizadorSintSem.estoyEnDeclaracion())
 			res = global.getByLex(lex);
 		
@@ -175,28 +97,24 @@ public class TablaS implements Modulo {
 	// Auxiliar para no repetir código de get. Busca
 	// por posTS en todas las tablas que puede
 	private static FilaTS getByPS(Integer posTS) {
-		FilaTS res = null;
-		res = actual.getByPosTS(posTS);
+		FilaTS res = actual.getByPosTS(posTS);
 		if(res==null && estoyEnFuncion())
 			res = global.getByPosTS(posTS);
 		return res;
 	}
 
-	// Usado por el sintáctico, busca en todas las tablas que puede
+	// Usado por el sintáctico (siempre encontrará la fila correspondiente)
 	public static String getLexema(Integer posTS) {
-		FilaTS res = null;
-		res = getByPS(posTS);
-		return ( res != null ? res.getLex() : null );
+		return getByPS(posTS).getLex();
 	}
 	
-	// Usado por el semántico. Es imposible que NO esté la
-	// fila correspondiente. Lo que sí puede ocurrir es que
-	// el tipo sea null (caso en el que intentamos usar un ID
-	// que no ha sido declarado aún, en cuyo caso se interpreta
-	// que es entero y global)
+	// Usado por el semántico (siempre encontrará la fila correspondiente).
 	public static Tipo getTipo(Integer posTS) {		
-		FilaTS res = null;
-		res = getByPS(posTS);
+		FilaTS res = getByPS(posTS);
+		
+		// Aunque puede ocurrir que el tipo de la fila esté a null, es decir, caso
+		// en el que el usuario utiliza un ID que no ha sido declarado aún. Cuando esto
+		// ocurre se interpreta que es entero y global.
 		if( res.getTipo() == null ) {
 			
 			if( estoyEnFuncion() ) {
@@ -230,9 +148,9 @@ public class TablaS implements Modulo {
 	public static void terminarEjecucion() {
 		// Si esto ocurre es que ha habido algun error
 		// lexico, sintactico o semantico
-		if(local!=null) {
+		if(local!=null)
 			salidaTS.escribir(local.toString());
-		}
+		
 
 		salidaTS.escribir(global.toString());
 	}

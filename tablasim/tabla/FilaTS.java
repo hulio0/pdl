@@ -1,4 +1,4 @@
-package tablasim;
+package tablasim.tabla;
 
 import errores.GestorErrores;
 import sintsem.tipo.Tipo;
@@ -30,25 +30,27 @@ public class FilaTS {
 					+"\t+id:"+id+"\n";
 
 
+		// Mostramos un formato "simple" cuando ha habido
+		// un error para que no salgan cosas imcompletas y/o raras
 		if(GestorErrores.huboError())
 			return res;
 		
 
 		res+="\t+Tipo:'"+tipo+"'\n";
 
-		if( !tipo.esFuncion() ) {
+		if( !tipo.esFuncion() ) 
 			res+="\t+Despl:"+desplazamiento+"\n";
-		}else {
+		
+		else {
 
 			Tupla parametros = ((Funcion) tipo).getParams();
 			Tipo tipoRetorno = ((Funcion) tipo).getTipoRetorno();
 
 			res+="\t+numParam:"+parametros.numElem()+"\n";
 
-			for(int i=0;i<parametros.numElem();i++) {
+			for(int i=0;i<parametros.numElem();i++) 
 				res+="\t\t+TipoParam"+dosDigitos(i+1)+":'"+parametros.get(i)+"'\n";
-			}
-
+			
 			res+="\t+TipoRetorno:'"+tipoRetorno+"'\n";
 
 			// Esto de la etiqueta lo exige Draco, who knows why...

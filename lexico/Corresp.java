@@ -162,4 +162,7 @@ public class Corresp {
 			return null;
 		}
 	}	
+	
+	
+	public static final int EOF = -1;
 }
