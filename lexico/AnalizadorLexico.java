@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import control.Control;
+import control.Modulo;
 import control.Salida;
 import errores.Error;
 import errores.GestorErrores;
@@ -17,7 +18,7 @@ import errores.err.lex.ErrorCadenaVariasLineas;
 import errores.err.lex.ErrorCharNoPer;
 import errores.err.lex.ErrorComentarioMalForm;
 import errores.err.lex.ErrorEnteroFueraDeRango;
-import errores.err.sem.ErrorVariableYaDeclarada;
+import errores.err.sem.ErrorIDYaDeclarado;
 import lexico.matrans.Accion;
 import lexico.matrans.EntradaMatTrans;
 import lexico.matrans.MatrizTransicion;
@@ -25,7 +26,7 @@ import sintsem.AnalizadorSintSem;
 import tablasim.TablaS;
 
 
-public class AnalizadorLexico {
+public class AnalizadorLexico implements Modulo {
 
 	private static BufferedReader ficheroFuente;
 	private static Salida salidaLex;
@@ -68,9 +69,8 @@ public class AnalizadorLexico {
 		if( chLeidoInt != -1 ) {
 			chLeidoChar = (char) chLeidoInt;
 
-			if( chLeidoChar == '\n' ) {
+			if( chLeidoChar == '\n' )
 				lineaActual++;
-			}
 		}
 
 	}
@@ -82,7 +82,7 @@ public class AnalizadorLexico {
 
 		BigInteger num=null;
 		String lex="";
-		Integer pos = null;	   // Cuando busquemos en TS o TPR guardaremos la respuesta aqui
+		Integer pos = null;	   // Cuando busquemos en TS o las pal. reservadas guardaremos la respuesta aqui
 
 		EntradaMatTrans entrada = null;
 		int estadoActual=0;
@@ -91,9 +91,12 @@ public class AnalizadorLexico {
 		// Los estados no terminales son 0,1,..,6
 		while( estadoActual <=6 ) {
 			entrada = MatrizTransicion.getNextTrans(estadoActual,chLeidoInt);
+			
+			// Nos movemos al siguiente estado
 			estadoActual = entrada.estado();
+			
+			// Ahora realizamos la acción semántica correspondiente a dicha transición
 			toDo = entrada.accion();
-
 			switch( toDo ){
 
 			case LEER:
@@ -124,19 +127,16 @@ public class AnalizadorLexico {
 				if( pos != null )
 					res = new Token(pos);
 				
-				
 				// Si no es una PR entonces es un ID, pos
 				// almacenará la posición en la TS de dicho id
 				else{
 					pos = TablaS.getPosTSLexico(lex);
 					
-					if( pos == null ) {
+					if( pos == null ) 
 						pos = TablaS.insertar(lex);
-					}
-					else if( AnalizadorSintSem.estoyEnDeclaracion() ) {		
-						reportarError(new ErrorVariableYaDeclarada(lex));
-					}
-
+					else if( AnalizadorSintSem.estoyEnDeclaracion() ) 	
+						reportarError(new ErrorIDYaDeclarado(lex));
+					
 					res = new Token(Corresp.ID,pos);
 				}
 				// Liberamos el lexema
@@ -157,7 +157,8 @@ public class AnalizadorLexico {
 				if( lex.length() <=64 ) {
 					leer();
 					res = new Token(Corresp.CADENA,"\""+lex+"\"");
-				} else
+				} 
+				else
 					reportarError(new ErrorCadenaExcedeLongitudMaxima(lex));
 
 				// Liberamos el lexema

@@ -3,6 +3,7 @@ package sintsem;
 import java.io.File;
 
 import control.Control;
+import control.Modulo;
 import control.Salida;
 import errores.Error;
 import errores.GestorErrores;
@@ -40,7 +41,7 @@ import sintsem.tipo.Tipo;
 import sintsem.tipo.Tupla;
 import tablasim.TablaS;
 
-public class AnalizadorSintSem {
+public class AnalizadorSintSem implements Modulo {
 
 	// El semántico no tiene salida
 	private static Salida salidaSint;
@@ -209,14 +210,14 @@ public class AnalizadorSintSem {
 		// Regla 9 [ F -> function T2 id ( Pr ) { C } ], única regla
 		escribir(9);
 		
+		zonaDeclaracion = true;		// Regla semántica
+		
 		comprobarToken(Corresp.FUNCTION);
 		Tipo tipoRetorno = T2();
 		Integer posTS = (Integer) comprobarToken(Corresp.ID);
 		
 		int linea = guardarLinea();
-		
-		zonaDeclaracion = true;		// Regla semántica
-		TablaS.abrirAmbito(tipoRetorno);
+		TablaS.abrirAmbito(tipoRetorno);	//Regla semántica
 		
 		comprobarToken(Corresp.PAR_AB);
 		Tupla parametros = Pr();		
@@ -1080,11 +1081,7 @@ public class AnalizadorSintSem {
 		Control.terminarEjecucion();
 	}
 
-	public static void terminarEjecucion() {
-		// A priori no hay nada que cerrar/salvar.
-		// Ponemos el método por consistencia (todas las clases
-		// principales de cada módulo lo tienen así que...)
-	}
+	public static void terminarEjecucion() {}
 	
 	private static boolean zonaDeclaracion = false;
 	public static boolean estoyEnDeclaracion() { return zonaDeclaracion; }

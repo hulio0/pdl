@@ -13,7 +13,6 @@ public class Salida {
 	
 	public Salida(File fichero) {
 		this.fichero = fichero;
-		
 	}
 	
 	public void escribir(String texto) {

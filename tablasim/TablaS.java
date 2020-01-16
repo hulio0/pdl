@@ -5,12 +5,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import control.Modulo;
 import control.Salida;
 import sintsem.AnalizadorSintSem;
 import sintsem.tipo.Tipo;
 
 
-public class TablaS {
+public class TablaS implements Modulo {
 
 	private static class Tabla {
 

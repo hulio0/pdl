@@ -129,7 +129,7 @@ public class Corresp {
 		case MAYOR:
 			return "MAYOR";				
 		default:
-			return "ERROR, CORRESPONDENCIA NO ENCONTRADA";
+			return null;
 		}
 	}
 	

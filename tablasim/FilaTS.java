@@ -30,9 +30,9 @@ public class FilaTS {
 					+"\t+id:"+id+"\n";
 
 
-		if(GestorErrores.huboError()) {
+		if(GestorErrores.huboError())
 			return res;
-		}
+		
 
 		res+="\t+Tipo:'"+tipo+"'\n";
 

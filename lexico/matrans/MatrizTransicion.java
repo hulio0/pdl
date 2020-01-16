@@ -20,7 +20,7 @@ public class MatrizTransicion {
 	public static final int MAS 		 = 9;
 	public static final int MAYOR 		 = 10;
 	public static final int MENOR 		 = 11;
-	public static final int DISTINTO 	 = 12;
+	public static final int NEGACION 	 = 12;
 	public static final int COMA 		 = 13;
 	public static final int PUNTO_COMA 	 = 14;
 	public static final int PAR_AB 		 = 15;
@@ -44,12 +44,15 @@ public class MatrizTransicion {
 		iniciarEstado6();			
 	}
 	
-	private static void iniciarEstado0() {			
-		mat[0][DEL]   		 = new EntradaMatTrans(0, Accion.LEER);
-		mat[0][CR]    		 = new EntradaMatTrans(0, Accion.LEER);
+	private static void iniciarEstado0() {	
+		EntradaMatTrans irA0YLeer = new EntradaMatTrans(0, Accion.LEER);
+		EntradaMatTrans irA23YErrCharNoPerm = new EntradaMatTrans(23, Accion.ERR_CARACTER_NO_PERMITIDO);		
+		
+		mat[0][DEL]   		 = irA0YLeer;
+		mat[0][CR]    		 = irA0YLeer;
 		mat[0][LETRA] 		 = new EntradaMatTrans(1, Accion.CONCATENAR);
 		mat[0][DIGITO]   	 = new EntradaMatTrans(2, Accion.DECLARAR_NUM);
-		mat[0][UNDERSCORE] 	 = new EntradaMatTrans(23, Accion.ERR_CARACTER_NO_PERMITIDO);
+		mat[0][UNDERSCORE] 	 = irA23YErrCharNoPerm;
 		mat[0][COMILLA] 	 = new EntradaMatTrans(3, Accion.LEER);
 		mat[0][MENOS] 		 = new EntradaMatTrans(4, Accion.LEER);
 		mat[0][BARRA] 		 = new EntradaMatTrans(5, Accion.LEER);
@@ -57,7 +60,7 @@ public class MatrizTransicion {
 		mat[0][MAS] 		 = new EntradaMatTrans(13, Accion.GENERAR_MAS);
 		mat[0][MAYOR] 		 = new EntradaMatTrans(14, Accion.GENERAR_MAYOR);
 		mat[0][MENOR] 		 = new EntradaMatTrans(15, Accion.GENERAR_MENOR);
-		mat[0][DISTINTO] 	 = new EntradaMatTrans(16, Accion.GENERAR_NEGACION);
+		mat[0][NEGACION] 	 = new EntradaMatTrans(16, Accion.GENERAR_NEGACION);
 		mat[0][COMA] 		 = new EntradaMatTrans(17, Accion.GENERAR_COMA);
 		mat[0][PUNTO_COMA] 	 = new EntradaMatTrans(18, Accion.GENERAR_PUNTO_COMA);
 		mat[0][PAR_AB] 		 = new EntradaMatTrans(19, Accion.GENERAR_PAR_AB);
@@ -65,7 +68,7 @@ public class MatrizTransicion {
 		mat[0][LLAV_AB] 	 = new EntradaMatTrans(21, Accion.GENERAR_LLA_AB);
 		mat[0][LLAVE_CE] 	 = new EntradaMatTrans(22, Accion.GENERAR_LLA_CE);
 		mat[0][EOF] 	 	 = new EntradaMatTrans(23, Accion.DEVOLVER_EOF);
-		mat[0][RESTO_CARACT] = new EntradaMatTrans(23, Accion.ERR_CARACTER_NO_PERMITIDO);
+		mat[0][RESTO_CARACT] = irA23YErrCharNoPerm;
 	}
 	
 	private static void iniciarEstado1() {
@@ -84,14 +87,14 @@ public class MatrizTransicion {
 		mat[1][MAS] 		 = irA7YGenerarPRoID;
 		mat[1][MAYOR] 		 = irA7YGenerarPRoID;
 		mat[1][MENOR] 		 = irA7YGenerarPRoID;
-		mat[1][DISTINTO] 	 = irA7YGenerarPRoID;
+		mat[1][NEGACION] 	 = irA7YGenerarPRoID;
 		mat[1][COMA] 		 = irA7YGenerarPRoID;
 		mat[1][PUNTO_COMA] 	 = irA7YGenerarPRoID;
 		mat[1][PAR_AB] 		 = irA7YGenerarPRoID;
 		mat[1][PAR_CE] 		 = irA7YGenerarPRoID;
 		mat[1][LLAV_AB] 	 = irA7YGenerarPRoID;
 		mat[1][LLAVE_CE] 	 = irA7YGenerarPRoID;
-		mat[1][EOF		] 	 = irA7YGenerarPRoID;
+		mat[1][EOF]		 	 = irA7YGenerarPRoID;
 		mat[1][RESTO_CARACT] = irA7YGenerarPRoID;
 		
 	}
@@ -111,14 +114,14 @@ public class MatrizTransicion {
 		mat[2][MAS] 		 = irA8YGenerarEntero;
 		mat[2][MAYOR] 		 = irA8YGenerarEntero;
 		mat[2][MENOR] 		 = irA8YGenerarEntero;
-		mat[2][DISTINTO] 	 = irA8YGenerarEntero;
+		mat[2][NEGACION] 	 = irA8YGenerarEntero;
 		mat[2][COMA] 		 = irA8YGenerarEntero;
 		mat[2][PUNTO_COMA] 	 = irA8YGenerarEntero;
 		mat[2][PAR_AB] 		 = irA8YGenerarEntero;
 		mat[2][PAR_CE] 		 = irA8YGenerarEntero;
 		mat[2][LLAV_AB] 	 = irA8YGenerarEntero;
 		mat[2][LLAVE_CE] 	 = irA8YGenerarEntero;
-		mat[2][EOF		] 	 = irA8YGenerarEntero;
+		mat[2][EOF] 	 	 = irA8YGenerarEntero;
 		mat[2][RESTO_CARACT] = irA8YGenerarEntero;
 	}
 	
@@ -137,7 +140,7 @@ public class MatrizTransicion {
 		mat[3][MAS] 		 = irA3YConcatenar;
 		mat[3][MAYOR] 		 = irA3YConcatenar;
 		mat[3][MENOR] 		 = irA3YConcatenar;
-		mat[3][DISTINTO] 	 = irA3YConcatenar;
+		mat[3][NEGACION] 	 = irA3YConcatenar;
 		mat[3][COMA] 		 = irA3YConcatenar;
 		mat[3][PUNTO_COMA] 	 = irA3YConcatenar;
 		mat[3][PAR_AB] 		 = irA3YConcatenar;
@@ -163,7 +166,7 @@ public class MatrizTransicion {
 		mat[4][MAS] 		 = irA10YGenerarMenos;
 		mat[4][MAYOR] 		 = irA10YGenerarMenos;
 		mat[4][MENOR] 		 = irA10YGenerarMenos;
-		mat[4][DISTINTO] 	 = irA10YGenerarMenos;
+		mat[4][NEGACION] 	 = irA10YGenerarMenos;
 		mat[4][COMA] 		 = irA10YGenerarMenos;
 		mat[4][PUNTO_COMA] 	 = irA10YGenerarMenos;
 		mat[4][PAR_AB] 		 = irA10YGenerarMenos;
@@ -189,7 +192,7 @@ public class MatrizTransicion {
 		mat[5][MAS] 		 = irA23YErrorComentario;
 		mat[5][MAYOR] 		 = irA23YErrorComentario;
 		mat[5][MENOR] 		 = irA23YErrorComentario;
-		mat[5][DISTINTO] 	 = irA23YErrorComentario;
+		mat[5][NEGACION] 	 = irA23YErrorComentario;
 		mat[5][COMA] 		 = irA23YErrorComentario;
 		mat[5][PUNTO_COMA] 	 = irA23YErrorComentario;
 		mat[5][PAR_AB] 		 = irA23YErrorComentario;
@@ -215,7 +218,7 @@ public class MatrizTransicion {
 		mat[6][MAS] 		 = irA6YLeer;
 		mat[6][MAYOR] 		 = irA6YLeer;
 		mat[6][MENOR] 		 = irA6YLeer;
-		mat[6][DISTINTO] 	 = irA6YLeer;
+		mat[6][NEGACION] 	 = irA6YLeer;
 		mat[6][COMA] 		 = irA6YLeer;
 		mat[6][PUNTO_COMA] 	 = irA6YLeer;
 		mat[6][PAR_AB] 		 = irA6YLeer;
@@ -265,7 +268,7 @@ public class MatrizTransicion {
 		case '<':
 			return MENOR;
 		case '!':
-			return DISTINTO;
+			return NEGACION;
 		case ',':
 			return COMA;
 		case ';':

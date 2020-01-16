@@ -1,14 +1,14 @@
 package errores;
 
 import java.io.File;
-
+import control.Modulo;
 import control.Salida;
 
 // Es el que recibe los errores de los diferentes modulos.
 // Basicamente se encarga de escribir las descripciones de
 // los errores en el fichero de errores. Tambien permite
 // consultar si se ha producido un error o no.
-public class GestorErrores {
+public class GestorErrores implements Modulo {
 	
 	private static Salida salidaGestErr;
 	
@@ -26,9 +26,5 @@ public class GestorErrores {
 		return huboError;
 	}
 	
-	public static void terminarEjecucion() {
-		// A priori no hay nada que cerrar/salvar.
-		// Ponemos el método por consistencia (todas las clases
-		// principales de cada módulo lo tienen así que...)
-	}
+	public static void terminarEjecucion() {}
 }
