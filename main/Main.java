@@ -1,6 +1,7 @@
 package main;
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,7 +53,6 @@ public class Main {
 		// interesa en la misma carpeta donde está el ejecutable. Cogemos
 		// el primer fichero con extensión .js que encontremos
 		else {
-
 			List<File> listaFicherosJS = Arrays.stream( dirActual.listFiles() )
 											   .filter( fich -> fich.getName().endsWith(".js") )
 											   .sorted()
@@ -75,7 +75,10 @@ public class Main {
 	}
 
 	private static File obtenerDirectorioEjecutable() {
-		return new File(ClassLoader.getSystemClassLoader().getResource(".").getPath());
+		File res = null;
+		try { res = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()); }
+		catch (URISyntaxException e) { e.printStackTrace(); }
+		return res.getParentFile();
 	}
 
 }
