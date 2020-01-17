@@ -220,7 +220,6 @@ public class AnalizadorSintSem implements Modulo {
 		Integer posTS = (Integer) comprobarToken(Corresp.ID);
 		
 		int linea = guardarLinea();
-		
 		TablaS.abrirAmbito(tipoRetorno);	//Regla semántica
 		
 		comprobarToken(Corresp.PAR_AB);
@@ -294,7 +293,7 @@ public class AnalizadorSintSem implements Modulo {
 			
 			Tupla tiposRestoParam = Rp();
 						
-			if( tiposRestoParam.estaVacia() )
+			if( tiposRestoParam.estaVacia() )	// Regla semántica
 				return new Tupla(tipoPrimerParam);
 			else
 				return new Tupla(tipoPrimerParam,tiposRestoParam);
@@ -327,7 +326,7 @@ public class AnalizadorSintSem implements Modulo {
 			
 			Tupla tipoRestoParam = Rp();
 			
-			if( tipoRestoParam.estaVacia() )
+			if( tipoRestoParam.estaVacia() )	// Regla semántica
 				return new Tupla(tipoParam);
 			else
 				return new Tupla(tipoParam, tipoRestoParam);
@@ -400,7 +399,6 @@ public class AnalizadorSintSem implements Modulo {
 
 		// Regla 19 [ E -> E2 Eaux ], unica regla
 		escribir(19);
-		
 		Tipo tipoE2 = E2();
 		Tipo tipoEaux = Eaux();
 
@@ -760,11 +758,11 @@ public class AnalizadorSintSem implements Modulo {
 			if( !tipoE.esLogico() ) 
 				reportarError(new ErrorIfNoValido(linea, tipoE));
 			
-			boolean tieneIfElseReturn = Bi();
+			boolean tieneReturnEnIfYElse = Bi();
 			//if( TablaS.estoyEnFuncion() && tieneIfElseReturn )
 			//	return true;
 			
-			return tieneIfElseReturn;
+			return tieneReturnEnIfYElse;
 
 		// Regla 40 [ S -> return Y ; ]
 		case Corresp.RETURN:	// First(return Y ;)
@@ -961,8 +959,8 @@ public class AnalizadorSintSem implements Modulo {
 		// Regla 50 [ Bi -> { Cie } El ]
 		case Corresp.LLA_AB:	// First({ Cie } El]
 			escribir(50);
-			pedirToken();
 			
+			comprobarToken(Corresp.LLA_AB);
 			tieneReturnCuerpo = Cie(false);
 			comprobarToken(Corresp.LLA_CE);
 			tieneReturnElse = El();
